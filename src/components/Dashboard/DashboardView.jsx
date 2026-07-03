@@ -57,7 +57,7 @@ const DashboardContent = () => {
   const [browserContentType, setBrowserContentType] = useState('adversary') // 'adversary' | 'environment'
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null)
   const [rightColumnMode, setRightColumnMode] = useState('browser') // 'browser' | 'info' | 'receipt'
-  const { sortBy, sortDir, groupBy, colossusDisplayMode, setSortBy, setGroupBy, setColossusDisplayMode } = useDashboardSortGroup()
+  const { sortBy, sortDir, groupBy, colossusDisplayMode, instanceLabelStyle, setSortBy, setGroupBy, setColossusDisplayMode, setInstanceLabelStyle } = useDashboardSortGroup()
 
   // Narrow screen detection for NavRail placement
   const dashboardRootRef = useRef(null)
@@ -485,8 +485,8 @@ const DashboardContent = () => {
             sortDir={sortDir}
             groupBy={groupBy}
             onSortBy={setSortBy}
-            onGroupBy={setGroupBy}
-            colossusDisplayMode={colossusDisplayMode} onColossusDisplayModeChange={setColossusDisplayMode}
+            onGroupBy={setGroupBy} colossusDisplayMode={colossusDisplayMode} onColossusDisplayModeChange={setColossusDisplayMode}
+            instanceLabelStyle={instanceLabelStyle} onInstanceLabelStyleChange={setInstanceLabelStyle}
           />
         <EntityColumns
           entityGroups={entityGroups}
@@ -514,7 +514,7 @@ const DashboardContent = () => {
           deleteAdversary={deleteAdversary}
           deleteEnvironment={deleteEnvironment}
           setRemovingCardSpacer={setRemovingCardSpacer}
-          setSpacerShrinking={setSpacerShrinking}
+          setSpacerShrinking={setSpacerShrinking} instanceLabelStyle={instanceLabelStyle}
           onOpenBrowser={() => {
             if (!rightColumnOpen) openRightColumn('browser')
           }}

@@ -58,7 +58,7 @@ const EntityColumns = ({
   deleteEnvironment,
   setRemovingCardSpacer,
   setSpacerShrinking,
-  onOpenBrowser,
+  onOpenBrowser, instanceLabelStyle = 'numeric',
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
 
@@ -141,7 +141,7 @@ const EntityColumns = ({
               ? { ...group.template, name: group.baseName, hp: 0, stress: 0, isDead: false }
               : { ...group.instances[0], name: group.instances[0]?.name || group.baseName }
           }
-          segment={group.segment} segmentKey={group.segmentKey} mode="expanded"
+          segment={group.segment} segmentKey={group.segmentKey} mode="expanded" instanceLabelStyle={instanceLabelStyle}
           instances={
             group.type === 'adversary'
               ? [...group.instances]

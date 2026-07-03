@@ -83,6 +83,14 @@ export const HpPips = ({ max, marked, onToggle }) => {
   )
 }
 
+// Shared Destroyed/Broken thresholds for a segment, used by both the nested
+// (GameCard.jsx) and standalone (this file) segment renderings.
+export const getSegmentStatus = (seg, markedHp) => {
+  const isDestroyed = markedHp >= (seg.hp || 0) && !!seg.hp
+  const isBroken = !isDestroyed && !!seg.hp && markedHp >= Math.ceil((seg.hp || 0) / 2)
+  return { isDestroyed, isBroken }
+}
+
 const ColossusSegmentCard = ({
   colossus,
   segment: seg,
@@ -95,8 +103,7 @@ const ColossusSegmentCard = ({
   quickEdit,
   setQuickEdit,
 }) => {
-  const isDestroyed = markedHp >= (seg.hp || 0) && seg.hp
-  const isBroken = !isDestroyed && seg.hp && markedHp >= Math.ceil((seg.hp || 0) / 2)
+  const { isDestroyed, isBroken } = getSegmentStatus(seg, markedHp)
 
   return (
     <ContainerWithTab

@@ -11,7 +11,7 @@ import { DASHBOARD_GAP, TAB_HEIGHT } from '../Dashboard/constants'
 import { highlightCardText } from './GameCard/textHighlighter'
 import MergedStatBadge from './GameCard/MergedStatBadge'
 import TabButtons from './GameCard/TabButtons'
-import ColossusSegmentCard, { Divider, FeatureList, HpPips, sortSegments } from './GameCard/ColossusSegmentCard'
+import ColossusSegmentCard, { Divider, FeatureList, HpPips, sortSegments, getSegmentStatus } from './GameCard/ColossusSegmentCard'
 import { EnvironmentFeatureGroup, EnvironmentImpulses, PotentialAdversaries } from './GameCard/EnvironmentFeaturesSection'
 
 const INSTANCE_COLORS = [
@@ -87,6 +87,7 @@ const GameCard = ({
   onDelete = null, // Handler for removing an environment from the session
   segment = null, // Colossus segment data — set to render this segment as its own standalone card
   segmentKey = null, // Segment HP tracking key (differs from segment.id when count > 1)
+  instanceLabelStyle = 'numeric', // Global display setting (#82): 'numeric' or 'alphabetic'
 }) => {
   const nameInputRef = useRef(null)
   const customCreatorRef = useRef(null)
@@ -730,7 +731,7 @@ const GameCard = ({
           instances={instances}
           isEditMode={isEditMode}
           type={type}
-          instanceColor={item.color}
+          instanceColor={item.color} instanceLabelStyle={instanceLabelStyle}
                               onUpdate={onUpdate}
           onApplyDamage={onApplyDamage}
           onApplyHealing={onApplyHealing}
@@ -915,8 +916,7 @@ const GameCard = ({
         const newMarked = pipIndex < markedHp ? pipIndex : pipIndex + 1
         onUpdate(inst.id, { segmentHp: { ...segmentHp, [instanceKey]: newMarked } })
       }
-      const isDestroyed = markedHp >= (seg.hp || 0) && seg.hp
-      const isBroken = !isDestroyed && seg.hp && markedHp >= Math.ceil((seg.hp || 0) / 2)
+      const { isDestroyed, isBroken } = getSegmentStatus(seg, markedHp)
 
       return (
         <div style={{

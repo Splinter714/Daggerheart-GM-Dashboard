@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { useDashboardSortGroup, defaultDirFor, applySort } from './useDashboardSortGroup'
+import { useDashboardSortGroup, defaultDirFor, applySort, toAlphabeticLabel, formatInstanceLabel } from './useDashboardSortGroup'
 
 beforeEach(() => localStorage.clear())
 
@@ -77,5 +77,58 @@ describe('grouping is always on (#106: "none" removed)', () => {
     // Same-type entries land adjacent to each other regardless of name order
     const types = sorted.map(g => g.type)
     expect(types[0]).toBe(types[1])
+  })
+})
+
+describe('toAlphabeticLabel (#82)', () => {
+  it('converts 1-26 to A-Z', () => {
+    expect(toAlphabeticLabel(1)).toBe('A')
+    expect(toAlphabeticLabel(2)).toBe('B')
+    expect(toAlphabeticLabel(26)).toBe('Z')
+  })
+
+  it('wraps past 26 into double letters, spreadsheet-column style', () => {
+    expect(toAlphabeticLabel(27)).toBe('AA')
+    expect(toAlphabeticLabel(28)).toBe('AB')
+    expect(toAlphabeticLabel(52)).toBe('AZ')
+    expect(toAlphabeticLabel(53)).toBe('BA')
+  })
+
+  it('never runs out — always returns a label for any positive integer', () => {
+    expect(toAlphabeticLabel(1000)).toMatch(/^[A-Z]+$/)
+  })
+})
+
+describe('formatInstanceLabel (#82: numeric stays default, alphabetic is an option)', () => {
+  it('defaults to numeric', () => {
+    expect(formatInstanceLabel(1, 'numeric')).toBe('1')
+    expect(formatInstanceLabel(3, 'numeric')).toBe('3')
+  })
+
+  it('formats alphabetically when instanceLabelStyle is "alphabetic"', () => {
+    expect(formatInstanceLabel(1, 'alphabetic')).toBe('A')
+    expect(formatInstanceLabel(2, 'alphabetic')).toBe('B')
+  })
+
+  it('treats a missing/falsy duplicateNumber as 1', () => {
+    expect(formatInstanceLabel(undefined, 'numeric')).toBe('1')
+    expect(formatInstanceLabel(undefined, 'alphabetic')).toBe('A')
+  })
+})
+
+describe('useDashboardSortGroup instanceLabelStyle (#82)', () => {
+  it('defaults to numeric', () => {
+    const { result } = renderHook(() => useDashboardSortGroup())
+    expect(result.current.instanceLabelStyle).toBe('numeric')
+  })
+
+  it('setInstanceLabelStyle updates the setting and numeric stays available afterward', () => {
+    const { result } = renderHook(() => useDashboardSortGroup())
+
+    act(() => result.current.setInstanceLabelStyle('alphabetic'))
+    expect(result.current.instanceLabelStyle).toBe('alphabetic')
+
+    act(() => result.current.setInstanceLabelStyle('numeric'))
+    expect(result.current.instanceLabelStyle).toBe('numeric')
   })
 })

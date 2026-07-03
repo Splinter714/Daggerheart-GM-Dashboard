@@ -4,6 +4,7 @@ import Pips from '../../Shared/Pips'
 import MergedStatBadge from './MergedStatBadge'
 import ExperienceSection from './ExperienceSection'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
+import { formatInstanceLabel } from '../../Dashboard/hooks/useDashboardSortGroup'
 
 const ThresholdSep = () => (
   <span style={{ display: 'inline-block', width: '1px', height: '1em', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
@@ -23,6 +24,7 @@ const StatusSection = ({
   isEditMode,
   type,
   instanceColor,
+  instanceLabelStyle = 'numeric', // Display-only label for the instance badge (#82)
   onUpdate,
   onApplyDamage,
   onApplyHealing,
@@ -100,7 +102,7 @@ const StatusSection = ({
               }}
             >
               <span style={{ fontSize: '0.75rem', fontWeight: 600, color: isInstanceDead ? 'var(--gray-400)' : 'white' }}>
-                {instance.duplicateNumber || 1}
+                {formatInstanceLabel(instance.duplicateNumber, instanceLabelStyle)}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>

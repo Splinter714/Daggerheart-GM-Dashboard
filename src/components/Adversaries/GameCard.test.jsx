@@ -128,3 +128,24 @@ describe('GameCard environment narrow/mobile layout (#105)', () => {
     expect(heading.style.textOverflow).toBe('ellipsis')
   })
 })
+
+describe('GameCard instance label style (#82)', () => {
+  const adversaryItem = { id: 'grp-1', name: 'Goblin', hpMax: 10, stressMax: 3, color: 'var(--red)' }
+  const instances = [
+    { id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, hpMax: 10, stressMax: 3 },
+    { id: 'adv-2', duplicateNumber: 2, hp: 0, stress: 0, hpMax: 10, stressMax: 3 },
+  ]
+
+  it('defaults to numeric instance badges', () => {
+    render(<GameCard type="adversary" item={adversaryItem} instances={instances} />)
+    expect(screen.getByText('1')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+  })
+
+  it('shows alphabetic instance badges when instanceLabelStyle is "alphabetic"', () => {
+    render(<GameCard type="adversary" item={adversaryItem} instances={instances} instanceLabelStyle="alphabetic" />)
+    expect(screen.getByText('A')).toBeInTheDocument()
+    expect(screen.getByText('B')).toBeInTheDocument()
+    expect(screen.queryByText('1')).toBeNull()
+  })
+})

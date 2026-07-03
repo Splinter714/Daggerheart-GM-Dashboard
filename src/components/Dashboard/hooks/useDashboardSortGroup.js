@@ -12,6 +12,11 @@ const DEFAULTS = {
   // 'nested' — one card containing all segments (current default, works well on mobile).
   // 'segments' — each segment renders as its own card, grouped/adjacent on the board.
   colossusDisplayMode: 'nested',
+  // Global toggle: how duplicate adversary instances are labeled (#82).
+  // 'numeric' (default) — "Goblin (2)", instance badge shows "2".
+  // 'alphabetic' — "Goblin (B)", instance badge shows "B". Display-only — the
+  // underlying duplicateNumber identity/ordering is unchanged either way.
+  instanceLabelStyle: 'numeric',
 }
 
 // Default sort direction when a field is first selected. Fields where higher
@@ -60,7 +65,28 @@ export function useDashboardSortGroup() {
 
   const setColossusDisplayMode = (colossusDisplayMode) => setSettings(s => ({ ...s, colossusDisplayMode }))
 
-  return { ...settings, setSortBy, setGroupBy, setColossusDisplayMode }
+  const setInstanceLabelStyle = (instanceLabelStyle) => setSettings(s => ({ ...s, instanceLabelStyle }))
+
+  return { ...settings, setSortBy, setGroupBy, setColossusDisplayMode, setInstanceLabelStyle }
+}
+
+// Converts a 1-based duplicateNumber into an alphabetic label: 1->A, 2->B, ...,
+// 26->Z, 27->AA, 28->AB, ... (spreadsheet-column style, so it never runs out).
+export function toAlphabeticLabel(n) {
+  let num = n
+  let label = ''
+  while (num > 0) {
+    const rem = (num - 1) % 26
+    label = String.fromCharCode(65 + rem) + label
+    num = Math.floor((num - 1) / 26)
+  }
+  return label || 'A'
+}
+
+export function formatInstanceLabel(duplicateNumber, instanceLabelStyle) {
+  return instanceLabelStyle === 'alphabetic'
+    ? toAlphabeticLabel(duplicateNumber || 1)
+    : String(duplicateNumber || 1)
 }
 
 const SORT_FIELD_KEY = {
