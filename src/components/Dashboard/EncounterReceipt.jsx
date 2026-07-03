@@ -232,6 +232,7 @@ const EncounterReceipt = ({
 
         {/* Adversary rows grouped by type */}
         {groups.map(({ key, items }) => {
+          const isColossus = key === 'Colossus'
           const cost = BATTLE_POINT_COSTS[key]
           return (
             <React.Fragment key={key}>
@@ -239,7 +240,11 @@ const EncounterReceipt = ({
                 <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
                   {key}
                 </span>
-                {cost != null && (
+                {isColossus ? (
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 400, fontStyle: 'italic' }}>
+                    (not BP-costed)
+                  </span>
+                ) : cost != null && (
                   <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 400 }}>
                     ({cost} BP each)
                   </span>
@@ -249,18 +254,22 @@ const EncounterReceipt = ({
                 const isZero = encounterItem.quantity === 0
                 return (
                   <div key={`${encounterItem.item.id}-${encounterItem.type}`} className="receipt-item" style={itemRowStyle}>
-                    <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={actionBtn(isZero)}>
-                      {isZero ? <X size={13} /> : <Minus size={13} />}
+                    <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={actionBtn(isColossus || isZero)}>
+                      {isColossus || isZero ? <X size={13} /> : <Minus size={13} />}
                     </button>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', minWidth: '1rem', textAlign: 'center', flexShrink: 0 }}>
-                      {encounterItem.quantity}
-                    </span>
+                    {!isColossus && (
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', minWidth: '1rem', textAlign: 'center', flexShrink: 0 }}>
+                        {encounterItem.quantity}
+                      </span>
+                    )}
                     <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {encounterItem.item.name || encounterItem.item.baseName}
                     </span>
-                    <button onClick={() => onAdd(encounterItem.item, encounterItem.type)} style={actionBtn(false)}>
-                      <Plus size={13} />
-                    </button>
+                    {!isColossus && (
+                      <button onClick={() => onAdd(encounterItem.item, encounterItem.type)} style={actionBtn(false)}>
+                        <Plus size={13} />
+                      </button>
+                    )}
                   </div>
                 )
               })}

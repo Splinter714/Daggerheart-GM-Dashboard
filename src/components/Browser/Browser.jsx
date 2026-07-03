@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useGameState } from '../../state/state'
 import CustomAdversaryCreator from '../Adversaries/CustomAdversaryCreator'
-import { BATTLE_POINT_COSTS, BATTLE_POINT_ADJUSTMENTS } from '../Dashboard/BattlePointsCalculator'
+import { calculateBaseBattlePoints, calculateSpentBattlePoints, calculateAutomaticAdjustments } from '../Dashboard/BattlePointsCalculator'
 import { loadCustomContent, saveCustomContent } from './DataLibrary'
 import { styles } from './Browser.styles'
 import AdversaryList from './AdversaryList'
@@ -579,60 +579,12 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
     }
   }, [activeTab, filteredAndSortedData, focusedItemId, onAddItem])
 
-  // Calculate remaining battle points budget
+  // Calculate remaining battle points budget — shared logic with EncounterReceipt/DashboardView
+  // (BattlePointsCalculator.js), so Colossi are excluded from BP sums here too (#99).
   const calculateRemainingBudget = () => {
-    const baseBattlePoints = (3 * pcCount) + 2
-    const spentBattlePoints = encounterItems.reduce((total, item) => {
-      if (item.type === 'adversary') {
-        const cost = BATTLE_POINT_COSTS[item.item.type] || 2
-        if (item.item.type === 'Minion') {
-          // Minions cost 1 BP per group equal to party size
-          const groups = Math.ceil(item.quantity / pcCount)
-          return total + (groups * cost)
-        } else {
-          return total + (item.quantity * cost)
-        }
-      }
-      return total
-    }, 0)
-    
-    // Calculate automatic adjustments (same logic as EncounterBuilder)
-    let automaticAdjustments = 0
-    
-    // Check for 2 or more Solo adversaries (only count those with quantity > 0)
-    const soloCount = encounterItems
-      .filter(item => item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0)
-      .reduce((sum, item) => sum + item.quantity, 0)
-    if (soloCount >= 2) {
-      automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos
-    }
-    
-    // Check if no Bruisers, Hordes, Leaders, or Solos (only count those with quantity > 0)
-    const hasBruisers = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Bruiser' && item.quantity > 0
-    )
-    const hasHordes = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Horde' && item.quantity > 0
-    )
-    const hasLeaders = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Leader' && item.quantity > 0
-    )
-    const hasSolos = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0
-    )
-    
-    if (!hasBruisers && !hasHordes && !hasLeaders && !hasSolos) {
-      automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos
-    }
-    
-    // Check for lower tier adversaries (only count those with quantity > 0)
-    // const hasLowerTierAdversaries = encounterItems.some(item => 
-    //   item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0
-    // )
-    // if (hasLowerTierAdversaries) {
-    //   automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.lowerTierAdversary
-    // }
-    
+    const baseBattlePoints = calculateBaseBattlePoints(pcCount)
+    const spentBattlePoints = calculateSpentBattlePoints(encounterItems, pcCount)
+    const automaticAdjustments = calculateAutomaticAdjustments(encounterItems)
     const availableBattlePoints = baseBattlePoints + automaticAdjustments
     return availableBattlePoints - spentBattlePoints
   }
@@ -809,53 +761,12 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
                     }}>
                       Balance: {(() => {
                         const partySize = encounter.partySize || 4
-                        const baseBattlePoints = (3 * partySize) + 2
-                        
-                        // Calculate automatic adjustments (same logic as EncounterBuilder)
-                        let automaticAdjustments = 0
                         const encounterItems = encounter.encounterItems || []
-                        
-                        // Check for 2 or more Solo adversaries
-                        const soloCount = encounterItems
-                          .filter(item => item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0)
-                          .reduce((sum, item) => sum + item.quantity, 0)
-                        if (soloCount >= 2) {
-                          automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos
-                        }
-                        
-                        // Check if no Bruisers, Hordes, Leaders, or Solos
-                        const hasBruisers = encounterItems.some(item => 
-                          item.type === 'adversary' && item.item.type === 'Bruiser' && item.quantity > 0
-                        )
-                        const hasHordes = encounterItems.some(item => 
-                          item.type === 'adversary' && item.item.type === 'Horde' && item.quantity > 0
-                        )
-                        const hasLeaders = encounterItems.some(item => 
-                          item.type === 'adversary' && item.item.type === 'Leader' && item.quantity > 0
-                        )
-                        const hasSolos = encounterItems.some(item => 
-                          item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0
-                        )
-                        
-                        if (!hasBruisers && !hasHordes && !hasLeaders && !hasSolos) {
-                          automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos
-                        }
-                        
+                        const baseBattlePoints = calculateBaseBattlePoints(partySize)
+                        const automaticAdjustments = calculateAutomaticAdjustments(encounterItems)
                         const availableBattlePoints = baseBattlePoints + automaticAdjustments
-                        
-                        const spentBattlePoints = encounterItems.reduce((total, item) => {
-                          if (item.type === 'adversary') {
-                            const cost = BATTLE_POINT_COSTS[item.item.type] || 2
-                            if (item.item.type === 'Minion') {
-                              const groups = Math.ceil(item.quantity / partySize)
-                              return total + (groups * cost)
-                            } else {
-                              return total + (item.quantity * cost)
-                            }
-                          }
-                          return total
-                        }, 0)
-                        
+                        const spentBattlePoints = calculateSpentBattlePoints(encounterItems, partySize)
+
                         if (spentBattlePoints > availableBattlePoints) {
                           return `+${spentBattlePoints - availableBattlePoints}`
                         } else if (spentBattlePoints === availableBattlePoints) {

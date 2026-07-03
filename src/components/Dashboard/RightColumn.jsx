@@ -34,13 +34,23 @@ const InfoContent = () => (
   </div>
 )
 
-// Convert live adversaryGroups into the encounterItems format EncounterReceipt expects
-const groupsToEncounterItems = (adversaryGroups, pcCount) =>
-  adversaryGroups.map((group) => {
+// Convert live adversaryGroups into the encounterItems format EncounterReceipt expects.
+// Colossi are one-of-a-kind encounters, not stackable instances (#99) — each instance
+// becomes its own separate, non-grouped encounterItem (quantity 1) keyed by instance id,
+// instead of being quantified together like minions/other adversaries.
+export const groupsToEncounterItems = (adversaryGroups, pcCount) =>
+  adversaryGroups.flatMap((group) => {
+    const { instances, ...itemData } = group
+    if (group.isColossus) {
+      return instances.map((inst) => ({
+        type: 'adversary',
+        item: { ...itemData, id: inst.id, name: group.baseName },
+        quantity: 1,
+      }))
+    }
     const isMinion = group.type === 'Minion'
     const qty = isMinion ? Math.round(group.instances.length / pcCount) : group.instances.length
-    const { instances, ...itemData } = group
-    return { type: 'adversary', item: { ...itemData, id: itemData.id || group.baseName, name: group.baseName }, quantity: qty }
+    return [{ type: 'adversary', item: { ...itemData, id: itemData.id || group.baseName, name: group.baseName }, quantity: qty }]
   })
 
 // mode: 'browser' | 'info' | 'receipt'
@@ -71,7 +81,13 @@ const RightColumn = ({
 
   const handleRemove = (itemId) => {
     const group = adversaryGroups.find(g => g.id === itemId || g.baseName === itemId)
-    if (!group) return
+    if (!group) {
+      // Colossus rows are keyed by instance id (each instance is its own row, #99) —
+      // find the owning group and remove just that instance.
+      const owningGroup = adversaryGroups.find(g => g.isColossus && g.instances.some(inst => inst.id === itemId))
+      if (owningGroup) deleteAdversary(itemId)
+      return
+    }
     const isMinion = group.type === 'Minion'
     const removeCount = isMinion ? pcCount : 1
     const sorted = [...group.instances].sort((a, b) => (b.duplicateNumber || 1) - (a.duplicateNumber || 1))

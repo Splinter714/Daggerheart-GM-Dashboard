@@ -29,7 +29,10 @@ export function calculateBaseBattlePoints(pcCount) {
 
 export function calculateSpentBattlePoints(encounterItems, pcCount) {
   return encounterItems.reduce((total, item) => {
-    if (item.type === 'adversary') {
+    // Colossi are the encounter (or boss centerpiece) — they never participate in the
+    // BP budget system, so skip them entirely rather than costing them like a normal
+    // adversary type (#99).
+    if (item.type === 'adversary' && item.item.type !== 'Colossus') {
       const cost = BATTLE_POINT_COSTS[item.item.type] || 2
       if (item.item.type === 'Minion') {
         return total + (Math.ceil(item.quantity / pcCount) * cost)
