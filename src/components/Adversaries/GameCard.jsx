@@ -12,7 +12,7 @@ import { highlightCardText } from './GameCard/textHighlighter'
 import MergedStatBadge from './GameCard/MergedStatBadge'
 import TabButtons from './GameCard/TabButtons'
 import ColossusSegmentCard, { Divider, FeatureList, HpPips, sortSegments } from './GameCard/ColossusSegmentCard'
-import { EnvironmentFeatureGroup, PotentialAdversaries } from './GameCard/EnvironmentFeaturesSection'
+import { EnvironmentFeatureGroup, EnvironmentImpulses, PotentialAdversaries } from './GameCard/EnvironmentFeaturesSection'
 
 const INSTANCE_COLORS = [
   { value: 'var(--red)',    label: 'Red' },
@@ -869,14 +869,7 @@ const GameCard = ({
               </div>
             </div>
 
-            {/* Impulses */}
-            {env.impulses && (
-              <div style={{ padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`, textAlign: 'center' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                  {env.impulses}
-                </span>
-              </div>
-            )}
+            <EnvironmentImpulses impulses={env.impulses} />
 
             {/* Features */}
             <EnvironmentFeatureGroup env={env} featureType="Passive" label="Passives" />

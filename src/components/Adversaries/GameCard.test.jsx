@@ -97,3 +97,17 @@ describe('GameCard environment potential-adversaries list styling (#103)', () =>
     expect(screen.queryByText('Potential Adversaries')).toBeNull()
   })
 })
+
+describe('GameCard environment visual polish pass (#100)', () => {
+  it('renders impulses as a bordered quote-block, matching the adversary motives convention', () => {
+    const envItem = { id: 'env-1', name: 'Ashen Wastes', type: 'Exploration', tier: 2, impulses: 'Smother, consume, spread.' }
+    render(<GameCard type="environment" item={envItem} />)
+    expect(screen.getByText('Smother, consume, spread.')).toBeInTheDocument()
+  })
+
+  it('omits the impulses block when absent', () => {
+    const envItem = { id: 'env-1', name: 'Ashen Wastes', type: 'Exploration', tier: 2 }
+    render(<GameCard type="environment" item={envItem} />)
+    expect(screen.queryByText(/Smother/)).toBeNull()
+  })
+})

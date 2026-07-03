@@ -13,6 +13,23 @@ export const FeatureDivider = ({ title }) => (
   </div>
 )
 
+// Impulses blurb — styled like adversary cards' motives quote-block for consistency (#100)
+export const EnvironmentImpulses = ({ impulses }) => {
+  if (!impulses) return null
+  return (
+    <div style={{ padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`, display: 'flex', justifyContent: 'center' }}>
+      <div style={{
+        fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--text-primary)', lineHeight: 1.4,
+        textAlign: 'center', textWrap: 'balance',
+        borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)',
+        padding: `0 ${CARD_SPACE_H}`,
+      }}>
+        {impulses}
+      </div>
+    </div>
+  )
+}
+
 export const EnvironmentFeatureGroup = ({ env, featureType, label }) => {
   const features = (env.features || []).filter(f => f.type === featureType)
   if (!features.length) return null
