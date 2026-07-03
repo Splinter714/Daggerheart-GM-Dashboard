@@ -76,3 +76,24 @@ describe('GameCard environment difficulty prominence (#104)', () => {
     expect(screen.queryByText('DIFF')).toBeNull()
   })
 })
+
+describe('GameCard environment potential-adversaries list styling (#103)', () => {
+  const envItem = {
+    id: 'env-1', name: 'Ashen Wastes', type: 'Exploration', tier: 2,
+    potentialAdversaries: ['Bone Golem', 'Ash Wraith'],
+  }
+
+  it('renders each potential adversary as a distinct styled tag', () => {
+    const { container } = render(<GameCard type="environment" item={envItem} />)
+    expect(screen.getByText('Bone Golem')).toBeInTheDocument()
+    expect(screen.getByText('Ash Wraith')).toBeInTheDocument()
+    const tag = screen.getByText('Bone Golem')
+    expect(tag.tagName).toBe('SPAN')
+    expect(container.querySelector('[style*="border-radius: 0.25rem"]')).toBeTruthy()
+  })
+
+  it('omits the section entirely when there are no potential adversaries', () => {
+    render(<GameCard type="environment" item={{ ...envItem, potentialAdversaries: [] }} />)
+    expect(screen.queryByText('Potential Adversaries')).toBeNull()
+  })
+})
