@@ -1,6 +1,6 @@
 {
   "name": "daggerheart-gm-dashboard",
-  "version": "0.11.19",
+  "version": "0.11.20",
   "description": "Installable PWA GM dashboard for running Daggerheart tabletop sessions — adversaries, Fear & Hope, countdowns, and encounter budgets, works offline.",
   "scripts": {
     "dev": "vite",

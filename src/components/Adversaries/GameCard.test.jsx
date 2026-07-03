@@ -54,3 +54,25 @@ describe('GameCard colossus display modes', () => {
     expect(onUpdate).toHaveBeenCalledWith('adv-1', { segmentHp: { 'ikeri-head': 1 } })
   })
 })
+
+describe('GameCard environment difficulty prominence (#104)', () => {
+  const envItem = { id: 'env-1', name: 'Ashen Wastes', type: 'Exploration', tier: 2, difficulty: 15 }
+
+  it('renders difficulty as a prominent hex stat badge, matching adversary card conventions', () => {
+    render(<GameCard type="environment" item={envItem} />)
+    // MergedStatBadge renders label/value as SVG <text> nodes
+    expect(screen.getByText('DIFF')).toBeInTheDocument()
+    expect(screen.getByText('15')).toBeInTheDocument()
+  })
+
+  it('still shows type and tier in the metadata pill alongside the badge', () => {
+    render(<GameCard type="environment" item={envItem} />)
+    expect(screen.getByText('Exploration')).toBeInTheDocument()
+    expect(screen.getByText('· T2')).toBeInTheDocument()
+  })
+
+  it('omits the difficulty badge when the environment has no difficulty', () => {
+    render(<GameCard type="environment" item={{ ...envItem, difficulty: null }} />)
+    expect(screen.queryByText('DIFF')).toBeNull()
+  })
+})

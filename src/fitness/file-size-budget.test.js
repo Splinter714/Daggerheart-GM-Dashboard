@@ -16,7 +16,7 @@ const SRC_ROOT = join(process.cwd(), 'src')
 const BUDGETS = {
   'src/components/Browser/Browser.jsx': 882,
   'src/components/Adversaries/CustomAdversaryCreator.jsx': 977,
-  'src/components/Adversaries/GameCard.jsx': 1334,
+  'src/components/Adversaries/GameCard.jsx': 1332,
   'src/components/Dashboard/DashboardView.jsx': 610,
   'src/components/Dashboard/EntityColumns.jsx': 576,
 }

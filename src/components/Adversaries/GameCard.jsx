@@ -892,17 +892,15 @@ const GameCard = ({
 
           {/* Scrollable content */}
           <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }} className="invisible-scrollbar">
-            {/* Metadata pill: type · tier · difficulty */}
-            <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+            {/* Difficulty badge (prominent, matches adversary-card convention) + type/tier pill */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: CARD_SPACE_H, padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+              {env.difficulty != null && <MergedStatBadge shape="hex" label="DIFF" value={env.difficulty} />}
               <div style={{
-                display: 'inline-flex', gap: '0.35rem', alignItems: 'center',
-                fontSize: '0.75rem', backgroundColor: 'black',
-                border: '1px solid var(--text-secondary)', borderRadius: '0.25rem',
-                height: '1.5rem', padding: '0 10px',
+                display: 'inline-flex', gap: '0.35rem', alignItems: 'center', fontSize: '0.75rem', backgroundColor: 'black',
+                border: '1px solid var(--text-secondary)', borderRadius: '0.25rem', height: '1.5rem', padding: '0 10px',
               }}>
                 <span style={{ color: 'white' }}>{env.type}</span>
                 <span style={{ color: 'white' }}>· T{env.tier}</span>
-                {env.difficulty != null && <span style={{ color: 'white' }}>· {env.difficulty}</span>}
               </div>
             </div>
 
