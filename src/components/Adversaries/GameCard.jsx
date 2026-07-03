@@ -857,8 +857,8 @@ const GameCard = ({
 
           {/* Scrollable content */}
           <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }} className="invisible-scrollbar">
-            {/* Difficulty badge (prominent, matches adversary-card convention) + type/tier pill */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: CARD_SPACE_H, padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+            {/* Difficulty badge + type/tier pill (flexWrap guards ~200px mobile width, #105) */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: CARD_SPACE_H, padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
               {env.difficulty != null && <MergedStatBadge shape="hex" label="DIFF" value={env.difficulty} />}
               <div style={{
                 display: 'inline-flex', gap: '0.35rem', alignItems: 'center', fontSize: '0.75rem', backgroundColor: 'black',

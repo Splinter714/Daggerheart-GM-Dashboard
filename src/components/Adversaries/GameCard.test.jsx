@@ -111,3 +111,20 @@ describe('GameCard environment visual polish pass (#100)', () => {
     expect(screen.queryByText(/Smother/)).toBeNull()
   })
 })
+
+describe('GameCard environment narrow/mobile layout (#105)', () => {
+  it('wraps the difficulty badge + type/tier row instead of forcing overflow at narrow widths', () => {
+    const envItem = { id: 'env-1', name: 'Ashen Wastes', type: 'Exploration', tier: 2, difficulty: 15 }
+    const { container } = render(<GameCard type="environment" item={envItem} />)
+    const row = container.querySelector('[style*="flex-wrap: wrap"]')
+    expect(row).toBeTruthy()
+  })
+
+  it('truncates a long environment name instead of overflowing the header', () => {
+    const longName = 'The Impossibly Long Environment Name That Would Overflow A Narrow Card'
+    render(<GameCard type="environment" item={{ id: 'env-1', name: longName, type: 'Exploration', tier: 2 }} />)
+    const heading = screen.getByText(longName)
+    expect(heading.style.whiteSpace).toBe('nowrap')
+    expect(heading.style.textOverflow).toBe('ellipsis')
+  })
+})
