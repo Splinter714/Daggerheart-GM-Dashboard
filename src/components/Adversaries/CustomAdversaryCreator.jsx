@@ -5,7 +5,7 @@ import ExperienceSection from './GameCard/ExperienceSection'
 import { getDefaultAdversaryValues } from './adversaryDefaults'
 import { typeGuide, stressFearGuide } from './adversaryTypeGuide'
 import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from '../Dashboard/constants'
-import { inputStyle, labelStyle, sectionStyle, DAMAGE_TYPES, parseDamage, buildDamage, reorder } from './customCreatorConstants'
+import { inputStyle, labelStyle, sectionStyle, DAMAGE_TYPES, parseDamage, buildDamage, reorder, compactCtrlBtnStyle } from './customCreatorConstants'
 import { DragHandle, PanelHeader } from './creatorAtoms'
 import { InfoPopover } from './InfoPopover'
 import { StatField } from './StatField'
@@ -720,55 +720,48 @@ const CustomAdversaryCreator = forwardRef(({
                   }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title="Add experience">+</button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                  {(formData.experience || []).map((exp, i) => (
-                    <div
-                      key={i}
-                      draggable
-                      onDragStart={() => { dragFromRef.current = i }}
-                      onDragOver={e => e.preventDefault()}
-                      onDrop={() => {
-                        if (dragFromRef.current === null) return
-                        setFormData(prev => ({ ...prev, experience: reorder(prev.experience, dragFromRef.current, i) }))
-                        dragFromRef.current = null
-                      }}
-                      style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}
-                    >
-                      <DragHandle />
-                      <input
-                        type="text"
-                        value={typeof exp === 'string' ? exp : (exp.name || '')}
-                        onChange={e => {
-                          const next = [...(formData.experience || [])]
-                          next[i] = { name: e.target.value, modifier: typeof exp === 'object' ? (exp.modifier || 0) : 0 }
-                          setFormData(prev => ({ ...prev, experience: next }))
-                        }}
-                        placeholder="Experience name"
-                        style={{ ...inputStyle, flex: 1 }}
-                      />
-                      {/* Bonus stepper */}
-                      <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                  {(formData.experience || []).map((exp, i) => {
+                    const name = typeof exp === 'string' ? exp : (exp.name || '')
+                    const modifier = typeof exp === 'object' ? (exp.modifier || 0) : 0
+                    const setExp = (patch) => setFormData(prev => {
+                      const next = [...(prev.experience || [])]
+                      next[i] = { name, modifier, ...patch }
+                      return { ...prev, experience: next }
+                    })
+                    return (
+                      <div key={i} draggable onDragStart={() => { dragFromRef.current = i }} onDragOver={e => e.preventDefault()}
+                        onDrop={() => { if (dragFromRef.current === null) return; setFormData(prev => ({ ...prev, experience: reorder(prev.experience, dragFromRef.current, i) })); dragFromRef.current = null }}
+                        style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}
+                      >
+                        <DragHandle />
+                        <input
+                          type="text"
+                          value={modifier > 0 ? `+${modifier}` : ''}
+                          onChange={e => {
+                            const raw = e.target.value.replace(/[^0-9+-]/g, '')
+                            setExp({ modifier: Math.max(0, raw === '' || raw === '+' ? 0 : parseInt(raw) || 0) })
+                          }}
+                          onKeyDown={e => {
+                            if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
+                            e.preventDefault()
+                            setExp({ modifier: Math.max(0, modifier + (e.key === 'ArrowUp' ? 1 : -1)) })
+                          }}
+                          style={{ width: '24px', height: '24px', flexShrink: 0, border: '1px solid var(--text-secondary)', borderRadius: '4px', backgroundColor: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'center', outline: 'none' }}
+                        />
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={e => setExp({ name: e.target.value })}
+                          placeholder="Experience name"
+                          style={{ ...inputStyle, flex: 1, fontSize: '0.85rem' }}
+                        />
                         <button type="button" onClick={() => {
-                          const next = [...(formData.experience || [])]
-                          const cur = typeof exp === 'object' ? (exp.modifier || 0) : 0
-                          next[i] = { name: typeof exp === 'object' ? (exp.name || '') : exp, modifier: Math.max(0, cur - 1) }
+                          const next = (formData.experience || []).filter((_, j) => j !== i)
                           setFormData(prev => ({ ...prev, experience: next }))
-                        }} style={{ width: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '0.25rem 0 0 0.25rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>−</button>
-                        <div style={{ width: '44px', height: '44px', border: '1px solid var(--border)', borderLeft: 'none', borderRight: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: 'var(--text-primary)', background: 'var(--bg-secondary)', fontFamily: 'monospace' }}>
-                          +{typeof exp === 'object' ? (exp.modifier || 0) : 0}
-                        </div>
-                        <button type="button" onClick={() => {
-                          const next = [...(formData.experience || [])]
-                          const cur = typeof exp === 'object' ? (exp.modifier || 0) : 0
-                          next[i] = { name: typeof exp === 'object' ? (exp.name || '') : exp, modifier: Math.min(6, cur + 1) }
-                          setFormData(prev => ({ ...prev, experience: next }))
-                        }} style={{ width: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '0 0.25rem 0.25rem 0', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>+</button>
+                        }} style={compactCtrlBtnStyle(false)} title="Delete experience">×</button>
                       </div>
-                      <button type="button" onClick={() => {
-                        const next = (formData.experience || []).filter((_, j) => j !== i)
-                        setFormData(prev => ({ ...prev, experience: next }))
-                      }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1rem', padding: '0.6rem 0.5rem', flexShrink: 0, minWidth: '36px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
 

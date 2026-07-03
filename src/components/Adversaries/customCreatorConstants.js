@@ -30,6 +30,28 @@ export const sectionStyle = {
   gap: '0.3rem',
 }
 
+// Compact 22px square control button (reorder/delete), matching quick-edit
+// mode's ReorderControls style (src/components/Adversaries/GameCard/ReorderControls.jsx).
+export const compactCtrlBtnStyle = (disabled) => ({
+  width: '22px',
+  height: '22px',
+  padding: 0,
+  border: '1px solid var(--border)',
+  borderRadius: '3px',
+  backgroundColor: 'var(--gray-700)',
+  color: disabled ? 'var(--text-secondary)' : 'white',
+  cursor: disabled ? 'not-allowed' : 'pointer',
+  opacity: disabled ? 0.5 : 1,
+  fontWeight: '600',
+  fontSize: '12px',
+  lineHeight: '1',
+  transition: 'background-color 0.2s',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+})
+
 export const TYPES = ['Standard', 'Bruiser', 'Horde', 'Leader', 'Minion', 'Ranged', 'Skulk', 'Solo', 'Support', 'Social']
 export const DAMAGE_TYPES = ['Physical', 'Magical', 'Physical/Magical']
 const TYPE_SHORT = { Physical: 'phy', Magical: 'mag', 'Physical/Magical': 'phy/mag' }

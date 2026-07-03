@@ -15,7 +15,7 @@ const SRC_ROOT = join(process.cwd(), 'src')
 // Lower these as the files shrink; never raise them.
 const BUDGETS = {
   'src/components/Browser/Browser.jsx': 882,
-  'src/components/Adversaries/CustomAdversaryCreator.jsx': 984,
+  'src/components/Adversaries/CustomAdversaryCreator.jsx': 977,
   'src/components/Adversaries/GameCard.jsx': 1380,
   'src/components/Dashboard/DashboardView.jsx': 610,
   'src/components/Dashboard/EntityColumns.jsx': 576,
