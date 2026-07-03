@@ -445,23 +445,22 @@ const EntityColumns = ({
             if (isFirst) firstGroupSeen = true
             return (
               <div style={{
-                height: groupTabBarHeight,
-                display: 'flex',
-                alignItems: 'flex-start',
-                position: 'relative',
+                height: groupTabBarHeight, display: 'flex',
+                alignItems: 'flex-start', position: 'relative',
               }}>
                 <div style={{
-                  position: 'absolute',
-                  top: groupLineY,
-                  left: 0,
-                  right: 0,
-                  bottom: 6,
+                  position: 'absolute', top: groupLineY, left: 0, right: 0, bottom: 6,
                   borderTop: '1px solid var(--text-secondary)',
-                  borderLeft: '1px solid var(--text-secondary)',
                   borderRight: '1px solid var(--text-secondary)',
-                  borderTopLeftRadius: 4,
-                  borderTopRightRadius: 4,
-                  pointerEvents: 'none',
+                  borderTopRightRadius: 4, pointerEvents: 'none',
+                }} />
+                {/* Rail's left edge, pinned like the pill (sticky) so it can't peek out
+                    past its left side (#86). width: 0 keeps it out of flex layout. */}
+                <div style={{
+                  position: 'sticky', left: 0, top: groupLineY, width: 0,
+                  height: `calc(100% - ${groupLineY}px - 6px)`,
+                  borderLeft: '1px solid var(--text-secondary)',
+                  pointerEvents: 'none', flexShrink: 0, zIndex: 1,
                 }} />
                 <span
                   ref={isFirst ? pillMeasureRef : undefined}
