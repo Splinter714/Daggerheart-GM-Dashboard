@@ -151,6 +151,24 @@ const AutoIndicator = ({ active }) => (
 
 const formatModifier = (value) => value > 0 ? `+${value} BP` : `${value} BP`
 
+// Small badge marking a row as auto-detected/read-only, distinct from the
+// clickable manual-adjustment rows above it (#78).
+const AutoTag = () => (
+  <span style={{
+    fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
+    color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '4px',
+    padding: '0.05rem 0.3rem', flexShrink: 0,
+  }}>
+    auto
+  </span>
+)
+
+const autoRowStyle = {
+  display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0.3rem',
+  userSelect: 'none', borderRadius: '5px',
+  background: 'color-mix(in srgb, var(--text-secondary) 6%, transparent)',
+}
+
 const EncounterReceipt = ({
   encounterItems,
   pcCount,
@@ -313,22 +331,24 @@ const EncounterReceipt = ({
           })}
 
           {/* Auto adjustment: 2+ Solos */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', userSelect: 'none' }}>
+          <div style={autoRowStyle}>
             <AutoIndicator active={twoOrMoreSolos} />
             <span style={{ flex: 1, fontSize: '0.85rem', color: twoOrMoreSolos ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
               2+ Solos
             </span>
+            <AutoTag />
             <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: twoOrMoreSolos ? 'var(--danger)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
               {twoOrMoreSolos ? formatModifier(BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos) : '—'}
             </span>
           </div>
 
           {/* Auto adjustment: no major threats */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', userSelect: 'none' }}>
+          <div style={autoRowStyle}>
             <AutoIndicator active={noMajorThreats} />
             <span style={{ flex: 1, fontSize: '0.85rem', color: noMajorThreats ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
               No Major Threats
             </span>
+            <AutoTag />
             <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: noMajorThreats ? 'var(--success)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
               {noMajorThreats ? formatModifier(BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos) : '—'}
             </span>
@@ -354,26 +374,31 @@ const EncounterReceipt = ({
         </div>
       </div>
 
-      {/* Sticky footer — budget/remaining */}
+      {/* Sticky footer — Remaining is the dominant number; Budget/Used are smaller
+          supporting figures underneath it (#78). */}
       <div style={{ flexShrink: 0, borderTop: '1px solid var(--border)', padding: '0.5rem 1rem 0.65rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0' }}>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Budget</span>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{availableBattlePoints} BP</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0' }}>
-          <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '0.15rem 0' }}>
+          <span style={{ color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: 700 }}>
             {spentBattlePoints > availableBattlePoints ? 'Over Budget' : 'Remaining'}
           </span>
           <span style={{
             color: spentBattlePoints > availableBattlePoints ? 'var(--danger)'
                  : spentBattlePoints === availableBattlePoints ? 'var(--purple)'
                  : 'var(--success)',
-            fontWeight: 600, fontSize: '0.9rem',
+            fontWeight: 700, fontSize: '1.15rem',
           }}>
             {spentBattlePoints > availableBattlePoints
               ? `${spentBattlePoints - availableBattlePoints} BP`
               : `${availableBattlePoints - spentBattlePoints} BP`}
           </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0' }}>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>Budget</span>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{availableBattlePoints} BP</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0' }}>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>Used</span>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{spentBattlePoints} BP</span>
         </div>
       </div>
 

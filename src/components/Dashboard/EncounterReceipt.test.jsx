@@ -43,4 +43,30 @@ describe('EncounterReceipt', () => {
     expect(screen.getByText('(not BP-costed)')).toBeTruthy()
     expect(screen.getAllByText('Ikeri, Injuries Untold')).toHaveLength(2)
   })
+
+  it('tags auto-detected adjustments distinctly from manual toggles (#78)', () => {
+    const encounterItems = [
+      { type: 'adversary', item: { id: 's1', type: 'Solo', name: 'Solo A' }, quantity: 2 },
+    ]
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} bpAdjustments={{}} />)
+
+    // "2+ Solos" auto-adjustment is active and carries the "auto" tag.
+    expect(screen.getByText('2+ Solos')).toBeTruthy()
+    expect(screen.getAllByText('auto').length).toBeGreaterThan(0)
+  })
+
+  it('makes Remaining the dominant footer figure, with Budget and Used as smaller supporting lines (#78)', () => {
+    const encounterItems = []
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} availableBattlePoints={14} spentBattlePoints={6} />)
+
+    const remainingLabel = screen.getByText('Remaining')
+    const budgetLabel = screen.getByText('Budget')
+    const usedLabel = screen.getByText('Used')
+
+    expect(parseFloat(remainingLabel.style.fontSize)).toBeGreaterThan(parseFloat(budgetLabel.style.fontSize))
+    expect(parseFloat(remainingLabel.style.fontSize)).toBeGreaterThan(parseFloat(usedLabel.style.fontSize))
+    expect(screen.getByText('8 BP')).toBeTruthy() // remaining
+    expect(screen.getByText('6 BP')).toBeTruthy() // used
+    expect(screen.getAllByText('14 BP').length).toBeGreaterThan(0) // budget (and base party BP, same value)
+  })
 })
