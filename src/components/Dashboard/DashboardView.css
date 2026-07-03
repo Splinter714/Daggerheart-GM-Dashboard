@@ -31,4 +31,15 @@
   display: flex;
 }
 
+/* Soft confirmation highlight on a newly-added adversary card (#55) — a
+   single-accent glow that fades on its own, no user interaction needed. */
+@keyframes card-added-pulse {
+  0% { box-shadow: 0 0 0 2px var(--purple); }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+
+.card-recently-added {
+  animation: card-added-pulse 1.8s ease-out forwards;
+  border-radius: 0.5rem;
+}
 

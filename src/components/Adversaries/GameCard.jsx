@@ -88,6 +88,7 @@ const GameCard = ({
   segment = null, // Colossus segment data — set to render this segment as its own standalone card
   segmentKey = null, // Segment HP tracking key (differs from segment.id when count > 1)
   instanceLabelStyle = 'numeric', // Global display setting (#82): 'numeric' or 'alphabetic'
+  isRecentlyAdded = false, // Soft fade-out confirmation pulse on newly-added cards (#55)
 }) => {
   const nameInputRef = useRef(null)
   const customCreatorRef = useRef(null)
@@ -245,12 +246,8 @@ const GameCard = ({
     }
     
     let className = 'border rounded-lg'
-    
-    // Apply border hover effect when selected
-    if (isSelected) {
-      className += ' border-hover'
-    }
-    
+    if (isSelected) className += ' border-hover' // Border hover effect when selected
+    if (isRecentlyAdded) className += ' card-recently-added' // Fade-out confirmation pulse (#55)
     return className
   }
 

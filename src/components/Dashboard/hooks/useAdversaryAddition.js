@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { DASHBOARD_GAP } from '../constants'
 
+// How long the "just added" confirmation pulse stays visible (#55) — must
+// match the CSS animation duration in DashboardView.css (.card-recently-added).
+export const RECENTLY_ADDED_DURATION_MS = 1800
+
 /**
  * Returns the monster addition handler that used to live inline in
  * DashboardView. Keeping it here makes the parent component far easier to scan
@@ -13,6 +17,7 @@ export const useAdversaryAddition = ({
   createAdversariesBulk,
   createAdversary,
   setNewCards,
+  setRecentlyAddedCards,
   getEntityGroups,
   smoothScrollTo,
   browserOpenAtPosition,
@@ -55,6 +60,19 @@ export const useAdversaryAddition = ({
       }
 
       onAdversaryAdded?.(baseName)
+
+      // Soft "just added" confirmation pulse — every add flashes the card that
+      // now holds the new instance, whether it's a brand-new group or a
+      // duplicate joining an existing one (#55).
+      const addedCardKey = `adversary-${baseName}`
+      setRecentlyAddedCards?.((prev) => new Set(prev).add(addedCardKey))
+      setTimeout(() => {
+        setRecentlyAddedCards?.((prev) => {
+          const next = new Set(prev)
+          next.delete(addedCardKey)
+          return next
+        })
+      }, RECENTLY_ADDED_DURATION_MS)
 
       if (isNewAdversary) {
         const cardKey = `adversary-${baseName}`
@@ -190,6 +208,7 @@ export const useAdversaryAddition = ({
       pcCount,
       scrollContainerRef,
       setNewCards,
+      setRecentlyAddedCards,
       smoothScrollTo,
       sortBy,
       sortDir

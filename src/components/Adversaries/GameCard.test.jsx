@@ -149,3 +149,18 @@ describe('GameCard instance label style (#82)', () => {
     expect(screen.queryByText('1')).toBeNull()
   })
 })
+
+describe('GameCard fade-out confirmation pulse on newly-added cards (#55)', () => {
+  const adversaryItem = { id: 'grp-1', name: 'Goblin', hpMax: 10, stressMax: 3 }
+  const instances = [{ id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, hpMax: 10, stressMax: 3 }]
+
+  it('does not apply the highlight class by default', () => {
+    const { container } = render(<GameCard type="adversary" item={adversaryItem} instances={instances} />)
+    expect(container.querySelector('.card-recently-added')).toBeNull()
+  })
+
+  it('applies the highlight class when isRecentlyAdded is true', () => {
+    const { container } = render(<GameCard type="adversary" item={adversaryItem} instances={instances} isRecentlyAdded />)
+    expect(container.querySelector('.card-recently-added')).toBeTruthy()
+  })
+})

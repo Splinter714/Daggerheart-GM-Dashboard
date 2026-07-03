@@ -64,6 +64,7 @@ const DashboardContent = () => {
 
   // Column layout state
   const [newCards, setNewCards] = useState(new Set())
+  const [recentlyAddedCards, setRecentlyAddedCards] = useState(new Set()) // #55
   const [removingCardSpacer, setRemovingCardSpacer] = useState(null)
   const [spacerShrinking, setSpacerShrinking] = useState(false)
   const scrollContainerRef = useRef(null)
@@ -105,11 +106,9 @@ const DashboardContent = () => {
     entityGroups,
     pcCount,
     scrollContainerRef,
-    createAdversariesBulk,
-    createAdversary,
-    setNewCards,
-    getEntityGroups,
-    smoothScrollTo,
+    createAdversariesBulk, createAdversary,
+    setNewCards, setRecentlyAddedCards,
+    getEntityGroups, smoothScrollTo,
     browserOpenAtPosition,
     columnWidth,
     sortBy,
@@ -495,7 +494,7 @@ const DashboardContent = () => {
           isNarrow={isNarrow}
           scrollContainerRef={scrollContainerRef}
           onScroll={handleScroll}
-          newCards={newCards}
+          newCards={newCards} recentlyAddedCards={recentlyAddedCards}
           removingCardSpacer={removingCardSpacer}
           spacerShrinking={spacerShrinking}
           browserOpenAtPosition={browserOpenAtPosition}

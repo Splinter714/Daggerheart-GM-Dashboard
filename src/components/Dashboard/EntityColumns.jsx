@@ -58,7 +58,7 @@ const EntityColumns = ({
   deleteEnvironment,
   setRemovingCardSpacer,
   setSpacerShrinking,
-  onOpenBrowser, instanceLabelStyle = 'numeric',
+  onOpenBrowser, instanceLabelStyle = 'numeric', recentlyAddedCards = new Set(),
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
 
@@ -142,6 +142,7 @@ const EntityColumns = ({
               : { ...group.instances[0], name: group.instances[0]?.name || group.baseName }
           }
           segment={group.segment} segmentKey={group.segmentKey} mode="expanded" instanceLabelStyle={instanceLabelStyle}
+          isRecentlyAdded={group.type === 'adversary' && recentlyAddedCards.has(`adversary-${group.baseName}`)}
           instances={
             group.type === 'adversary'
               ? [...group.instances]
