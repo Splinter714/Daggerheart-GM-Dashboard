@@ -19,3 +19,7 @@ For styling/highlighting work, start simple (single accent, minimal coloring) an
 ## Dev Server / Preview
 
 Don't start your own `npm run dev` — Claude Code's preview owns this worktree's dev server (`.claude/launch.json`, `autoPort: true`), and each worktree gets its own port. A second server in the same worktree bumps the preview onto a phantom port and the panes diverge (the "stale dev server" gotcha). For verification, rely on the preview's already-running server; only start one if none is detected for this worktree.
+
+## Versioning
+
+Bump the patch version in `package.json` (`0.11.11` → `0.11.12`) as part of any change landing on `main` — this repo doesn't do minor/major semver bumps, just an incrementing patch counter per shipped change. Bump it in the same PR as the change (no need for a separate `chore: bump version` commit unless the change is otherwise unrelated to a landed PR).
