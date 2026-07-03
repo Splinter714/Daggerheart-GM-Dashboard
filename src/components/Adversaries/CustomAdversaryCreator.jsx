@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef, useCallback, useLayoutEffect } from 'react'
+import { Eye, X, Check, Plus } from 'lucide-react'
 import GameCard from './GameCard'
+import { AdversaryPreviewCard } from './AdversaryPreviewCard'
 import FeaturesSection from './GameCard/FeaturesSection'
 import ExperienceSection from './GameCard/ExperienceSection'
 import { getDefaultAdversaryValues } from './adversaryDefaults'
 import { typeGuide, stressFearGuide } from './adversaryTypeGuide'
 import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from '../Dashboard/constants'
 import { inputStyle, labelStyle, sectionStyle, DAMAGE_TYPES, parseDamage, buildDamage, reorder, compactCtrlBtnStyle } from './customCreatorConstants'
-import { DragHandle, PanelHeader } from './creatorAtoms'
+import { DragHandle } from './creatorAtoms'
 import { InfoPopover } from './InfoPopover'
 import { StatField } from './StatField'
 import { FeatureList } from './FeatureList'
@@ -486,40 +488,46 @@ const CustomAdversaryCreator = forwardRef(({
       flexShrink: 0, whiteSpace: 'nowrap',
     }
 
+    // Compact icon + short-label button so all four actions fit in one row
+    // without clipping on narrow viewports.
+    const mobileBtnBase = {
+      ...btnBase, padding: '0.3rem 0.5rem', minWidth: 0, flex: '1 1 0', overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
+    }
+    const mobileBtnLabel = { overflow: 'hidden', textOverflow: 'ellipsis' }
+
     const MobileActionBar = () => (
       <div style={{
         flex: '0 0 auto', display: 'flex', alignItems: 'center',
-        padding: '0.5rem 0.75rem', borderTop: '1px solid var(--border)', gap: '0.5rem',
+        padding: '0.5rem 0.75rem', borderTop: '1px solid var(--border)', gap: '0.4rem',
       }}>
         <button
           onClick={() => setActiveTab(v => v === 'build' ? 'preview' : 'build')}
           style={{
-            ...btnBase,
+            ...mobileBtnBase,
             background: activeTab === 'preview' ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent',
             border: `1px solid ${activeTab === 'preview' ? 'var(--purple)' : 'var(--border)'}`,
             color: activeTab === 'preview' ? 'var(--purple)' : 'var(--text-secondary)',
           }}
-        >{activeTab === 'preview' ? '← Form' : 'Preview'}</button>
-
-        <div style={{ flex: 1 }} />
+        ><Eye size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>{activeTab === 'preview' ? 'Form' : 'Preview'}</span></button>
 
         {onCancelEdit && (
-          <button onClick={onCancelEdit} style={{ ...btnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
-            Cancel
+          <button onClick={onCancelEdit} style={{ ...mobileBtnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+            <X size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>Cancel</span>
           </button>
         )}
         {onSaveAndAdd && (
           <button
             onClick={handleSaveAndAdd}
             disabled={!canAct}
-            style={{ ...btnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)', ...(canAct ? {} : disabledStyle) }}
-          >{isSaving ? 'Saving…' : 'Save & Add to Encounter'}</button>
+            style={{ ...mobileBtnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)', ...(canAct ? {} : disabledStyle) }}
+          ><Plus size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>{isSaving ? 'Saving…' : 'Add'}</span></button>
         )}
         <button
           onClick={handleSave}
           disabled={!canAct}
-          style={{ ...btnBase, background: canAct ? 'var(--purple)' : 'var(--gray-600)', border: 'none', color: 'white', fontWeight: '600', ...(canAct ? {} : disabledStyle) }}
-        >{isSaving ? 'Saving…' : 'Save'}</button>
+          style={{ ...mobileBtnBase, background: canAct ? 'var(--purple)' : 'var(--gray-600)', border: 'none', color: 'white', fontWeight: '600', ...(canAct ? {} : disabledStyle) }}
+        ><Check size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>{isSaving ? 'Saving…' : 'Save'}</span></button>
       </div>
     )
 
@@ -788,21 +796,9 @@ const CustomAdversaryCreator = forwardRef(({
         </div>
     )
 
-    const previewContent = (
-      <>
-        <PanelHeader label="Preview" />
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
-          <GameCard
-            item={formItem}
-            type="adversary"
-            mode="expanded"
-            instances={previewInstances}
-            showAddRemoveButtons={false}
-            onUpdate={() => {}}
-          />
-        </div>
-      </>
-    )
+    // Live preview: see AdversaryPreviewCard (renders the actual dashboard
+    // card component with a "Type: PREVIEW" pill, no boxed panel wrapper).
+    const previewContent = <AdversaryPreviewCard formItem={formItem} previewInstances={previewInstances} />
 
     // Desktop panel mode: render two sibling absolute panels inside dashboard-main,
     // exactly like RightColumn but one for the form and one for the preview.
@@ -819,9 +815,12 @@ const CustomAdversaryCreator = forwardRef(({
         boxShadow: PANEL_BOX_SHADOW,
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }
+      // Preview slot: same position/sizing as the boxed panel, but no
+      // border/background/shadow — the live card sits directly in the column.
+      const { backgroundColor, border, boxShadow, borderRadius, ...previewSlotStyle } = panelStyle
       return (
         <>
-          <div style={{ ...panelStyle, right: `${DASHBOARD_GAP + columnWidth + DASHBOARD_GAP}px` }}>
+          <div style={{ ...previewSlotStyle, right: `${DASHBOARD_GAP + columnWidth + DASHBOARD_GAP}px` }}>
             {previewContent}
           </div>
           <div style={{ ...panelStyle, right: `${DASHBOARD_GAP}px` }}>
@@ -844,10 +843,10 @@ const CustomAdversaryCreator = forwardRef(({
       )
     }
 
-    // Wide: two equal card panels side by side
+    // Wide: preview sits unboxed, form keeps its card panel
     return (
       <div ref={containerRef} style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%', overflow: 'hidden', gap: '12px' }}>
-        <div style={cardStyle}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {previewContent}
         </div>
         <div style={cardStyle}>
