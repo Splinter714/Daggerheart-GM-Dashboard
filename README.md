@@ -1,6 +1,6 @@
 # Daggerheart GM Dashboard
 
-A web-based GM dashboard for running Daggerheart RPG sessions. Built with React + Vite, deployed to GitHub Pages.
+The GM screen for running Daggerheart tabletop sessions — track adversaries, Fear & Hope, countdowns, and encounter budgets from your browser, online or off. Installable as a PWA on desktop, iOS, and Android.
 
 **Live:** https://splinter714.github.io/Daggerheart/
 
@@ -15,6 +15,7 @@ A web-based GM dashboard for running Daggerheart RPG sessions. Built with React 
 - **Persistent state** — game state saves automatically across sessions
 - **Drag & drop** — reorder cards with touch-friendly drag controls
 - **Mobile support** — bottom NavRail on narrow screens, responsive layout
+- **Installable PWA** — add to home screen / dock, works offline via service worker
 
 ## Dev
 
@@ -22,7 +23,7 @@ A web-based GM dashboard for running Daggerheart RPG sessions. Built with React 
 npm install
 npm run dev       # localhost:5173
 npm run build     # production build to ../dist
-npm run deploy    # build + push to gh-pages
+npm run deploy    # build + push to gh-pages manually (CI also deploys on push to main)
 ```
 
 ## Stack
