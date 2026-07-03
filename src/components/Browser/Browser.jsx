@@ -614,8 +614,8 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             autoFocus={autoFocus}
             onClose={onClose}
             placeholder={searchPlaceholder}
+            remainingBudget={type === 'adversary' ? remainingBudget : null}
           />
-          
           {!hideImportExport && (
           <BrowserButtonRow
             showCustomToggle={showCustomToggle}

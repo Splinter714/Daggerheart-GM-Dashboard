@@ -152,6 +152,8 @@ const RightColumn = ({
               hideImportExport={true}
               onClose={null}
               searchPlaceholder="Search adversaries"
+              encounterItems={encounterItems}
+              pcCount={pcCount}
             />
           ) : (
             <Browser
