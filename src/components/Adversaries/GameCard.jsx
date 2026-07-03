@@ -11,6 +11,7 @@ import { DASHBOARD_GAP, TAB_HEIGHT } from '../Dashboard/constants'
 import { highlightCardText } from './GameCard/textHighlighter'
 import MergedStatBadge from './GameCard/MergedStatBadge'
 import TabButtons from './GameCard/TabButtons'
+import ColossusSegmentCard, { Divider, FeatureList, HpPips, sortSegments } from './GameCard/ColossusSegmentCard'
 
 const INSTANCE_COLORS = [
   { value: 'var(--red)',    label: 'Red' },
@@ -83,6 +84,8 @@ const GameCard = ({
   onCancelEdit = null, // Handler for canceling edit
   isStockAdversary = false, // Whether this is a stock adversary (needs Save As)
   onDelete = null, // Handler for removing an environment from the session
+  segment = null, // Colossus segment data — set to render this segment as its own standalone card
+  segmentKey = null, // Segment HP tracking key (differs from segment.id when count > 1)
 }) => {
   const nameInputRef = useRef(null)
   const customCreatorRef = useRef(null)
@@ -936,78 +939,29 @@ const GameCard = ({
     )
   }
 
+  const renderExpandedColossusSegment = () => {
+    const inst = instances[0]
+    const segmentHp = inst?.segmentHp || {}
+    const markedHp = segmentHp[segmentKey] || 0
+    const toggleHpPip = (i) => {
+      if (!inst || !onUpdate) return
+      onUpdate(inst.id, { segmentHp: { ...segmentHp, [segmentKey]: i < markedHp ? i : i + 1 } })
+    }
+    return (
+      <ColossusSegmentCard
+        colossus={item} segment={segment} segmentKey={segmentKey} markedHp={markedHp}
+        onToggleHpPip={toggleHpPip} onUpdate={onUpdate} onDelete={onDelete}
+        getCardStyle={getCardStyle} quickEdit={quickEdit} setQuickEdit={setQuickEdit}
+      />
+    )
+  }
+
   const renderExpandedColossus = () => {
     const colossus = item
     // Pull segmentHp from the single instance (colossi don't stack)
     const inst = instances[0]
     const segmentHp = inst?.segmentHp || {}
-
-    const SEGMENT_ROLE_ORDER = {
-      head: 1, neck: 2, torso: 3, body: 3, shell: 3, cavity: 3,
-      arm: 4, claw: 4, wing: 4, foreleg: 5, hindleg: 6, leg: 6, talon: 6, tail: 7,
-    }
-
-    const sortedSegments = [...(colossus.segments || [])].sort((a, b) => {
-      const ra = SEGMENT_ROLE_ORDER[a.role] ?? 99
-      const rb = SEGMENT_ROLE_ORDER[b.role] ?? 99
-      return ra !== rb ? ra - rb : (a.name || '').localeCompare(b.name || '')
-    })
-
-    const Divider = ({ title }) => (
-      <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginTop: CARD_SPACE_V }}>
-        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)', margin: 0 }} />
-        <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          {title}
-        </span>
-      </div>
-    )
-
-    const FeatureList = ({ features }) => {
-      if (!features?.length) return null
-      const byType = ['Passive', 'Action', 'Reaction']
-      return byType.map(ftype => {
-        const fts = features.filter(f => f.type === ftype)
-        if (!fts.length) return null
-        return (
-          <div key={ftype}>
-            <Divider title={ftype + 's'} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
-              {fts.map((f, i) => (
-                <div key={i}>
-                  <span style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{f.name}</span>
-                  {f.description && (
-                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '0.125rem' }}>
-                      {highlightCardText(f.description)}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      })
-    }
-
-    const HpPips = ({ max, marked, onToggle }) => {
-      if (!max) return null
-      return (
-        <div style={{ display: 'flex', gap: '0.1875rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          {Array.from({ length: max }, (_, i) => (
-            <div
-              key={i}
-              onClick={e => { e.stopPropagation(); onToggle(i) }}
-              style={{
-                width: '0.75rem', height: '0.75rem', borderRadius: '50%', cursor: 'pointer',
-                border: '1.5px solid var(--text-secondary)',
-                backgroundColor: i < marked ? 'var(--text-primary)' : 'transparent',
-                transition: 'background-color 0.1s',
-                flexShrink: 0,
-              }}
-            />
-          ))}
-        </div>
-      )
-    }
+    const sortedSegments = sortSegments(colossus.segments)
 
     const SegmentBlock = ({ seg, instanceKey, markedHp }) => {
       const handlePipToggle = (pipIndex) => {
@@ -1360,9 +1314,9 @@ const GameCard = ({
     return renderExpandedEnvironment()
   }
 
-  // Render colossus card
+  // Colossus: segment-per-card (global "segments" mode) or nested (default)
   if (item.isColossus) {
-    return renderExpandedColossus()
+    return segment ? renderExpandedColossusSegment() : renderExpandedColossus()
   }
 
   // When showCustomCreator is true, use edit mode instead

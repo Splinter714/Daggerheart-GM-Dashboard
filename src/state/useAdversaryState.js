@@ -5,7 +5,9 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { generateId, readFromStorage, writeToStorage } from './StorageHelpers'
 
 // Per-instance fields — everything else lives on the group template
-const INSTANCE_FIELDS = new Set(['hp', 'stress', 'isVisible'])
+// segmentHp tracks colossus per-segment HP pips per instance (colossi don't
+// stack, but the value still lives on the instance alongside hp/stress).
+const INSTANCE_FIELDS = new Set(['hp', 'stress', 'isVisible', 'segmentHp'])
 
 // Migrate old flat-array format → group format
 const migrateToGroups = (flatAdversaries) => {

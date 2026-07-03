@@ -11,12 +11,37 @@ const ColumnHeader = ({ title }) => (
 )
 
 
-const InfoContent = () => (
+const InfoContent = ({ colossusDisplayMode, onColossusDisplayModeChange }) => (
   <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem' }}>
     <img src={logoImage} alt="Daggerheart Community Content Logo"
       width="639" height="156"
       style={{ width: '100%', maxWidth: '220px', height: 'auto', display: 'block', margin: '0 auto 1.25rem' }}
       onError={(e) => { e.target.style.display = 'none' }} />
+    {onColossusDisplayModeChange && (
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+          Colossus display
+        </div>
+        <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+          {[
+            { value: 'nested', label: 'Nested' },
+            { value: 'segments', label: 'Segments' },
+          ].map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => onColossusDisplayModeChange(value)}
+              style={{
+                flex: 1, padding: '0.5rem', border: 'none', cursor: 'pointer', fontSize: '0.8rem',
+                background: colossusDisplayMode === value ? 'var(--purple)' : 'var(--bg-secondary)',
+                color: colossusDisplayMode === value ? 'white' : 'var(--text-primary)',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
     <div style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
       <p style={{ marginTop: 0 }}>This product includes materials from the Daggerheart System Reference Document 1.0, © Critical Role, LLC, under the terms of the Darrington Press Community Gaming (DPCGL) License.</p>
       <p>More information can be found at{' '}<a href="https://www.daggerheart.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--purple)', textDecoration: 'underline' }}>daggerheart.com</a></p>
@@ -70,6 +95,7 @@ const RightColumn = ({
   bpAdjustments, onChangeBpAdjustments,
   availableBattlePoints, spentBattlePoints,
   sortBy, sortDir, groupBy, onSortBy, onGroupBy,
+  colossusDisplayMode, onColossusDisplayModeChange,
 }) => {
 
   const encounterItems = groupsToEncounterItems(adversaryGroups, pcCount)
@@ -142,7 +168,12 @@ const RightColumn = ({
         </>
       )}
 
-      {mode === 'info' && <InfoContent />}
+      {mode === 'info' && (
+        <InfoContent
+          colossusDisplayMode={colossusDisplayMode}
+          onColossusDisplayModeChange={onColossusDisplayModeChange}
+        />
+      )}
 
       {mode === 'receipt' && (
         <>

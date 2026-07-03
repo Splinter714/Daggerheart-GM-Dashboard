@@ -45,6 +45,22 @@ describe('useAdversaryState', () => {
     expect(result.current.adversaries[0].difficulty).toBe(14)
   })
 
+  it('routes a segmentHp update to the instance (colossus HP pips must persist per-instance)', () => {
+    const { result } = renderHook(() => useAdversaryState())
+    act(() => result.current.createAdversary({
+      name: 'Ikeri',
+      isColossus: true,
+      segments: [{ id: 'ikeri-head', hp: 5, count: 1 }],
+    }))
+
+    const instanceId = result.current.groups[0].instances[0].id
+    act(() => result.current.updateAdversary(instanceId, { segmentHp: { 'ikeri-head': 3 } }))
+
+    expect(result.current.groups[0].instances[0].segmentHp).toEqual({ 'ikeri-head': 3 })
+    // Must not leak onto the group template, which lacks a segmentHp field entirely.
+    expect(result.current.groups[0].segmentHp).toBeUndefined()
+  })
+
   it('deletes an instance and prunes the group once it is empty', () => {
     const { result } = renderHook(() => useAdversaryState())
     act(() => result.current.createAdversary({ name: 'Goblin' }))

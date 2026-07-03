@@ -8,6 +8,10 @@ const DEFAULTS = {
   sortBy: 'name',
   sortDir: 'asc',
   groupBy: 'type',
+  // Global toggle: how colossus adversaries render on the board.
+  // 'nested' — one card containing all segments (current default, works well on mobile).
+  // 'segments' — each segment renders as its own card, grouped/adjacent on the board.
+  colossusDisplayMode: 'nested',
 }
 
 export function useDashboardSortGroup() {
@@ -35,7 +39,9 @@ export function useDashboardSortGroup() {
 
   const setGroupBy = (groupBy) => setSettings(s => ({ ...s, groupBy }))
 
-  return { ...settings, setSortBy, setGroupBy }
+  const setColossusDisplayMode = (colossusDisplayMode) => setSettings(s => ({ ...s, colossusDisplayMode }))
+
+  return { ...settings, setSortBy, setGroupBy, setColossusDisplayMode }
 }
 
 const SORT_FIELD_KEY = {

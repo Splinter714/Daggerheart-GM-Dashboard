@@ -55,7 +55,7 @@ const DashboardContent = () => {
   const [browserContentType, setBrowserContentType] = useState('adversary') // 'adversary' | 'environment'
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null)
   const [rightColumnMode, setRightColumnMode] = useState('browser') // 'browser' | 'info' | 'receipt'
-  const { sortBy, sortDir, groupBy, setSortBy, setGroupBy } = useDashboardSortGroup()
+  const { sortBy, sortDir, groupBy, colossusDisplayMode, setSortBy, setGroupBy, setColossusDisplayMode } = useDashboardSortGroup()
 
   // Narrow screen detection for NavRail placement
   const dashboardRootRef = useRef(null)
@@ -65,10 +65,9 @@ const DashboardContent = () => {
   const [removingCardSpacer, setRemovingCardSpacer] = useState(null)
   const [spacerShrinking, setSpacerShrinking] = useState(false)
   const scrollContainerRef = useRef(null)
-
   useMinionSync(adversaryGroups, pcCount, createAdversariesBulk, deleteAdversary)
 
-  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, environments, sortBy, sortDir, groupBy)
+  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, environments, sortBy, sortDir, groupBy, colossusDisplayMode)
 
   const effectiveGap = DASHBOARD_GAP
   const edgePadding = DASHBOARD_GAP
@@ -483,6 +482,7 @@ const DashboardContent = () => {
             groupBy={groupBy}
             onSortBy={setSortBy}
             onGroupBy={setGroupBy}
+            colossusDisplayMode={colossusDisplayMode} onColossusDisplayModeChange={setColossusDisplayMode}
           />
         <EntityColumns
           entityGroups={entityGroups}
