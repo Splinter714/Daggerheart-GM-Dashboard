@@ -19,7 +19,8 @@ export const useAdversaryAddition = ({
   columnWidth,
   sortBy,
   sortDir,
-  groupBy
+  groupBy,
+  onAdversaryAdded
 }) => {
   const getEntityGroupsRef = useRef(getEntityGroups)
   useEffect(() => { getEntityGroupsRef.current = getEntityGroups }, [getEntityGroups])
@@ -52,6 +53,8 @@ export const useAdversaryAddition = ({
       } else {
         createAdversary(itemData)
       }
+
+      onAdversaryAdded?.(baseName)
 
       if (isNewAdversary) {
         const cardKey = `adversary-${baseName}`
@@ -183,6 +186,7 @@ export const useAdversaryAddition = ({
       createAdversary,
       entityGroups,
       groupBy,
+      onAdversaryAdded,
       pcCount,
       scrollContainerRef,
       setNewCards,

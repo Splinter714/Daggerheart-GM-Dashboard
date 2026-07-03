@@ -19,7 +19,9 @@ import { useBrowserOverlay } from './hooks/useBrowserOverlay'
 import { useSmoothScroll } from './hooks/useSmoothScroll'
 import { useEntityGroups } from './hooks/useEntityGroups'
 import { useAdversaryAddition } from './hooks/useAdversaryAddition'
+import { useAdversaryToast } from './hooks/useAdversaryToast'
 import { useDashboardSortGroup } from './hooks/useDashboardSortGroup'
+import AdversaryToast from './AdversaryToast'
 import NavRail, { RAIL_SIZE, isPWA } from './NavRail'
 import './DashboardView.css'
 
@@ -74,6 +76,7 @@ const DashboardContent = () => {
 
   const { columnWidth, visibleColumns } = useColumnLayout(scrollContainerRef, effectiveGap, edgePadding, RAIL_SIZE)
   const isNarrow = visibleColumns < 2
+  const { toastMessage, showAdversaryToast } = useAdversaryToast()
 
   const { browserOpenAtPosition, handleOpenBrowser, handleCloseBrowser } = useBrowserOverlay({
     scrollContainerRef,
@@ -111,7 +114,8 @@ const DashboardContent = () => {
     columnWidth,
     sortBy,
     sortDir,
-    groupBy
+    groupBy,
+    onAdversaryAdded: isNarrow ? showAdversaryToast : undefined
   })
 
   // Handle editing an adversary
@@ -576,6 +580,8 @@ const DashboardContent = () => {
 
 
       <PWAInstallPrompt />
+
+      {isNarrow && <AdversaryToast message={toastMessage} />}
 
       {showNavRail && (
         <NavRail
