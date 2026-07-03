@@ -233,7 +233,13 @@ const EncounterReceipt = ({
         {/* Adversary rows grouped by type */}
         {groups.map(({ key, items }) => {
           const isColossus = key === 'Colossus'
+          const isMinion = key === 'Minion'
           const cost = BATTLE_POINT_COSTS[key]
+          // Total minion instance count across all minion groups — independent of the
+          // BP-group math, since minions are N instances per 1 BP (#87).
+          const totalMinionInstances = isMinion
+            ? items.reduce((sum, i) => sum + (i.instanceCount ?? i.quantity), 0)
+            : 0
           return (
             <React.Fragment key={key}>
               <div style={{ padding: '0.3rem 0 0.1rem', display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
@@ -247,6 +253,11 @@ const EncounterReceipt = ({
                 ) : cost != null && (
                   <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 400 }}>
                     ({cost} BP each)
+                  </span>
+                )}
+                {isMinion && (
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 400 }}>
+                    · {totalMinionInstances} instance{totalMinionInstances === 1 ? '' : 's'}
                   </span>
                 )}
               </div>

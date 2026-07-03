@@ -50,7 +50,11 @@ export const groupsToEncounterItems = (adversaryGroups, pcCount) =>
     }
     const isMinion = group.type === 'Minion'
     const qty = isMinion ? Math.round(group.instances.length / pcCount) : group.instances.length
-    return [{ type: 'adversary', item: { ...itemData, id: itemData.id || group.baseName, name: group.baseName }, quantity: qty }]
+    const entry = { type: 'adversary', item: { ...itemData, id: itemData.id || group.baseName, name: group.baseName }, quantity: qty }
+    // Minions cost BP per group of pcCount instances, but the GM also needs the actual
+    // instance/token count on the table, which differs from the BP-group quantity (#87).
+    if (isMinion) entry.instanceCount = group.instances.length
+    return [entry]
   })
 
 // mode: 'browser' | 'info' | 'receipt'

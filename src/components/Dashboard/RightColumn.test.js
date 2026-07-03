@@ -12,13 +12,14 @@ describe('groupsToEncounterItems', () => {
     expect(items[0].item.name).toBe('Goblin')
   })
 
-  it('groups minions into BP-equivalent groups based on party size', () => {
+  it('groups minions into BP-equivalent groups based on party size, and reports the raw instance count separately (#87)', () => {
     const groups = [
       { id: 'grp1', baseName: 'Minion Swarm', type: 'Minion', instances: [{ id: 'a1' }, { id: 'a2' }, { id: 'a3' }, { id: 'a4' }] },
     ]
     const items = groupsToEncounterItems(groups, 4)
     expect(items).toHaveLength(1)
     expect(items[0].quantity).toBe(1)
+    expect(items[0].instanceCount).toBe(4)
   })
 
   it('expands a colossus group into one separate encounterItem per instance, never grouped (#99)', () => {
