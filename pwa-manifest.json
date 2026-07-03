@@ -1,7 +1,7 @@
 {
   "id": "./",
   "name": "Daggerheart GM Dashboard",
-  "short_name": "Daggerheart GM",
+  "short_name": "GM Dashboard",
   "description": "The GM screen for running Daggerheart tabletop sessions — track adversaries, Fear & Hope, countdowns, and encounter budgets from your browser, online or off.",
   "start_url": "./",
   "display": "standalone",
