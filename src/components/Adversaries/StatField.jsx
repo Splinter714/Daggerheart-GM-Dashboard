@@ -1,4 +1,5 @@
 import React from 'react'
+import { Minus, Plus } from 'lucide-react'
 import { formatRange, formatAtkRange, getGuideRange, isInRange, guideRanges } from './adversaryGuideRanges'
 import { inputStyle, labelStyle, sectionStyle } from './customCreatorConstants'
 import { InfoPopover } from './InfoPopover'
@@ -28,17 +29,19 @@ export const StatField = ({ label, field, subfield, rangeKey, disabled, formData
     }
   }
 
+  // Compact quick-edit-style stepper button (matches GameCard.jsx's
+  // add/remove-instance controls: 1.5rem square, gray-700 fill, gray-600 border).
   const stepBtn = (delta) => (
     <button type="button" disabled={disabled} onClick={() => set((parseInt(raw) || 0) + delta)} style={{
-      width: '44px', height: '44px', flexShrink: 0,
-      border: `1px solid ${color}`,
-      borderRadius: delta < 0 ? '0.25rem 0 0 0.25rem' : '0 0.25rem 0.25rem 0',
-      background: 'var(--bg-secondary)',
-      color: disabled ? 'var(--text-secondary)' : 'var(--text-primary)',
-      fontSize: '1rem', lineHeight: 1, cursor: disabled ? 'not-allowed' : 'pointer',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      width: '1.5rem', height: '1.5rem', flexShrink: 0,
+      border: '1px solid var(--gray-600)',
+      borderRadius: '0.25rem',
+      background: 'var(--gray-700)',
+      color: disabled ? 'var(--text-secondary)' : 'white',
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
       opacity: disabled ? 0.4 : 1,
-    }}>{delta < 0 ? '−' : '+'}</button>
+    }}>{delta < 0 ? <Minus size={12} /> : <Plus size={12} />}</button>
   )
 
   return (
@@ -89,7 +92,7 @@ export const StatField = ({ label, field, subfield, rangeKey, disabled, formData
           </InfoPopover>
         </span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
         {stepBtn(-1)}
         <input
           type="number"
@@ -97,7 +100,7 @@ export const StatField = ({ label, field, subfield, rangeKey, disabled, formData
           disabled={disabled}
           onChange={e => set(e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
           style={{
-            ...inputStyle, borderRadius: 0, borderLeft: 'none', borderRight: 'none',
+            ...inputStyle,
             textAlign: 'center', opacity: disabled ? 0.4 : 1, borderColor: color,
             width: '100%', minWidth: 0,
           }}
