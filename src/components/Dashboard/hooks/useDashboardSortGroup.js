@@ -14,6 +14,24 @@ const DEFAULTS = {
   colossusDisplayMode: 'nested',
 }
 
+// Default sort direction when a field is first selected. Fields where higher
+// values are more relevant/dangerous (HP, difficulty, attack, threshold)
+// default to descending (high-to-low); alphabetical/ordinal fields default
+// to ascending (A-Z / low tier-index first).
+const DEFAULT_SORT_DIR = {
+  name: 'asc',
+  tier: 'asc',
+  type: 'asc',
+  hp: 'desc',
+  difficulty: 'desc',
+  atk: 'desc',
+  threshold: 'desc',
+}
+
+export function defaultDirFor(field) {
+  return DEFAULT_SORT_DIR[field] ?? 'asc'
+}
+
 export function useDashboardSortGroup() {
   const [settings, setSettings] = useState(() => {
     const stored = readFromStorage(STORAGE_KEY)
@@ -30,11 +48,12 @@ export function useDashboardSortGroup() {
     writeToStorage(STORAGE_KEY, settings)
   }, [settings])
 
-  // Clicking the same field toggles direction; clicking a new field starts ascending
+  // Clicking the same field toggles direction; clicking a new field resets to
+  // that field's sensible default direction (see DEFAULT_SORT_DIR).
   const setSortBy = (field) => setSettings(s => ({
     ...s,
     sortBy: field,
-    sortDir: s.sortBy === field ? (s.sortDir === 'asc' ? 'desc' : 'asc') : 'asc',
+    sortDir: s.sortBy === field ? (s.sortDir === 'asc' ? 'desc' : 'asc') : defaultDirFor(field),
   }))
 
   const setGroupBy = (groupBy) => setSettings(s => ({ ...s, groupBy }))
