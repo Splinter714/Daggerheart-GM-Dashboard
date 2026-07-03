@@ -1,5 +1,5 @@
 import React from 'react'
-import { inputStyle, labelStyle, sectionStyle, reorder } from './customCreatorConstants'
+import { inputStyle, labelStyle, sectionStyle, reorder, compactCtrlBtnStyle } from './customCreatorConstants'
 import { DragHandle } from './creatorAtoms'
 import { InfoPopover } from './InfoPopover'
 
@@ -68,10 +68,10 @@ export const FeatureList = ({ featureType, label, formData, setFormData, dragFro
                 setFormData(prev => ({ ...prev, features: rebuilt }))
                 dragFromRef.current = null
               }}
-              style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '0.25rem', padding: '0.4rem 0.5rem' }}
+              style={{ display: 'flex', gap: '0.4rem', alignItems: 'stretch', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '0.25rem', padding: '0.4rem 0.5rem' }}
             >
-              <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
-                <DragHandle />
+              <DragHandle />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: 0 }}>
                 <input
                   type="text"
                   value={feat.name || ''}
@@ -81,28 +81,24 @@ export const FeatureList = ({ featureType, label, formData, setFormData, dragFro
                     setFormData(prev => ({ ...prev, features: next }))
                   }}
                   placeholder={`${label.slice(0, -1)} name`}
-                  style={{ ...inputStyle, flex: 1, background: 'transparent', border: '1px solid transparent', borderRadius: '0.25rem' }}
-                  onFocus={e => e.target.style.borderColor = 'var(--border)'}
-                  onBlur={e => e.target.style.borderColor = 'transparent'}
+                  style={{ ...inputStyle }}
                 />
-                <button type="button" onClick={() => {
-                  const next = allFeatures.filter((_, i) => i !== globalIdx)
-                  setFormData(prev => ({ ...prev, features: next }))
-                }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.6rem 0.5rem', fontSize: '1rem', flexShrink: 0, minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                <textarea
+                  value={feat.description || ''}
+                  onChange={e => {
+                    const next = [...allFeatures]
+                    next[globalIdx] = { ...next[globalIdx], description: e.target.value }
+                    setFormData(prev => ({ ...prev, features: next }))
+                  }}
+                  placeholder="Description..."
+                  rows={2}
+                  style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', minHeight: '48px' }}
+                />
               </div>
-              <textarea
-                value={feat.description || ''}
-                onChange={e => {
-                  const next = [...allFeatures]
-                  next[globalIdx] = { ...next[globalIdx], description: e.target.value }
-                  setFormData(prev => ({ ...prev, features: next }))
-                }}
-                placeholder="Description..."
-                rows={2}
-                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', minHeight: '48px', background: 'transparent', border: '1px solid transparent', borderRadius: '0.25rem' }}
-                onFocus={e => e.target.style.borderColor = 'var(--border)'}
-                onBlur={e => e.target.style.borderColor = 'transparent'}
-              />
+              <button type="button" onClick={() => {
+                const next = allFeatures.filter((_, i) => i !== globalIdx)
+                setFormData(prev => ({ ...prev, features: next }))
+              }} style={{ ...compactCtrlBtnStyle(false), alignSelf: 'flex-start' }} title={`Delete ${label.slice(0, -1).toLowerCase()}`}>×</button>
             </div>
           )
         })}
