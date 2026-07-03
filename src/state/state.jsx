@@ -77,6 +77,9 @@ export const GameStateProvider = ({ children }) => {
     addCustomAdversary: customContentState.addCustomAdversary,
     updateCustomAdversary: customContentState.updateCustomAdversary,
     deleteCustomAdversary: customContentState.deleteCustomAdversary,
+    addCustomEnvironment: customContentState.addCustomEnvironment,
+    updateCustomEnvironment: customContentState.updateCustomEnvironment,
+    deleteCustomEnvironment: customContentState.deleteCustomEnvironment,
   }
 
   return (
@@ -120,6 +123,9 @@ export const useGameState = () => {
       addCustomAdversary: () => {},
       updateCustomAdversary: () => {},
       deleteCustomAdversary: () => {},
+      addCustomEnvironment: () => {},
+      updateCustomEnvironment: () => {},
+      deleteCustomEnvironment: () => {},
 
       // Computed values
       hasAdversaries: false,
@@ -164,6 +170,9 @@ export const useGameState = () => {
       addCustomAdversary: () => {},
       updateCustomAdversary: () => {},
       deleteCustomAdversary: () => {},
+      addCustomEnvironment: () => {},
+      updateCustomEnvironment: () => {},
+      deleteCustomEnvironment: () => {},
 
       // Computed values
       hasAdversaries: false,

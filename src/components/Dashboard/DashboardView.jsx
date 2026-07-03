@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useGameState } from '../../state/state'
-import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from './constants'
+import { DASHBOARD_GAP } from './constants'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import { useAppKeyboardShortcuts } from './useAppKeyboardShortcuts'
 import {
@@ -11,7 +11,7 @@ import {
 } from './BattlePointsCalculator'
 import RightColumn from './RightColumn'
 import EntityColumns from './EntityColumns'
-import CustomAdversaryCreator from '../Adversaries/CustomAdversaryCreator'
+import CreatorPanel from './CreatorPanel'
 import { useMinionSync } from './hooks/useMinionSync'
 import { useColumnLayout } from './hooks/useColumnLayout'
 import ErrorBoundary from './ErrorBoundary'
@@ -45,12 +45,17 @@ const DashboardContent = () => {
     createEnvironment,
     updateEnvironment,
     deleteEnvironment,
+    addCustomEnvironment,
+    updateCustomEnvironment,
   } = useGameState()
 
   const pcCount = partySize || 4
 
   // Dashboard state
   const [adversaryCreatorOpen, setAdversaryCreatorOpen] = useState(false)
+  // Which kind of custom content the creator panel is building — toggled from
+  // within the panel itself (see #102) rather than a second nav icon.
+  const [creatorContentType, setCreatorContentType] = useState('adversary') // 'adversary' | 'environment'
   const [bpAdjustments, setBpAdjustments] = useState({ lessDifficult: false, increasedDamage: false, moreDangerous: false })
   const [editingAdversaryId, setEditingAdversaryId] = useState(null)
   const [browserActiveTab, setBrowserActiveTab] = useState('adversaries')
@@ -428,6 +433,7 @@ const DashboardContent = () => {
       if (!rightColumnOpen) handleOpenBrowser(entityGroups.length)
     } else if (id === 'create') {
       handleCloseBrowser()
+      setCreatorContentType(browserContentType)
       setAdversaryCreatorOpen(true)
     } else if (id === 'receipt') {
       setAdversaryCreatorOpen(false)
@@ -519,61 +525,21 @@ const DashboardContent = () => {
           }}
         />
 
-        {/* Custom Adversary Creator — inside dashboard-main so position:absolute matches RightColumn */}
+        {/* Custom Adversary/Environment Creator — inside dashboard-main so position:absolute matches RightColumn */}
         {adversaryCreatorOpen && (
-          isNarrow ? (
-            <>
-              <div style={{ position: 'absolute', inset: 0, zIndex: 99, backgroundColor: 'var(--bg-primary)' }} />
-              <div style={{
-                position: 'absolute',
-                top: `${DASHBOARD_GAP}px`, right: `${DASHBOARD_GAP}px`,
-                bottom: `${DASHBOARD_GAP}px`, left: `${DASHBOARD_GAP}px`,
-                zIndex: 100,
-                backgroundColor: 'var(--bg-primary)',
-                border: PANEL_BORDER,
-                borderRadius: PANEL_BORDER_RADIUS,
-                boxShadow: PANEL_BOX_SHADOW,
-                display: 'flex', flexDirection: 'column', overflow: 'hidden',
-              }}>
-                <CustomAdversaryCreator
-                  onSave={(adversaryData, id) => {
-                    if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
-                    setAdversaryCreatorOpen(false)
-                  }}
-                  onSaveAndAdd={(adversaryData) => {
-                    addCustomAdversary(adversaryData)
-                    createAdversary({ ...adversaryData })
-                    setAdversaryCreatorOpen(false)
-                  }}
-                  onAddToEncounter={(adversaryData) => {
-                    createAdversary({ ...adversaryData })
-                    setAdversaryCreatorOpen(false)
-                  }}
-                  onCancelEdit={() => setAdversaryCreatorOpen(false)}
-                  customAdversaries={customContent?.adversaries || []}
-                  embedded={false}
-                  autoFocus
-                />
-              </div>
-            </>
-          ) : (
-            // Desktop: CustomAdversaryCreator renders two absolute column panels itself
-            <CustomAdversaryCreator
-              onSave={(adversaryData, id) => {
-                if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
-                setAdversaryCreatorOpen(false)
-              }}
-              onAddToEncounter={(adversaryData) => {
-                createAdversary({ ...adversaryData })
-                setAdversaryCreatorOpen(false)
-              }}
-              onCancelEdit={() => setAdversaryCreatorOpen(false)}
-              customAdversaries={customContent?.adversaries || []}
-              embedded={false}
-              autoFocus
-              columnWidth={columnWidth}
-            />
-          )
+          <CreatorPanel
+            isNarrow={isNarrow}
+            creatorContentType={creatorContentType}
+            columnWidth={columnWidth}
+            customContent={customContent}
+            onCancel={() => setAdversaryCreatorOpen(false)}
+            addCustomAdversary={addCustomAdversary}
+            updateCustomAdversary={updateCustomAdversary}
+            createAdversary={createAdversary}
+            addCustomEnvironment={addCustomEnvironment}
+            updateCustomEnvironment={updateCustomEnvironment}
+            createEnvironment={createEnvironment}
+          />
         )}
       </div>
 

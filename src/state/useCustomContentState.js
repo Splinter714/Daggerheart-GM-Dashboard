@@ -60,11 +60,46 @@ export function useCustomContentState() {
     }))
   }
 
+  const addCustomEnvironment = (environmentData) => {
+    const newEnvironment = {
+      ...environmentData,
+      id: generateId('custom-env'),
+      source: environmentData.source || 'Homebrew',
+      isCustom: true
+    }
+
+    setCustomContent(prev => ({
+      ...prev,
+      environments: [...prev.environments, newEnvironment]
+    }))
+
+    return newEnvironment.id
+  }
+
+  const updateCustomEnvironment = (id, updates) => {
+    setCustomContent(prev => ({
+      ...prev,
+      environments: prev.environments.map(env =>
+        env.id === id ? { ...env, ...updates } : env
+      )
+    }))
+  }
+
+  const deleteCustomEnvironment = (id) => {
+    setCustomContent(prev => ({
+      ...prev,
+      environments: prev.environments.filter(env => env.id !== id)
+    }))
+  }
+
   return {
     customContent,
     addCustomAdversary,
     updateCustomAdversary,
-    deleteCustomAdversary
+    deleteCustomAdversary,
+    addCustomEnvironment,
+    updateCustomEnvironment,
+    deleteCustomEnvironment
   }
 }
 
