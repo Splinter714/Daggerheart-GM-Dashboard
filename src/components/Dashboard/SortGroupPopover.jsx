@@ -13,7 +13,6 @@ const SORT_OPTIONS = [
 ]
 
 const GROUP_OPTIONS = [
-  { value: 'none', label: 'None' },
   { value: 'type', label: 'Type' },
   { value: 'tier', label: 'Tier' },
 ]

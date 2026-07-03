@@ -76,7 +76,7 @@ export const useAdversaryAddition = ({
             }
 
             if (isNewAdversary) {
-              const isDefaultOrder = groupBy === 'none' && sortBy === 'name' && sortDir === 'asc'
+              const isDefaultOrder = groupBy === 'type' && sortBy === 'name' && sortDir === 'asc'
               if (isDefaultOrder) {
                 const initialScrollWidth = container.scrollWidth
                 setTimeout(() => {

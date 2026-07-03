@@ -33,7 +33,7 @@ const expandColossusIntoSegmentGroups = (group) => {
  * the rendering layer. Environments always appear first with a fixed groupName
  * of "environment: [type]". Adversaries follow with optional grouping.
  */
-export const useEntityGroups = (adversaryGroups, environments = [], sortBy = 'name', sortDir = 'asc', groupBy = 'none', colossusDisplayMode = 'nested') => {
+export const useEntityGroups = (adversaryGroups, environments = [], sortBy = 'name', sortDir = 'asc', groupBy = 'type', colossusDisplayMode = 'nested') => {
   const getEntityGroups = useCallback(() => {
     // Environments always come first, sorted by type then name, always grouped
     const envGroups = [...environments]
@@ -59,7 +59,7 @@ export const useEntityGroups = (adversaryGroups, environments = [], sortBy = 'na
         baseName: group.baseName,
         template: group,
         instances: group.instances,
-        groupName: groupBy !== 'none' ? getGroupLabel(group, groupBy) : null,
+        groupName: getGroupLabel(group, groupBy),
       }]
     })
 

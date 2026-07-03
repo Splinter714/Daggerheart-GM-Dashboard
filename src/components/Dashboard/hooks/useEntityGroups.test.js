@@ -31,7 +31,7 @@ describe('useEntityGroups colossus display modes', () => {
 
   it('segments mode expands a colossus into one pseudo-group per segment instance', () => {
     const { result } = renderHook(() =>
-      useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'none', 'segments')
+      useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'type', 'segments')
     )
     const segmentEntries = result.current.entityGroups.filter(g => g.isColossusSegment)
     // 1 Head + 2 Arms (count: 2) = 3 segment cards
@@ -41,7 +41,7 @@ describe('useEntityGroups colossus display modes', () => {
 
   it('keeps all segment cards for one colossus grouped under the same groupName (stay adjacent)', () => {
     const { result } = renderHook(() =>
-      useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'none', 'segments')
+      useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'type', 'segments')
     )
     const segmentEntries = result.current.entityGroups.filter(g => g.isColossusSegment)
     const groupNames = new Set(segmentEntries.map(e => e.groupName))
@@ -50,7 +50,7 @@ describe('useEntityGroups colossus display modes', () => {
 
   it('does not expand non-colossus adversary groups', () => {
     const { result } = renderHook(() =>
-      useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'none', 'segments')
+      useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'type', 'segments')
     )
     const goblinEntries = result.current.entityGroups.filter(g => g.baseName === 'Goblin')
     expect(goblinEntries).toHaveLength(1)
@@ -59,7 +59,7 @@ describe('useEntityGroups colossus display modes', () => {
 
   it('segment pseudo-groups share the same underlying instances as the colossus (deleting it removes all segment cards)', () => {
     const { result } = renderHook(() =>
-      useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'none', 'segments')
+      useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'type', 'segments')
     )
     const segmentEntries = result.current.entityGroups.filter(g => g.isColossusSegment)
     segmentEntries.forEach(entry => {
