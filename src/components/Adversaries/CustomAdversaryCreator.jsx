@@ -508,18 +508,18 @@ const CustomAdversaryCreator = forwardRef(({
             Cancel
           </button>
         )}
-        <button
-          onClick={handleSave}
-          disabled={!canAct}
-          style={{ ...btnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)', ...(canAct ? {} : disabledStyle) }}
-        >{isSaving ? 'Saving…' : 'Save'}</button>
         {onSaveAndAdd && (
           <button
             onClick={handleSaveAndAdd}
             disabled={!canAct}
-            style={{ ...btnBase, background: canAct ? 'var(--purple)' : 'var(--gray-600)', border: 'none', color: 'white', fontWeight: '600', ...(canAct ? {} : disabledStyle) }}
-          >{isSaving ? 'Saving…' : 'Save & Add'}</button>
+            style={{ ...btnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)', ...(canAct ? {} : disabledStyle) }}
+          >{isSaving ? 'Saving…' : 'Save & Add to Encounter'}</button>
         )}
+        <button
+          onClick={handleSave}
+          disabled={!canAct}
+          style={{ ...btnBase, background: canAct ? 'var(--purple)' : 'var(--gray-600)', border: 'none', color: 'white', fontWeight: '600', ...(canAct ? {} : disabledStyle) }}
+        >{isSaving ? 'Saving…' : 'Save'}</button>
       </div>
     )
 
@@ -876,6 +876,21 @@ const CustomAdversaryCreator = forwardRef(({
           borderBottom: '1px solid var(--border)',
           gap: '0.5rem',
         }}>
+          {onCancelEdit && (
+            <button
+              onClick={onCancelEdit}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: 'transparent',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+                borderRadius: '0.375rem', cursor: 'pointer',
+                fontSize: '0.85rem', fontWeight: '600',
+              }}
+            >
+              Cancel
+            </button>
+          )}
           <button
             onClick={handleSave}
             disabled={isSaving || !formData.name.trim()}
@@ -892,21 +907,6 @@ const CustomAdversaryCreator = forwardRef(({
               ? (editingAdversary ? (isStockAdversary ? 'Creating...' : 'Saving...') : 'Saving...')
               : (editingAdversary ? (isStockAdversary ? 'Save As Custom' : 'Save') : 'Save')}
           </button>
-          {onCancelEdit && (
-            <button
-              onClick={onCancelEdit}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: 'transparent',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
-                borderRadius: '0.375rem', cursor: 'pointer',
-                fontSize: '0.85rem', fontWeight: '600',
-              }}
-            >
-              Cancel
-            </button>
-          )}
         </div>
       )}
 
