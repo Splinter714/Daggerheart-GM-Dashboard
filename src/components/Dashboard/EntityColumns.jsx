@@ -3,6 +3,7 @@ import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
 import { getCardScrollTarget } from './hooks/cardScrollTarget'
+import { isColossusGroup } from './hooks/useEntityGroups'
 
 // Collect consecutive same-groupName entries into sections (any entity type).
 function buildSections(entityGroups) {
@@ -77,7 +78,6 @@ const EntityColumns = ({
     entryCount * columnWidth + Math.max(0, entryCount - 1) * DASHBOARD_GAP
 
   // ─── Card panel renderer ────────────────────────────────────────────────────
-
   const renderCardPanel = (group, flatIndex, cssClass, isFirstInGroup = false, isLastInGroup = false) => {
     const isSpacerPosition =
       removingCardSpacer &&
@@ -229,9 +229,9 @@ const EntityColumns = ({
                   : undefined
           }
           adversaries={adversaries}
-          showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
+          showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary' && !isColossusGroup(group)}
           onEdit={group.type === 'adversary' ? itemId => handleEditAdversary(itemId) : undefined}
-          onAddInstance={group.type === 'adversary'
+          onAddInstance={group.type === 'adversary' && !isColossusGroup(group)
             ? item => {
                 const isMinion = item.type === 'Minion'
                 const instancesToAdd = isMinion ? pcCount : 1
@@ -258,7 +258,7 @@ const EntityColumns = ({
                 }, 50)
               }
             : undefined}
-          onRemoveInstance={group.type === 'adversary'
+          onRemoveInstance={group.type === 'adversary' && !isColossusGroup(group)
             ? () => {
                 const isMinion = group.template?.type === 'Minion'
                 const instancesToRemove = isMinion ? pcCount : 1

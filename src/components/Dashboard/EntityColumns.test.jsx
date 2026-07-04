@@ -1,6 +1,11 @@
 import { render } from '@testing-library/react'
 import { createRef } from 'react'
 import EntityColumns from './EntityColumns'
+import GameCard from '../Adversaries/GameCard'
+
+vi.mock('../Adversaries/GameCard', () => ({
+  default: vi.fn(() => null),
+}))
 
 // Covers #86: the grouper rail's left edge must be pinned the same way as the
 // group-name pill (sticky), not a plain absolute box spanning the whole
@@ -63,5 +68,91 @@ describe('EntityColumns grouper rail (#86)', () => {
       // it should be a hairline pinned to the left, independent of the pill.
       expect(stickyLeftEdge.style.width).toBe('0px')
     })
+  })
+})
+
+// #96: colossus cards never get add/remove instance buttons, in either
+// display mode, regardless of whether the adversary browser panel is open
+// (browserOpenAtPosition is what normally gates showAddRemoveButtons/
+// onAddInstance/onRemoveInstance for regular adversaries).
+describe('EntityColumns colossus add/remove suppression (#96)', () => {
+  const baseProps = {
+    columnWidth: 300,
+    scrollContainerRef: createRef(),
+    onScroll: noop,
+    newCards: new Set(),
+    removingCardSpacer: null,
+    spacerShrinking: false,
+    editingAdversaryId: null,
+    handleSaveCustomAdversary: noop,
+    handleCancelEdit: noop,
+    updateAdversary: noop,
+    updateEnvironment: noop,
+    adversaries: [],
+    handleEditAdversary: noop,
+    createAdversary: noop,
+    createAdversariesBulk: noop,
+    pcCount: 4,
+    smoothScrollTo: noop,
+    deleteAdversary: noop,
+    deleteEnvironment: noop,
+    setRemovingCardSpacer: noop,
+    setSpacerShrinking: noop,
+  }
+
+  const colossusInstance = { id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true, segmentHp: { seg1: 0 } }
+  const colossusTemplate = { baseName: 'Ikeri', isColossus: true, segments: [{ id: 'seg1', name: 'Head', hp: 5 }] }
+
+  it('nested mode: suppresses add/remove props even with the browser panel open', () => {
+    const nestedGroup = {
+      type: 'adversary',
+      baseName: 'Ikeri',
+      template: colossusTemplate,
+      instances: [colossusInstance],
+    }
+    const entityGroups = [nestedGroup]
+
+    render(
+      <EntityColumns
+        {...baseProps}
+        entityGroups={entityGroups}
+        browserOpenAtPosition={0}
+        getEntityGroups={() => entityGroups}
+      />
+    )
+
+    const props = GameCard.mock.calls.at(-1)[0]
+    expect(props.showAddRemoveButtons).toBe(false)
+    expect(props.onAddInstance).toBeUndefined()
+    expect(props.onRemoveInstance).toBeUndefined()
+  })
+
+  it('segments mode: suppresses add/remove props on each segment pseudo-group even with the browser panel open', () => {
+    const segmentGroup = {
+      type: 'adversary',
+      baseName: 'Ikeri::seg1',
+      template: colossusTemplate,
+      instances: [colossusInstance],
+      groupName: 'colossus: ikeri',
+      isColossusSegment: true,
+      segment: colossusTemplate.segments[0],
+      segmentKey: 'seg1',
+      colossusInstanceId: colossusInstance.id,
+    }
+    const entityGroups = [segmentGroup]
+
+    render(
+      <EntityColumns
+        {...baseProps}
+        entityGroups={entityGroups}
+        browserOpenAtPosition={0}
+        getEntityGroups={() => entityGroups}
+      />
+    )
+
+    const props = GameCard.mock.calls.at(-1)[0]
+    expect(props.showAddRemoveButtons).toBe(false)
+    expect(props.onAddInstance).toBeUndefined()
+    expect(props.onRemoveInstance).toBeUndefined()
   })
 })

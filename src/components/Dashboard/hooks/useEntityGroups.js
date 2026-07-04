@@ -28,6 +28,11 @@ const expandColossusIntoSegmentGroups = (group) => {
   })
 }
 
+// Colossi never get add/remove instance buttons in either display mode (#96)
+// — true for both the nested card and each segment-mode pseudo-group.
+export const isColossusGroup = (group) =>
+  group.type === 'adversary' && (group.template?.isColossus || group.isColossusSegment)
+
 /**
  * Builds the ordered list of entity groups (environments + adversaries) for
  * the rendering layer. Environments always appear first with a fixed groupName
