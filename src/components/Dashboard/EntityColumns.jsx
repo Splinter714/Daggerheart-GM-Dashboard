@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
+import { getCardScrollTarget } from './hooks/cardScrollTarget'
 
 // Collect consecutive same-groupName entries into sections (any entity type).
 function buildSections(entityGroups) {
@@ -24,11 +25,6 @@ function buildSections(entityGroups) {
     }
   }
   return sections
-}
-
-// With uniform effectiveGap between all columns, the scroll position is simply:
-function cardScrollPosition(flatIndex, columnWidth, effectiveGap) {
-  return DASHBOARD_GAP + flatIndex * (columnWidth + effectiveGap)
 }
 
 const EntityColumns = ({
@@ -118,6 +114,7 @@ const EntityColumns = ({
           ? `adversary-${group.template?.id || group.baseName}`
           : `${group.type}-${group.baseName}`}
         className={cssClass}
+        dataCardKey={`${group.type}-${group.baseName}`}
         style={{
           width: `${columnWidth}px`,
           flexShrink: 0, flexGrow: 0, flex: 'none',
@@ -247,31 +244,15 @@ const EntityColumns = ({
                   requestAnimationFrame(() => requestAnimationFrame(() => {
                     if (!scrollContainerRef.current) return
                     const container = scrollContainerRef.current
-                    const currentScroll = container.scrollLeft
-                    const containerWidth = container.clientWidth
-                    const effectiveWidth = browserOpenAtPosition !== null
-                      ? containerWidth - columnWidth - DASHBOARD_GAP
-                      : containerWidth
-                    const updatedGroups = getEntityGroups()
-                    const groupIndex = updatedGroups.findIndex(
-                      g => g.baseName === group.baseName && g.type === 'adversary')
-                    if (groupIndex >= 0) {
-                      const cardPosition = cardScrollPosition(groupIndex, columnWidth, effectiveGap)
-                      const cardEnd = cardPosition + columnWidth
-                      const margin = 10
-                      const isVisible = cardPosition >= currentScroll - margin &&
-                        cardEnd <= currentScroll + effectiveWidth + margin
-                      if (!isVisible) {
-                        let targetScroll
-                        if (cardEnd > currentScroll + effectiveWidth + margin) {
-                          const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + effectiveGap))
-                          const prevIdx = Math.max(0, groupIndex - visibleColumns + 2)
-                          targetScroll = cardScrollPosition(prevIdx, columnWidth, effectiveGap) - DASHBOARD_GAP
-                        } else {
-                          targetScroll = cardScrollPosition(groupIndex, columnWidth, effectiveGap) - DASHBOARD_GAP
-                        }
-                        smoothScrollTo(Math.max(0, targetScroll), 500)
-                      }
+                    const cardKey = `adversary-${group.baseName}`
+                    const targetScroll = getCardScrollTarget({
+                      container,
+                      cardKey,
+                      columnWidth,
+                      browserOpenAtPosition,
+                    })
+                    if (targetScroll !== null) {
+                      smoothScrollTo(targetScroll, 500)
                     }
                   }))
                 }, 50)

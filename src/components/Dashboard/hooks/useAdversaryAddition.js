@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react'
-import { DASHBOARD_GAP } from '../constants'
+import { useCallback } from 'react'
+import { getCardScrollTarget } from './cardScrollTarget'
 
 // How long the "just added" confirmation pulse stays visible (#55) — must
 // match the CSS animation duration in DashboardView.css (.card-recently-added).
@@ -27,9 +27,6 @@ export const useAdversaryAddition = ({
   groupBy,
   onAdversaryAdded
 }) => {
-  const getEntityGroupsRef = useRef(getEntityGroups)
-  useEffect(() => { getEntityGroupsRef.current = getEntityGroups }, [getEntityGroups])
-
   return useCallback(
     (itemData) => {
       const baseName = itemData.baseName || itemData.name?.replace(/\s+\(\d+\)$/, '') || itemData.name
@@ -133,64 +130,30 @@ export const useAdversaryAddition = ({
                 // Reuse the same visibility logic as the existing-group path.
                 setTimeout(() => {
                   if (!scrollContainerRef.current) return
-                  const updatedGroups = getEntityGroupsRef.current()
-                  const groupIndex = updatedGroups.findIndex((g) => g.baseName === baseName && g.type === 'adversary')
-                  if (groupIndex >= 0) {
-                    const c = scrollContainerRef.current
-                    const currentScroll = c.scrollLeft
-                    const containerWidth = c.clientWidth
-                    const effectiveWidth = browserOpenAtPosition !== null
-                      ? containerWidth - columnWidth - DASHBOARD_GAP
-                      : containerWidth
-                    const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
-                    const cardEnd = cardPosition + columnWidth
-                    const margin = 10
-                    const isVisible = cardPosition >= currentScroll - margin && cardEnd <= currentScroll + effectiveWidth + margin
-                    if (!isVisible) {
-                      let targetScroll
-                      if (cardEnd > currentScroll + effectiveWidth + margin) {
-                        const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + DASHBOARD_GAP))
-                        const lastVisibleSlot = browserOpenAtPosition !== null ? visibleColumns - 2 : visibleColumns - 1
-                        targetScroll = (groupIndex - lastVisibleSlot) * (columnWidth + DASHBOARD_GAP)
-                      } else {
-                        targetScroll = groupIndex * (columnWidth + DASHBOARD_GAP)
-                      }
-                      smoothScrollTo(Math.max(0, targetScroll), 500)
-                    }
+                  const container = scrollContainerRef.current
+                  const cardKey = `adversary-${baseName}`
+                  const targetScroll = getCardScrollTarget({
+                    container,
+                    cardKey,
+                    columnWidth,
+                    browserOpenAtPosition,
+                  })
+                  if (targetScroll !== null) {
+                    smoothScrollTo(targetScroll, 500)
                   }
                 }, 10)
               }
             } else {
-              const updatedGroups = getEntityGroupsRef.current()
-              const groupIndex = updatedGroups.findIndex((g) => g.baseName === baseName && g.type === 'adversary')
-              if (groupIndex >= 0) {
-                const container = scrollContainerRef.current
-                const currentScroll = container.scrollLeft
-                const containerWidth = container.clientWidth
-                // When browser is open, the last column is covered — reduce visible area
-                const effectiveWidth = browserOpenAtPosition !== null
-                  ? containerWidth - columnWidth - DASHBOARD_GAP
-                  : containerWidth
-
-                // Account for left padding: DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
-                const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
-                const cardEnd = cardPosition + columnWidth
-                const margin = 10
-                const isVisible = cardPosition >= currentScroll - margin && cardEnd <= currentScroll + effectiveWidth + margin
-
-                if (!isVisible) {
-                  let targetScroll
-                  if (cardEnd > currentScroll + effectiveWidth + margin) {
-                    // Card is hidden on the right — snap-aligned target placing card in last visible slot
-                    const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + DASHBOARD_GAP))
-                    const lastVisibleSlot = browserOpenAtPosition !== null ? visibleColumns - 2 : visibleColumns - 1
-                    targetScroll = (groupIndex - lastVisibleSlot) * (columnWidth + DASHBOARD_GAP)
-                  } else {
-                    // Card is hidden on the left — snap-aligned left edge
-                    targetScroll = groupIndex * (columnWidth + DASHBOARD_GAP)
-                  }
-                  smoothScrollTo(Math.max(0, targetScroll), 500)
-                }
+              const container = scrollContainerRef.current
+              const cardKey = `adversary-${baseName}`
+              const targetScroll = getCardScrollTarget({
+                container,
+                cardKey,
+                columnWidth,
+                browserOpenAtPosition,
+              })
+              if (targetScroll !== null) {
+                smoothScrollTo(targetScroll, 500)
               }
             }
           })

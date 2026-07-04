@@ -1,13 +1,14 @@
 import React from 'react'
 
-const Panel = ({ 
+const Panel = ({
   side = 'left', // 'left' or 'right'
-  children, 
+  children,
   className = '',
-  style = {}
+  style = {},
+  dataCardKey
 }) => {
   const isLeft = side === 'left'
-  
+
   const baseStyle = {
     flex: 1,
     minWidth: 0,
@@ -22,9 +23,10 @@ const Panel = ({
   }
 
   return (
-    <div 
+    <div
       className={className}
       style={baseStyle}
+      data-card-key={dataCardKey}
     >
       {children}
     </div>

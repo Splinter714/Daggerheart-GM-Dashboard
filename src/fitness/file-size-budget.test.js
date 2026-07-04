@@ -18,7 +18,7 @@ const BUDGETS = {
   'src/components/Adversaries/CustomAdversaryCreator.jsx': 976,
   'src/components/Adversaries/GameCard.jsx': 1277,
   'src/components/Dashboard/DashboardView.jsx': 581,
-  'src/components/Dashboard/EntityColumns.jsx': 576,
+  'src/components/Dashboard/EntityColumns.jsx': 557,
 }
 
 // Every other source file must stay under this.
