@@ -2,6 +2,7 @@ import React from 'react'
 import { Check, Pencil, X, Minus, Plus, Circle } from 'lucide-react'
 import ContainerWithTab from '../../Dashboard/ContainerWithTab'
 import MergedStatBadge from './MergedStatBadge'
+import ColossusFrameworkInfo, { ColossusThresholdsBadge } from './ColossusFrameworkInfo'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 import { DASHBOARD_GAP } from '../../Dashboard/constants'
 import { highlightCardText } from './textHighlighter'
@@ -26,6 +27,22 @@ export const sortSegments = (segments) =>
     const rb = SEGMENT_ROLE_ORDER[b.role] ?? 99
     return ra !== rb ? ra - rb : (a.name || '').localeCompare(b.name || '')
   })
+
+// Expands a colossus's segments (respecting each segment's `count`) into a
+// flat, running-numbered list in `sortSegments` order — e.g. Head=1, Torso=2,
+// Arm A=3, Arm B=4, Leg A=5, Leg B=6 (#109). The number is shared across the
+// whole colossus rather than restarting per segment role, so it can be used
+// as a stable, human-readable "instance number" in both the nested
+// (GameCard.jsx) and standalone (this file) segment card headers.
+export const numberSegmentInstances = (segments) =>
+  sortSegments(segments).flatMap((seg) => {
+    const count = seg.count || 1
+    return Array.from({ length: count }, (_, idx) => ({ seg, idx, count }))
+  }).map((entry, i) => ({
+    ...entry,
+    instanceKey: entry.count > 1 ? `${entry.seg.id}-${entry.idx + 1}` : entry.seg.id,
+    instanceNumber: i + 1,
+  }))
 
 export const Divider = ({ title }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginTop: CARD_SPACE_V }}>
@@ -61,6 +78,32 @@ export const FeatureList = ({ features }) => {
     )
   })
 }
+
+// Segment-specific features plus framework-wide features (e.g. "Colossal
+// Power"), clearly distinguished with their own divider/section since both
+// now appear together on the same self-contained segment card (#109).
+export const SegmentFeatures = ({ segmentFeatures, frameworkFeatures }) => (
+  <>
+    <FeatureList features={segmentFeatures} />
+    {frameworkFeatures?.length > 0 && (
+      <div>
+        <Divider title="Colossus Features" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
+          {frameworkFeatures.map((f, i) => (
+            <div key={i}>
+              <span style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{f.name}</span>
+              {f.description && (
+                <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '0.125rem' }}>
+                  {highlightCardText(f.description)}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </>
+)
 
 // Individually-clickable HP pips — same interaction model as the nested view.
 // Each pip's clickable area is expanded toward 44x44px via an invisible
@@ -145,7 +188,7 @@ const tokenBtnStyle = {
 // Lives here (rather than GameCard.jsx) to keep that file within its size
 // budget; extracted alongside the standalone ColossusSegmentCard so both
 // segment renderings share the HP-pip/token/status helpers above.
-export const NestedSegmentBlock = ({ seg, instanceKey, markedHp, tokenCount, inst, onUpdate }) => {
+export const NestedSegmentBlock = ({ seg, instanceKey, instanceNumber, markedHp, tokenCount, inst, colossus, onUpdate }) => {
   const handlePipToggle = (pipIndex) => {
     if (!inst || !onUpdate) return
     const newMarked = pipIndex < markedHp ? pipIndex : pipIndex + 1
@@ -169,13 +212,14 @@ export const NestedSegmentBlock = ({ seg, instanceKey, markedHp, tokenCount, ins
       {/* Segment header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '0.25rem', flexWrap: 'wrap' }}>
         <span style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
-          {seg.name}
+          {seg.name}{instanceNumber != null && ` #${instanceNumber}`}
           {isDestroyed && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
           {!isDestroyed && (isBroken || hasTokens) && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
         </span>
         <div style={{ display: 'flex', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0, alignItems: 'center' }}>
           <span>Diff {seg.difficulty}</span>
           {seg.atk != null && <span>ATK +{seg.atk}</span>}
+          {colossus?.thresholds && <span>Thresh {colossus.thresholds.major}/{colossus.thresholds.severe}</span>}
         </div>
       </div>
       {/* HP pips */}
@@ -197,8 +241,15 @@ export const NestedSegmentBlock = ({ seg, instanceKey, markedHp, tokenCount, ins
       <div style={{ marginBottom: '0.25rem' }}>
         <TokenCounter count={tokenCount} onChange={handleTokenChange} />
       </div>
-      {/* Features */}
-      <FeatureList features={seg.features} />
+      {/* Framework-shared info (Motives, Experience, Stress) — repeated on
+          every segment card so each is self-contained (#109) */}
+      {colossus && (
+        <div style={{ marginBottom: '0.25rem' }}>
+          <ColossusFrameworkInfo colossus={colossus} inst={inst} onUpdate={onUpdate} />
+        </div>
+      )}
+      {/* Features — segment-specific plus framework-wide, clearly distinguished */}
+      <SegmentFeatures segmentFeatures={seg.features} frameworkFeatures={colossus?.features} />
     </div>
   )
 }
@@ -207,10 +258,12 @@ const ColossusSegmentCard = ({
   colossus,
   segment: seg,
   segmentKey,
+  instanceNumber,
   markedHp,
   onToggleHpPip,
   tokenCount = 0,
   onTokenChange,
+  inst,
   onUpdate,
   onDelete,
   getCardStyle,
@@ -255,7 +308,7 @@ const ColossusSegmentCard = ({
                 </TouchTarget>
               )}
               <span style={{ flex: 1, minWidth: 0, textAlign: 'center', fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {seg.name}
+                {seg.name}{instanceNumber != null && ` #${instanceNumber}`}
               </span>
               <TouchTarget
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
@@ -281,7 +334,7 @@ const ColossusSegmentCard = ({
                 textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem',
               }}>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{seg.name}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{seg.name}{instanceNumber != null && ` #${instanceNumber}`}</span>
                 {isDestroyed && <span style={{ fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
                 {!isDestroyed && (isBroken || hasTokens) && <span style={{ fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
               </h4>
@@ -305,7 +358,8 @@ const ColossusSegmentCard = ({
             </div>
           </div>
 
-          {/* Difficulty + ATK badges + weapon pill — matches regular adversary card conventions */}
+          {/* Attack Modifier | Standard Attack, then Difficulty | Thresholds —
+              mirrors the regular adversary card's stat-row conventions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, paddingTop: CARD_SPACE_V, paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, flexWrap: 'wrap' }}>
             {seg.difficulty != null && (
               <MergedStatBadge shape="hex" label="DIFF" value={seg.difficulty} />
@@ -313,6 +367,7 @@ const ColossusSegmentCard = ({
             {seg.atk != null && (
               <MergedStatBadge shape="diamond" label="ATK" value={seg.atk >= 0 ? `+${seg.atk}` : seg.atk} />
             )}
+            {colossus.thresholds && <ColossusThresholdsBadge colossus={colossus} />}
             {seg.weapon && (
               <div style={{
                 display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center',
@@ -356,9 +411,15 @@ const ColossusSegmentCard = ({
             </div>
           )}
 
-          {/* Segment features */}
+          {/* Framework-shared info (Motives, Experience, Stress) — repeated
+              on every segment card so each is self-contained (#109) */}
+          <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, paddingTop: CARD_SPACE_V }}>
+            <ColossusFrameworkInfo colossus={colossus} inst={inst} onUpdate={onUpdate} />
+          </div>
+
+          {/* Features — segment-specific plus framework-wide, clearly distinguished */}
           <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H }}>
-            <FeatureList features={seg.features} />
+            <SegmentFeatures segmentFeatures={seg.features} frameworkFeatures={colossus.features} />
           </div>
 
           <div style={{ height: CARD_SPACE_V }} />

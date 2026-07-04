@@ -7,6 +7,13 @@ const colossusItem = {
   isColossus: true,
   tier: 1,
   thresholds: { major: 11, severe: 22 },
+  motivesAndTactics: 'Entangle, intimidate, peck, stomp',
+  experience: [{ name: 'Huge', modifier: 2 }],
+  // colossusStressMax mirrors what EntityColumns.jsx derives for `item` — the
+  // framework stress-track length, kept distinct from the `stress` key
+  // (reserved for instance HP-tracking fields, zeroed on `item` upstream).
+  colossusStressMax: 6,
+  features: [{ name: 'Colossal Power', type: 'Passive', description: 'Ikeri deals extra damage.' }],
   segments: [
     { id: 'ikeri-head', name: 'Head', role: 'head', count: 1, hp: 5, difficulty: 16, atk: 2 },
   ],
@@ -25,10 +32,12 @@ describe('GameCard colossus display modes', () => {
         onUpdate={onUpdate}
       />
     )
-    expect(screen.getByText('Head')).toBeInTheDocument()
-    const pips = container.querySelectorAll('[style*="border-radius: 50%"]')
-    expect(pips.length).toBeGreaterThan(0)
-    fireEvent.click(pips[0])
+    expect(screen.getByText((_, el) => el?.textContent === 'Head #1')).toBeInTheDocument()
+    // Scope to the HP row specifically — the framework Stress row (#109) also renders pips now.
+    const hpLabel = screen.getAllByText('HP')[0]
+    const hpPips = hpLabel.parentElement.querySelectorAll('[style*="border-radius: 50%"]')
+    expect(hpPips.length).toBe(5)
+    fireEvent.click(hpPips[0])
     expect(onUpdate).toHaveBeenCalledWith('adv-1', { segmentHp: { 'ikeri-head': 1 } })
   })
 
@@ -41,10 +50,11 @@ describe('GameCard colossus display modes', () => {
         instances={[colossusInstance]}
         segment={colossusItem.segments[0]}
         segmentKey="ikeri-head"
+        instanceNumber={1}
         onUpdate={onUpdate}
       />
     )
-    expect(screen.getByText('Head')).toBeInTheDocument()
+    expect(screen.getAllByText((_, el) => el?.textContent === 'Head #1').length).toBeGreaterThan(0)
     // The standalone segment card also shows the parent colossus name for context
     expect(screen.getByText('Ikeri, Injuries Untold')).toBeInTheDocument()
 
@@ -133,6 +143,28 @@ describe('GameCard colossus token tracking (#97)', () => {
     expect(screen.queryByText('Broken')).toBeNull()
     fireEvent.click(screen.getByTitle('Place a token'))
     expect(onUpdate).toHaveBeenCalledWith('adv-2', { segmentTokens: { 'ikeri-head': 1 } })
+  })
+})
+
+describe('GameCard nested colossus segment cards repeat framework info (#109)', () => {
+  it('shows Motives & Tactics, Experience, Thresholds, and Stress on the segment block, in sync with the shared instance stress', () => {
+    const onUpdate = vi.fn()
+    const instance = { ...colossusInstance, stress: 1 }
+    const { container } = render(
+      <GameCard type="adversary" item={colossusItem} instances={[instance]} onUpdate={onUpdate} />
+    )
+    expect(screen.getAllByText(/Entangle, intimidate, peck, stomp/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Huge +2').length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Thresh 11\/22/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Colossal Power').length).toBeGreaterThan(0)
+
+    // Two Stress rows now render (top-level colossus header + segment block),
+    // both reading/writing the same shared inst.stress field (#109).
+    const stressLabels = screen.getAllByText('Stress')
+    expect(stressLabels.length).toBe(2)
+    const segmentStressPips = stressLabels[1].parentElement.querySelectorAll('[style*="border-radius: 50%"]')
+    fireEvent.click(segmentStressPips[3])
+    expect(onUpdate).toHaveBeenCalledWith('adv-1', { stress: 4 })
   })
 })
 

@@ -3,7 +3,7 @@ import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
 import { getCardScrollTarget } from './hooks/cardScrollTarget'
-import { isColossusGroup } from './hooks/useEntityGroups'
+import { isColossusGroup, buildAdversaryItem } from './hooks/useEntityGroups'
 
 // Collect consecutive same-groupName entries into sections (any entity type).
 function buildSections(entityGroups) {
@@ -111,7 +111,7 @@ const EntityColumns = ({
     return (
       <Panel
         key={group.type === 'adversary'
-          ? `adversary-${group.template?.id || group.baseName}`
+          ? `adversary-${!group.isColossusSegment && group.template?.id || group.baseName}` /* #109: segments share one template.id */
           : `${group.type}-${group.baseName}`}
         className={cssClass}
         dataCardKey={`${group.type}-${group.baseName}`}
@@ -135,10 +135,10 @@ const EntityColumns = ({
           type={group.type}
           item={
             group.type === 'adversary'
-              ? { ...group.template, name: group.isColossusSegment ? group.template?.baseName : group.baseName, hp: 0, stress: 0, isDead: false }
+              ? buildAdversaryItem(group)
               : { ...group.instances[0], name: group.instances[0]?.name || group.baseName }
           }
-          segment={group.segment} segmentKey={group.segmentKey} mode="expanded" instanceLabelStyle={instanceLabelStyle}
+          segment={group.segment} segmentKey={group.segmentKey} instanceNumber={group.instanceNumber} mode="expanded" instanceLabelStyle={instanceLabelStyle}
           isRecentlyAdded={group.type === 'adversary' && recentlyAddedCards.has(`adversary-${group.baseName}`)}
           instances={
             group.type === 'adversary'

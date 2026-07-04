@@ -123,6 +123,10 @@ export function useAdversaryState(initialAdversaries = []) {
           ...prev,
           {
             ...template,
+            // For colossi, `stress` on the raw data is the framework stress-track
+            // length (colossi.json), not an instance value — preserve it under a
+            // distinct key since `stress` above is stripped as an instance field (#109).
+            ...(adversaryData.isColossus ? { colossusStressMax: stress } : {}),
             id: generateId('grp'),
             baseName,
             instances: [
@@ -157,6 +161,7 @@ export function useAdversaryState(initialAdversaries = []) {
           const { hp, stress, isVisible, duplicateNumber, name, id: _id, ...template } = adversaryData
           next.push({
             ...template,
+            ...(adversaryData.isColossus ? { colossusStressMax: stress } : {}),
             id: generateId('grp'),
             baseName,
             instances: [{ id: generateId('adv'), duplicateNumber: 1, hp: 0, stress: 0, isVisible: true }],

@@ -157,11 +157,10 @@ describe('EntityColumns colossus add/remove suppression (#96)', () => {
   })
 })
 
-// #108: standalone segment cards (colossus display mode "segments") must show
-// the plain colossus name in their parent-context pill, not the synthetic
-// `baseName::segmentKey` pseudo-group identity used internally for
-// section-grouping (see expandColossusIntoSegmentGroups in useEntityGroups.js).
-describe('EntityColumns colossus segment item name (#108)', () => {
+// #108: colossus segment pseudo-groups synthesize a unique `baseName` (e.g.
+// "Ikeri::seg1") so segment cards stay visually adjacent under grouping — but
+// the card itself must still display the plain colossus name, not that key.
+describe('EntityColumns colossus segment card name (#108)', () => {
   const baseProps = {
     columnWidth: 300,
     scrollContainerRef: createRef(),
@@ -186,18 +185,19 @@ describe('EntityColumns colossus segment item name (#108)', () => {
     setSpacerShrinking: noop,
   }
 
-  it('passes the plain colossus name (not the synthetic ::segmentKey suffix) as item.name', () => {
-    const colossusInstance = { id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true, segmentHp: { 'daktadae-head': 0 } }
-    const colossusTemplate = { baseName: 'Daktadae, the Cleaver', isColossus: true, segments: [{ id: 'daktadae-head', name: 'Head', hp: 5 }] }
+  const colossusInstance = { id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true, segmentHp: { seg1: 0 } }
+  const colossusTemplate = { baseName: 'Ikeri', isColossus: true, segments: [{ id: 'seg1', name: 'Head', hp: 5 }] }
+
+  it('passes the plain colossus name to GameCard, not the synthetic segment baseName', () => {
     const segmentGroup = {
       type: 'adversary',
-      baseName: 'Daktadae, the Cleaver::daktadae-head',
+      baseName: 'Ikeri::seg1',
       template: colossusTemplate,
       instances: [colossusInstance],
-      groupName: 'colossus: daktadae, the cleaver',
+      groupName: 'colossus: ikeri',
       isColossusSegment: true,
       segment: colossusTemplate.segments[0],
-      segmentKey: 'daktadae-head',
+      segmentKey: 'seg1',
       colossusInstanceId: colossusInstance.id,
     }
     const entityGroups = [segmentGroup]
@@ -212,7 +212,62 @@ describe('EntityColumns colossus segment item name (#108)', () => {
     )
 
     const props = GameCard.mock.calls.at(-1)[0]
-    expect(props.item.name).toBe('Daktadae, the Cleaver')
+    expect(props.item.name).toBe('Ikeri')
     expect(props.item.name).not.toContain('::')
+  })
+})
+
+// #109: group.template.colossusStressMax (set at creation time in
+// useAdversaryState.js) must survive onto `item` unchanged — `item.hp`/
+// `item.stress` are zeroed above for the (unrelated) adversary-instance-fields
+// convention, so the framework stress-track length needs its own key.
+describe('EntityColumns preserves colossus stress track length (#109)', () => {
+  const baseProps = {
+    columnWidth: 300,
+    scrollContainerRef: createRef(),
+    onScroll: noop,
+    newCards: new Set(),
+    removingCardSpacer: null,
+    spacerShrinking: false,
+    editingAdversaryId: null,
+    handleSaveCustomAdversary: noop,
+    handleCancelEdit: noop,
+    updateAdversary: noop,
+    updateEnvironment: noop,
+    adversaries: [],
+    handleEditAdversary: noop,
+    createAdversary: noop,
+    createAdversariesBulk: noop,
+    pcCount: 4,
+    smoothScrollTo: noop,
+    deleteAdversary: noop,
+    deleteEnvironment: noop,
+    setRemovingCardSpacer: noop,
+    setSpacerShrinking: noop,
+  }
+
+  it('exposes the colossus stress track length as item.colossusStressMax, not the zeroed item.stress', () => {
+    const colossusInstance = { id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 2, isVisible: true }
+    const colossusTemplate = { baseName: 'Ikeri', isColossus: true, colossusStressMax: 6, segments: [] }
+    const nestedGroup = {
+      type: 'adversary',
+      baseName: 'Ikeri',
+      template: colossusTemplate,
+      instances: [colossusInstance],
+    }
+    const entityGroups = [nestedGroup]
+
+    render(
+      <EntityColumns
+        {...baseProps}
+        entityGroups={entityGroups}
+        browserOpenAtPosition={null}
+        getEntityGroups={() => entityGroups}
+      />
+    )
+
+    const props = GameCard.mock.calls.at(-1)[0]
+    expect(props.item.colossusStressMax).toBe(6)
+    expect(props.item.stress).toBe(0)
   })
 })

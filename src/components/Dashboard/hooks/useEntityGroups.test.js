@@ -57,6 +57,18 @@ describe('useEntityGroups colossus display modes', () => {
     expect(goblinEntries[0].isColossusSegment).toBeUndefined()
   })
 
+  it('assigns a running instance number shared across the whole colossus, following sortSegments order (#109)', () => {
+    const { result } = renderHook(() =>
+      useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'type', 'segments')
+    )
+    const segmentEntries = result.current.entityGroups.filter(g => g.isColossusSegment)
+    expect(segmentEntries.map(e => [e.segmentKey, e.instanceNumber])).toEqual([
+      ['ikeri-head', 1],
+      ['ikeri-arm-1', 2],
+      ['ikeri-arm-2', 3],
+    ])
+  })
+
   it('segment pseudo-groups share the same underlying instances as the colossus (deleting it removes all segment cards)', () => {
     const { result } = renderHook(() =>
       useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'type', 'segments')

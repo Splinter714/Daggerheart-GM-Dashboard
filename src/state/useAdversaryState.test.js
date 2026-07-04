@@ -61,6 +61,27 @@ describe('useAdversaryState', () => {
     expect(result.current.groups[0].segmentHp).toBeUndefined()
   })
 
+  it('preserves the colossus framework stress-track length as colossusStressMax on the group (#109)', () => {
+    const { result } = renderHook(() => useAdversaryState())
+    act(() => result.current.createAdversary({
+      name: 'Ikeri',
+      isColossus: true,
+      stress: 6,
+      segments: [{ id: 'ikeri-head', hp: 5, count: 1 }],
+    }))
+
+    expect(result.current.groups[0].colossusStressMax).toBe(6)
+    // The instance-tracking `stress` field (current marked stress) stays separate and starts at 0.
+    expect(result.current.groups[0].instances[0].stress).toBe(0)
+  })
+
+  it('does not add colossusStressMax for non-colossus adversaries', () => {
+    const { result } = renderHook(() => useAdversaryState())
+    act(() => result.current.createAdversary({ name: 'Goblin', stressMax: 3 }))
+
+    expect(result.current.groups[0].colossusStressMax).toBeUndefined()
+  })
+
   it('deletes an instance and prunes the group once it is empty', () => {
     const { result } = renderHook(() => useAdversaryState())
     act(() => result.current.createAdversary({ name: 'Goblin' }))

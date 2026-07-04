@@ -11,7 +11,7 @@ import { DASHBOARD_GAP, TAB_HEIGHT } from '../Dashboard/constants'
 import { highlightCardText } from './GameCard/textHighlighter'
 import MergedStatBadge from './GameCard/MergedStatBadge'
 import TabButtons from './GameCard/TabButtons'
-import ColossusSegmentCard, { Divider, FeatureList, sortSegments, NestedSegmentBlock } from './GameCard/ColossusSegmentCard'
+import ColossusSegmentCard, { Divider, FeatureList, numberSegmentInstances, NestedSegmentBlock } from './GameCard/ColossusSegmentCard'
 import { EnvironmentFeatureGroup, EnvironmentImpulses, PotentialAdversaries } from './GameCard/EnvironmentFeaturesSection'
 import TouchTarget from '../Shared/TouchTarget'
 
@@ -88,6 +88,7 @@ const GameCard = ({
   onDelete = null, // Handler for removing an environment from the session
   segment = null, // Colossus segment data — set to render this segment as its own standalone card
   segmentKey = null, // Segment HP tracking key (differs from segment.id when count > 1)
+  instanceNumber = null, // Running instance number shared across the whole colossus (#109), e.g. Arm #4
   instanceLabelStyle = 'numeric', // Global display setting (#82): 'numeric' or 'alphabetic'
   isRecentlyAdded = false, // Soft fade-out confirmation pulse on newly-added cards (#55)
 }) => {
@@ -891,9 +892,9 @@ const GameCard = ({
     }
     return (
       <ColossusSegmentCard
-        colossus={item} segment={segment} segmentKey={segmentKey} markedHp={markedHp}
+        colossus={item} segment={segment} segmentKey={segmentKey} instanceNumber={instanceNumber} markedHp={markedHp}
         onToggleHpPip={toggleHpPip} tokenCount={tokenCount} onTokenChange={handleTokenChange}
-        onUpdate={onUpdate} onDelete={onDelete}
+        inst={inst} onUpdate={onUpdate} onDelete={onDelete}
         getCardStyle={getCardStyle} quickEdit={quickEdit} setQuickEdit={setQuickEdit}
       />
     )
@@ -905,7 +906,6 @@ const GameCard = ({
     const inst = instances[0]
     const segmentHp = inst?.segmentHp || {}
     const segmentTokens = inst?.segmentTokens || {}
-    const sortedSegments = sortSegments(colossus.segments)
 
     return (
       <ContainerWithTab
@@ -1011,11 +1011,11 @@ const GameCard = ({
             )}
 
             {/* Stress pips */}
-            {colossus.stress > 0 && (
+            {colossus.colossusStressMax > 0 && (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: CARD_SPACE_H, padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Stress</span>
                 <div style={{ display: 'flex', gap: '0.1875rem' }}>
-                  {Array.from({ length: colossus.stress }, (_, i) => (
+                  {Array.from({ length: colossus.colossusStressMax }, (_, i) => (
                     <span key={i} style={{
                       position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                       width: '44px', height: '44px', margin: '-0.6875rem', flexShrink: 0,
@@ -1062,24 +1062,22 @@ const GameCard = ({
             <div style={{ padding: `${CARD_SPACE_V} ${CARD_SPACE_H}` }}>
               <Divider title="Segments" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
-                {sortedSegments.map(seg => {
-                  const count = seg.count || 1
-                  return Array.from({ length: count }, (_, idx) => {
-                    const key = count > 1 ? `${seg.id}-${idx + 1}` : seg.id
-                    const markedHp = segmentHp[key] || 0
-                    const tokenCount = segmentTokens[key] || 0
-                    return (
-                      <NestedSegmentBlock
-                        key={key}
-                        seg={seg}
-                        instanceKey={key}
-                        markedHp={markedHp}
-                        tokenCount={tokenCount}
-                        inst={inst}
-                        onUpdate={onUpdate}
-                      />
-                    )
-                  })
+                {numberSegmentInstances(colossus.segments).map(({ seg, instanceKey, instanceNumber }) => {
+                  const markedHp = segmentHp[instanceKey] || 0
+                  const tokenCount = segmentTokens[instanceKey] || 0
+                  return (
+                    <NestedSegmentBlock
+                      key={instanceKey}
+                      seg={seg}
+                      instanceKey={instanceKey}
+                      instanceNumber={instanceNumber}
+                      markedHp={markedHp}
+                      tokenCount={tokenCount}
+                      inst={inst}
+                      colossus={colossus}
+                      onUpdate={onUpdate}
+                    />
+                  )
                 })}
               </div>
             </div>
