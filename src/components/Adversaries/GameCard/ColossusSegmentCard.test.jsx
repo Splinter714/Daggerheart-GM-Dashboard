@@ -117,4 +117,22 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getByText('Colossal Power')).toBeInTheDocument()
     expect(screen.getByText('Colossus Features')).toBeInTheDocument()
   })
+
+  // #79: the DIFF/ATK/thresholds badges are fixed-size and must not shrink —
+  // only the weapon pill should give way, wrapping onto its own line at
+  // narrow widths instead of being squeezed illegibly small. Verifies the
+  // structural styles (flexShrink/flexBasis) rather than pixel layout, since
+  // jsdom doesn't compute real flex-wrap — the live 375px-viewport check in
+  // this session confirmed the visual wrap.
+  it('does not let the thresholds badge or weapon pill shrink to fit — thresholds is flex-shrink 0 and the weapon pill has a wrap-forcing flex-basis (#79)', () => {
+    const { container } = render(<ColossusSegmentCard {...baseProps} />)
+
+    const thresholdsText = screen.getByText('Major 11 / Severe 22')
+    const thresholdsWrapper = thresholdsText.parentElement
+    expect(thresholdsWrapper.style.flexShrink).toBe('0')
+
+    const weaponPill = container.querySelector('[style*="flex: 1 1 160px"]')
+    expect(weaponPill).toBeTruthy()
+    expect(weaponPill.textContent).toContain('Peck')
+  })
 })

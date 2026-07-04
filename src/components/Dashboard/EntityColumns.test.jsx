@@ -217,6 +217,81 @@ describe('EntityColumns colossus segment card name (#108)', () => {
   })
 })
 
+// #79: on narrow/mobile viewports, a multi-entry group section (e.g. colossus
+// segments, one pseudo-group per segment sharing a groupName) must not grow
+// past columnWidth. Without the isNarrow cap, the group-wrapper's cards row
+// sizes to its natural width (entries * columnWidth), which broke the
+// single-column mobile layout and let segment cards render far wider than
+// the viewport.
+describe('EntityColumns narrow-mode group width cap (#79)', () => {
+  const group = (baseName) => ({
+    type: 'adversary',
+    baseName,
+    groupName: 'colossus: daktadae',
+    template: { baseName: 'Daktadae', isColossus: true },
+    instances: [{ id: `${baseName}-1`, duplicateNumber: 1, hp: 0, stress: 0, isVisible: true }],
+    isColossusSegment: true,
+  })
+
+  const baseProps = {
+    scrollContainerRef: createRef(),
+    onScroll: noop,
+    newCards: new Set(),
+    removingCardSpacer: null,
+    spacerShrinking: false,
+    browserOpenAtPosition: null,
+    editingAdversaryId: null,
+    handleSaveCustomAdversary: noop,
+    handleCancelEdit: noop,
+    updateAdversary: noop,
+    updateEnvironment: noop,
+    adversaries: [],
+    handleEditAdversary: noop,
+    createAdversary: noop,
+    createAdversariesBulk: noop,
+    pcCount: 4,
+    smoothScrollTo: noop,
+    deleteAdversary: noop,
+    deleteEnvironment: noop,
+    setRemovingCardSpacer: noop,
+    setSpacerShrinking: noop,
+  }
+
+  it('caps the group-wrapper width to columnWidth when isNarrow is true', () => {
+    const entityGroups = [group('Head'), group('Torso'), group('Foreleg')]
+
+    const { container } = render(
+      <EntityColumns
+        {...baseProps}
+        entityGroups={entityGroups}
+        getEntityGroups={() => entityGroups}
+        columnWidth={355}
+        isNarrow
+      />
+    )
+
+    const wrapper = container.querySelector('[data-group-wrapper]')
+    expect(wrapper.style.width).toBe('355px')
+  })
+
+  it('leaves the group-wrapper width unconstrained when isNarrow is false', () => {
+    const entityGroups = [group('Head'), group('Torso'), group('Foreleg')]
+
+    const { container } = render(
+      <EntityColumns
+        {...baseProps}
+        entityGroups={entityGroups}
+        getEntityGroups={() => entityGroups}
+        columnWidth={355}
+        isNarrow={false}
+      />
+    )
+
+    const wrapper = container.querySelector('[data-group-wrapper]')
+    expect(wrapper.style.width).toBe('')
+  })
+})
+
 // #109: group.template.colossusStressMax (set at creation time in
 // useAdversaryState.js) must survive onto `item` unchanged — `item.hp`/
 // `item.stress` are zeroed above for the (unrelated) adversary-instance-fields

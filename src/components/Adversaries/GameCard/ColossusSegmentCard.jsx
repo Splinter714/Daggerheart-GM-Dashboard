@@ -367,13 +367,17 @@ const ColossusSegmentCard = ({
             {seg.atk != null && (
               <MergedStatBadge shape="diamond" label="ATK" value={seg.atk >= 0 ? `+${seg.atk}` : seg.atk} />
             )}
-            {colossus.thresholds && <ColossusThresholdsBadge colossus={colossus} />}
+            {colossus.thresholds && (
+              <span style={{ flexShrink: 0 }}>
+                <ColossusThresholdsBadge colossus={colossus} />
+              </span>
+            )}
             {seg.weapon && (
               <div style={{
                 display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center',
                 gap: '0.35rem', fontSize: '0.75rem', fontWeight: 400, lineHeight: 1.3,
                 backgroundColor: 'black', border: '1px solid var(--text-secondary)', borderRadius: '0.25rem',
-                minHeight: '1.375rem', padding: '0.2rem 0.4rem', flex: 1, minWidth: 0,
+                minHeight: '1.375rem', padding: '0.2rem 0.4rem', flex: '1 1 160px', minWidth: 0,
               }}>
                 <span style={{ color: 'white', overflowWrap: 'normal', textAlign: 'center' }}>{seg.weapon}</span>
                 {seg.range && (

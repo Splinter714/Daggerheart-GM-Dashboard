@@ -416,6 +416,15 @@ const EntityColumns = ({
             flexGrow: 0,
             flex: 'none',
             height: '100%',
+            // On narrow/mobile viewports the outer scroll container shows one
+            // column at a time (scroll-snap). Without a width cap here, a
+            // multi-entry group's cards row grows to its natural width
+            // (entries * columnWidth), which breaks that single-column layout
+            // and lets its cards render far wider than the viewport (#79).
+            // Capping the wrapper to columnWidth and letting the cards row
+            // scroll+snap internally keeps each card at the narrow width
+            // while still allowing swiping between entries in the group.
+            width: isNarrow ? `${columnWidth}px` : undefined,
           }}
         >
           {/* Inset top-tab label — full-width frame renders behind the pill.
@@ -470,13 +479,17 @@ const EntityColumns = ({
               </div>
             )
           })()}
-          {/* Cards row */}
+          {/* Cards row — on narrow viewports this scrolls+snaps internally so
+              a multi-entry group (e.g. colossus segments) still shows one
+              full-width card at a time instead of overflowing (#79). */}
           <div style={{
             display: 'flex',
             flexDirection: 'row',
             gap: `${DASHBOARD_GAP}px`,
             flex: 1,
             minHeight: 0,
+            overflowX: isNarrow ? 'auto' : 'visible',
+            scrollSnapType: isNarrow ? 'x mandatory' : undefined,
           }}>
             {cards}
           </div>
