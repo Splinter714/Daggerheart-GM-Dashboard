@@ -3,6 +3,7 @@ import { Minus, Plus } from 'lucide-react'
 import { formatRange, formatAtkRange, getGuideRange, isInRange, guideRanges } from './adversaryGuideRanges'
 import { inputStyle, labelStyle, sectionStyle } from './customCreatorConstants'
 import { InfoPopover } from './InfoPopover'
+import TouchTarget from '../Shared/TouchTarget'
 
 // STAT_COLS and StatField extracted verbatim from CustomAdversaryCreator.jsx (Phase 4).
 const STAT_COLS = [
@@ -32,16 +33,22 @@ export const StatField = ({ label, field, subfield, rangeKey, disabled, formData
   // Compact quick-edit-style stepper button (matches GameCard.jsx's
   // add/remove-instance controls: 1.5rem square, gray-700 fill, gray-600 border).
   const stepBtn = (delta) => (
-    <button type="button" disabled={disabled} onClick={() => set((parseInt(raw) || 0) + delta)} style={{
-      width: '1.5rem', height: '1.5rem', flexShrink: 0,
-      border: '1px solid var(--gray-600)',
-      borderRadius: '0.25rem',
-      background: 'var(--gray-700)',
-      color: disabled ? 'var(--text-secondary)' : 'white',
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-      opacity: disabled ? 0.4 : 1,
-    }}>{delta < 0 ? <Minus size={12} /> : <Plus size={12} />}</button>
+    <TouchTarget
+      as="button"
+      type="button"
+      disabled={disabled}
+      onClick={() => set((parseInt(raw) || 0) + delta)}
+      wrapperStyle={{ flexShrink: 0 }}
+      style={{
+        width: '1.5rem', height: '1.5rem',
+        border: '1px solid var(--gray-600)',
+        borderRadius: '0.25rem',
+        background: 'var(--gray-700)',
+        color: disabled ? 'var(--text-secondary)' : 'white',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.4 : 1,
+      }}
+    >{delta < 0 ? <Minus size={12} /> : <Plus size={12} />}</TouchTarget>
   )
 
   return (

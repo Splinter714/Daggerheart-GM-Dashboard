@@ -15,7 +15,7 @@ import { FeatureList } from './FeatureList'
 import { DamageSelector, selectArrowBg } from './DamageSelector'
 import { TypeSelector } from './TypeSelector'
 import { loadData, adversariesData } from './customAdversaryData'
-
+import TouchTarget from '../Shared/TouchTarget'
 // ─── Main component ──────────────────────────────────────────────────────────
 
 const CustomAdversaryCreator = forwardRef(({
@@ -763,10 +763,10 @@ const CustomAdversaryCreator = forwardRef(({
                           placeholder="Experience name"
                           style={{ ...inputStyle, flex: 1, fontSize: '0.85rem' }}
                         />
-                        <button type="button" onClick={() => {
+                        <TouchTarget type="button" onClick={() => {
                           const next = (formData.experience || []).filter((_, j) => j !== i)
                           setFormData(prev => ({ ...prev, experience: next }))
-                        }} style={compactCtrlBtnStyle(false)} title="Delete experience">×</button>
+                        }} style={compactCtrlBtnStyle(false)} visualSize={22} title="Delete experience">×</TouchTarget>
                       </div>
                     )
                   })}

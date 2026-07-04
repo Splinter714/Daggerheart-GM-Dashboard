@@ -11,8 +11,8 @@ const buttonBaseStyles = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '32px',
-  height: '32px',
+  width: '44px',
+  height: '44px',
   transition: 'all 0.2s ease'
 }
 

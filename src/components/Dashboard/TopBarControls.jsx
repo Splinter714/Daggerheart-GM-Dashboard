@@ -32,8 +32,8 @@ const TopBarControls = ({ fearValue, onUpdateFear, onToggleBrowser, isBrowserOpe
           onClick={onToggleBrowser}
           title={isBrowserOpen ? 'Close Browser' : 'Add Adversaries'}
           style={{
-            width: '36px',
-            height: '36px',
+            width: '44px',
+            height: '44px',
             padding: 0,
             backgroundColor: isBrowserOpen ? 'var(--purple)' : 'transparent',
             border: '1px solid var(--border)',

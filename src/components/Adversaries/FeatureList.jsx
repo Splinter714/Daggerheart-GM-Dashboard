@@ -2,6 +2,7 @@ import React from 'react'
 import { inputStyle, labelStyle, sectionStyle, reorder, compactCtrlBtnStyle } from './customCreatorConstants'
 import { DragHandle } from './creatorAtoms'
 import { InfoPopover } from './InfoPopover'
+import TouchTarget from '../Shared/TouchTarget'
 
 // Drag-reorderable feature list (passives/actions/reactions) for the custom
 // adversary creator. Extracted verbatim from CustomAdversaryCreator.jsx (Phase 4).
@@ -95,10 +96,10 @@ export const FeatureList = ({ featureType, label, formData, setFormData, dragFro
                   style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', minHeight: '48px' }}
                 />
               </div>
-              <button type="button" onClick={() => {
+              <TouchTarget type="button" onClick={() => {
                 const next = allFeatures.filter((_, i) => i !== globalIdx)
                 setFormData(prev => ({ ...prev, features: next }))
-              }} style={{ ...compactCtrlBtnStyle(false), alignSelf: 'flex-start' }} title={`Delete ${label.slice(0, -1).toLowerCase()}`}>×</button>
+              }} wrapperStyle={{ alignSelf: 'flex-start' }} style={compactCtrlBtnStyle(false)} visualSize={22} title={`Delete ${label.slice(0, -1).toLowerCase()}`}>×</TouchTarget>
             </div>
           )
         })}

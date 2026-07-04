@@ -13,6 +13,7 @@ import MergedStatBadge from './GameCard/MergedStatBadge'
 import TabButtons from './GameCard/TabButtons'
 import ColossusSegmentCard, { Divider, FeatureList, HpPips, sortSegments, getSegmentStatus } from './GameCard/ColossusSegmentCard'
 import { EnvironmentFeatureGroup, EnvironmentImpulses, PotentialAdversaries } from './GameCard/EnvironmentFeaturesSection'
+import TouchTarget from '../Shared/TouchTarget'
 
 const INSTANCE_COLORS = [
   { value: 'var(--red)',    label: 'Red' },
@@ -374,15 +375,17 @@ const GameCard = ({
           {quickEdit ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', height: '1.5rem', overflow: 'visible' }}>
               <div style={{ position: 'relative', flexShrink: 0, height: '1.5rem', display: 'flex', alignItems: 'center' }}>
-                <button
+                <TouchTarget
                   onClick={(e) => { e.stopPropagation(); setShowColorPicker(v => !v) }}
                   title="Instance color"
-                  style={{
+                  visualSize={24}
+                >
+                  <span style={{
                     width: '1.5rem', height: '1.5rem', borderRadius: '50%', flexShrink: 0,
                     background: item.color || 'black', border: '1px solid white',
-                    cursor: 'pointer', padding: 0,
-                  }}
-                />
+                    display: 'block',
+                  }} />
+                </TouchTarget>
                 {showColorPicker && (
                   <div
                     onClick={(e) => e.stopPropagation()}
@@ -397,19 +400,20 @@ const GameCard = ({
                       {INSTANCE_COLORS.map(({ value, label }) => {
                         const isSelected = item.color === value
                         return (
-                          <button
+                          <TouchTarget
                             key={value}
                             onClick={() => { onUpdate && onUpdate(item.id, { color: value }) }}
                             title={label}
-                            style={{
+                            visualSize={28}
+                          >
+                            <span style={{
                               width: '1.75rem', height: '1.75rem', borderRadius: '50%',
                               background: value, border: '1px solid white',
-                              cursor: 'pointer', padding: 0, position: 'relative',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}
-                          >
-                            {isSelected && <Check size={12} strokeWidth={3} color="white" />}
-                          </button>
+                            }}>
+                              {isSelected && <Check size={12} strokeWidth={3} color="white" />}
+                            </span>
+                          </TouchTarget>
                         )
                       })}
                     </div>
@@ -440,37 +444,37 @@ const GameCard = ({
               />
               {(onRemoveInstance || onAddInstance) && (
                 <>
-                  <button
+                  <TouchTarget
                     onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
-                    style={{
-                      flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                      background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
-                      color: 'white', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                    }}
                     title="Remove one"
+                    wrapperStyle={{ flexShrink: 0 }}
+                    style={{
+                      width: '1.5rem', height: '1.5rem',
+                      background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
+                      color: 'white',
+                    }}
                   >
                     <Minus size={12} />
-                  </button>
+                  </TouchTarget>
                   <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'white', flexShrink: 0, display: 'inline-block', minWidth: '0.9rem', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
                     {instances.length}
                   </span>
-                  <button
+                  <TouchTarget
                     onClick={(e) => { e.stopPropagation(); onAddInstance?.(item) }}
-                    style={{
-                      flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                      background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
-                      color: 'white', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                    }}
                     title="Add one"
+                    wrapperStyle={{ flexShrink: 0 }}
+                    style={{
+                      width: '1.5rem', height: '1.5rem',
+                      background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
+                      color: 'white',
+                    }}
                   >
                     <Plus size={12} />
-                  </button>
+                  </TouchTarget>
                 </>
               )}
               {onDelete && (
-                <button
+                <TouchTarget
                   onClick={(e) => {
                     e.stopPropagation()
                     if (deleteConfirm) {
@@ -480,50 +484,50 @@ const GameCard = ({
                       setTimeout(() => setDeleteConfirm(false), 3000)
                     }
                   }}
+                  title={deleteConfirm ? 'Click again to confirm' : 'Remove all'}
+                  wrapperStyle={{ flexShrink: 0 }}
                   style={{
-                    flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                    width: '1.5rem', height: '1.5rem',
                     background: deleteConfirm ? 'var(--danger)' : 'black',
                     border: deleteConfirm ? 'none' : '1px solid var(--gray-600)',
                     borderRadius: '0.25rem',
                     color: deleteConfirm ? 'white' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                     transition: 'background 0.15s, color 0.15s',
                   }}
-                  title={deleteConfirm ? 'Click again to confirm' : 'Remove all'}
                 >
                   <X size={12} />
-                </button>
+                </TouchTarget>
               )}
-              <button
+              <TouchTarget
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(false); setShowColorPicker(false); setDeleteConfirm(false) }}
-                style={{
-                  flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                  background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
-                  color: 'white', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                }}
                 title="Done editing"
+                wrapperStyle={{ flexShrink: 0 }}
+                style={{
+                  width: '1.5rem', height: '1.5rem',
+                  background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
+                  color: 'white',
+                }}
               >
                 <Check size={12} />
-              </button>
+              </TouchTarget>
             </div>
           ) : (
             <>
-              <button
+              <TouchTarget
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
-                style={{
-                  position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                  width: '1.5rem', height: '1.5rem',
-                  background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                  color: 'var(--text-secondary)', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: 0, transition: 'all 0.15s ease',
-                }}
                 title="Edit"
+                wrapperStyle={{
+                  position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
+                }}
+                style={{
+                  width: '1.5rem', height: '1.5rem',
+                  background: 'transparent', borderRadius: '0.25rem',
+                  color: 'var(--text-secondary)',
+                  transition: 'all 0.15s ease',
+                }}
               >
                 <Pencil size={12} />
-              </button>
+              </TouchTarget>
               <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: isDead ? 1 : 'auto', padding: 0, gap: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
                   <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
@@ -787,18 +791,14 @@ const GameCard = ({
             {quickEdit ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                 {onDelete && (
-                  <button
+                  <TouchTarget
                     onClick={(e) => { e.stopPropagation(); onDelete() }}
-                    style={{
-                      flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                      background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                      color: 'var(--danger)', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                    }}
                     title="Remove"
+                    wrapperStyle={{ flexShrink: 0 }}
+                    style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--danger)' }}
                   >
                     <X size={12} />
-                  </button>
+                  </TouchTarget>
                 )}
                 <input
                   type="text"
@@ -813,35 +813,25 @@ const GameCard = ({
                   }}
                   placeholder="Name"
                 />
-                <button
+                <TouchTarget
                   onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
-                  style={{
-                    flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                    background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
-                    color: 'white', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                  }}
                   title="Done editing"
+                  wrapperStyle={{ flexShrink: 0 }}
+                  style={{ width: '1.5rem', height: '1.5rem', background: 'var(--purple)', borderRadius: '0.25rem', color: 'white' }}
                 >
                   <Check size={12} />
-                </button>
+                </TouchTarget>
               </div>
             ) : (
               <>
-                <button
+                <TouchTarget
                   onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
-                  style={{
-                    position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                    width: '1.5rem', height: '1.5rem',
-                    background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                    color: 'var(--text-secondary)', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: 0, transition: 'all 0.15s ease',
-                  }}
                   title="Edit"
+                  wrapperStyle={{ position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}
+                  style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--text-secondary)', transition: 'all 0.15s ease' }}
                 >
                   <Pencil size={12} />
-                </button>
+                </TouchTarget>
                 <h4 style={{
                   ...styles.rowTitle, margin: 0, fontSize: '1rem',
                   textAlign: 'center',
@@ -981,18 +971,14 @@ const GameCard = ({
             {quickEdit ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                 {onDelete && (
-                  <button
+                  <TouchTarget
                     onClick={(e) => { e.stopPropagation(); onDelete() }}
-                    style={{
-                      flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                      background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                      color: 'var(--danger)', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                    }}
                     title="Remove"
+                    wrapperStyle={{ flexShrink: 0 }}
+                    style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--danger)' }}
                   >
                     <X size={12} />
-                  </button>
+                  </TouchTarget>
                 )}
                 <input
                   type="text"
@@ -1007,35 +993,25 @@ const GameCard = ({
                   }}
                   placeholder="Name"
                 />
-                <button
+                <TouchTarget
                   onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
-                  style={{
-                    flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                    background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
-                    color: 'white', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                  }}
                   title="Done editing"
+                  wrapperStyle={{ flexShrink: 0 }}
+                  style={{ width: '1.5rem', height: '1.5rem', background: 'var(--purple)', borderRadius: '0.25rem', color: 'white' }}
                 >
                   <Check size={12} />
-                </button>
+                </TouchTarget>
               </div>
             ) : (
               <>
-                <button
+                <TouchTarget
                   onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
-                  style={{
-                    position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                    width: '1.5rem', height: '1.5rem',
-                    background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                    color: 'var(--text-secondary)', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: 0, transition: 'all 0.15s ease',
-                  }}
                   title="Edit"
+                  wrapperStyle={{ position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}
+                  style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--text-secondary)', transition: 'all 0.15s ease' }}
                 >
                   <Pencil size={12} />
-                </button>
+                </TouchTarget>
                 <h4 style={{
                   ...styles.rowTitle, margin: 0, fontSize: '1rem',
                   textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
@@ -1079,10 +1055,9 @@ const GameCard = ({
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Stress</span>
                 <div style={{ display: 'flex', gap: '0.1875rem' }}>
                   {Array.from({ length: colossus.stress }, (_, i) => (
-                    <div key={i} style={{
-                      width: '0.75rem', height: '0.75rem', borderRadius: '50%',
-                      border: '1.5px solid var(--text-secondary)',
-                      backgroundColor: i < (inst?.stress || 0) ? 'var(--text-primary)' : 'transparent',
+                    <span key={i} style={{
+                      position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      width: '44px', height: '44px', margin: '-0.6875rem', flexShrink: 0,
                       cursor: onUpdate && inst ? 'pointer' : 'default',
                     }}
                     onClick={e => {
@@ -1091,7 +1066,13 @@ const GameCard = ({
                       const newStress = i < (inst.stress || 0) ? i : i + 1
                       onUpdate(inst.id, { stress: newStress })
                     }}
-                    />
+                    >
+                      <div style={{
+                        width: '0.75rem', height: '0.75rem', borderRadius: '50%',
+                        border: '1.5px solid var(--text-secondary)',
+                        backgroundColor: i < (inst?.stress || 0) ? 'var(--text-primary)' : 'transparent',
+                      }} />
+                    </span>
                   ))}
                 </div>
               </div>

@@ -5,6 +5,7 @@ import MergedStatBadge from './MergedStatBadge'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 import { DASHBOARD_GAP } from '../../Dashboard/constants'
 import { highlightCardText } from './textHighlighter'
+import TouchTarget from '../../Shared/TouchTarget'
 
 // Renders a single colossus segment as its own standalone card, styled to
 // match regular adversary card conventions (difficulty hex badge, ATK
@@ -62,22 +63,32 @@ export const FeatureList = ({ features }) => {
 }
 
 // Individually-clickable HP pips — same interaction model as the nested view.
+// Each pip's clickable area is expanded toward 44x44px via an invisible
+// hit-area wrapper (negative margin pulls the tap zone back over neighbors)
+// so the visual dot stays small and non-overlapping (#30 Priority 2).
 export const HpPips = ({ max, marked, onToggle }) => {
   if (!max) return null
   return (
     <div style={{ display: 'flex', gap: '0.1875rem', flexWrap: 'wrap', alignItems: 'center' }}>
       {Array.from({ length: max }, (_, i) => (
-        <div
+        <span
           key={i}
           onClick={e => { e.stopPropagation(); onToggle(i) }}
           style={{
-            width: '0.75rem', height: '0.75rem', borderRadius: '50%', cursor: 'pointer',
-            border: '1.5px solid var(--text-secondary)',
-            backgroundColor: i < marked ? 'var(--text-primary)' : 'transparent',
-            transition: 'background-color 0.1s',
-            flexShrink: 0,
+            position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: '44px', height: '44px', margin: '-0.6875rem', flexShrink: 0, cursor: 'pointer',
           }}
-        />
+        >
+          <div
+            style={{
+              width: '0.75rem', height: '0.75rem', borderRadius: '50%',
+              border: '1.5px solid var(--text-secondary)',
+              backgroundColor: i < marked ? 'var(--text-primary)' : 'transparent',
+              transition: 'background-color 0.1s',
+              flexShrink: 0,
+            }}
+          />
+        </span>
       ))}
     </div>
   )
@@ -130,51 +141,37 @@ const ColossusSegmentCard = ({
           {quickEdit ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
               {onDelete && (
-                <button
+                <TouchTarget
                   onClick={(e) => { e.stopPropagation(); onDelete() }}
-                  style={{
-                    flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                    background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                    color: 'var(--danger)', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                  }}
                   title="Remove colossus"
+                  wrapperStyle={{ flexShrink: 0 }}
+                  style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--danger)' }}
                 >
                   <X size={12} />
-                </button>
+                </TouchTarget>
               )}
               <span style={{ flex: 1, minWidth: 0, textAlign: 'center', fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {seg.name}
               </span>
-              <button
+              <TouchTarget
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
-                style={{
-                  flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                  background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
-                  color: 'white', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                }}
                 title="Done editing"
+                wrapperStyle={{ flexShrink: 0 }}
+                style={{ width: '1.5rem', height: '1.5rem', background: 'var(--purple)', borderRadius: '0.25rem', color: 'white' }}
               >
                 <Check size={12} />
-              </button>
+              </TouchTarget>
             </div>
           ) : (
             <>
-              <button
+              <TouchTarget
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
-                style={{
-                  position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                  width: '1.5rem', height: '1.5rem',
-                  background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                  color: 'var(--text-secondary)', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: 0, transition: 'all 0.15s ease',
-                }}
                 title="Edit"
+                wrapperStyle={{ position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}
+                style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--text-secondary)', transition: 'all 0.15s ease' }}
               >
                 <Pencil size={12} />
-              </button>
+              </TouchTarget>
               <h4 style={{
                 margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)',
                 textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

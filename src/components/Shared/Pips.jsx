@@ -334,49 +334,78 @@ const Pips = ({
               ? pipIndex >= effectiveMaxValue - safeValue
               : pipIndex < safeValue
             
+            // Individually-clickable pips (enableBoundaryClick=false) render inside an
+            // invisible 44x44px hit-area wrapper — the visual pip stays small and the
+            // pips don't visually overlap, but each has a touch-friendly tap zone
+            // (#30 mobile touch-target audit, Priority 2).
+            const individuallyClickable = !enableBoundaryClick && (onChange || onPipClick)
+            const hitAreaWrapperStyle = individuallyClickable ? {
+              position: 'relative',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '44px',
+              height: '44px',
+              margin: '-0.6875rem', // pulls the 44px hit area back over neighboring pips without changing visual gap/flow
+              flexShrink: 0,
+              cursor: 'pointer',
+            } : {}
+
             if (config.isDots) {
               // Dot-based pips
-              return (
+              const dot = (
                 <div
-                  key={pipIndex}
                   style={{
                     ...config.pipStyle,
                     ...(isFilled ? config.filledStyle : config.emptyStyle),
                     ...pipStyle,
-                    cursor: (onChange || onPipClick) ? 'pointer' : 'default'
+                    cursor: (onChange || onPipClick) ? 'pointer' : 'default',
+                    position: individuallyClickable ? 'relative' : undefined,
+                    zIndex: individuallyClickable ? 1 : undefined,
                   }}
                   onClick={!enableBoundaryClick ? () => handlePipClick(pipIndex, isFilled) : undefined}
                   title={`${pipIndex + 1} of ${effectiveMaxValue}`}
                 />
               )
+              return individuallyClickable ? (
+                <span key={pipIndex} style={hitAreaWrapperStyle}>{dot}</span>
+              ) : (
+                React.cloneElement(dot, { key: pipIndex })
+              )
             } else {
               // Symbol-based pips
               const IconComponent = config.icon
               const isFontAwesome = IconComponent && typeof IconComponent === 'object' && IconComponent.iconName
-              
+
               const currentColor = isFilled ? filledColor : (emptyColor || config.emptyColor)
-              return (
-                <span 
-                  key={pipIndex} 
+              const symbol = (
+                <span
                   className={`fear-pip ${isFilled ? 'filled' : 'empty'}`}
-                  style={{ 
+                  style={{
                     ...config.pipStyle,
                     color: currentColor,
                     cursor: (onChange || onPipClick) ? 'pointer' : 'default',
-                    ...pipStyle
+                    ...pipStyle,
+                    position: individuallyClickable ? 'relative' : undefined,
+                    zIndex: individuallyClickable ? 1 : undefined,
                   }}
                   onClick={!enableBoundaryClick ? () => handlePipClick(pipIndex, isFilled) : undefined}
                   title={`${pipIndex + 1} of ${effectiveMaxValue}`}
                 >
                   {isFontAwesome ? (
-                    <FontAwesomeIcon 
-                      icon={IconComponent} 
+                    <FontAwesomeIcon
+                      icon={IconComponent}
                       size={size}
                     />
                   ) : (
                     <IconComponent size="100%" strokeWidth={1.25} />
                   )}
                 </span>
+              )
+              return individuallyClickable ? (
+                <span key={pipIndex} style={hitAreaWrapperStyle}>{symbol}</span>
+              ) : (
+                React.cloneElement(symbol, { key: pipIndex })
               )
             }
           })}

@@ -153,7 +153,7 @@ const CustomEnvironmentCreator = ({
                     type="button"
                     onClick={() => setTier(t)}
                     style={{
-                      width: '38px', height: '38px', borderRadius: '0.25rem',
+                      width: '44px', height: '44px', borderRadius: '0.25rem',
                       border: `1px solid ${formData.tier === t ? 'var(--purple)' : 'var(--border)'}`,
                       background: formData.tier === t ? 'var(--purple)' : 'var(--bg-secondary)',
                       color: formData.tier === t ? 'white' : 'var(--text-primary)',
