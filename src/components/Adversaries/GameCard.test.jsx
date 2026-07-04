@@ -55,6 +55,87 @@ describe('GameCard colossus display modes', () => {
   })
 })
 
+// #97: token tracking ("place a token" / "Broken until cleared" mechanics,
+// e.g. Daktadae's Head) — token state keys off the single colossus instance
+// id in both display modes, consistent with how segmentHp already works.
+describe('GameCard colossus token tracking (#97)', () => {
+  const tokenInstance = { id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true, segmentHp: { 'ikeri-head': 0 }, segmentTokens: { 'ikeri-head': 1 } }
+
+  it('nested mode: shows the current token count and increments it on the +1 button, keyed off the colossus instance id', () => {
+    const onUpdate = vi.fn()
+    render(
+      <GameCard
+        type="adversary"
+        item={colossusItem}
+        instances={[tokenInstance]}
+        onUpdate={onUpdate}
+      />
+    )
+    expect(screen.getByText('1')).toBeInTheDocument()
+    fireEvent.click(screen.getByTitle('Place a token'))
+    expect(onUpdate).toHaveBeenCalledWith('adv-1', { segmentTokens: { 'ikeri-head': 2 } })
+  })
+
+  it('nested mode: decrements the token count on the -1 button, never below zero', () => {
+    const onUpdate = vi.fn()
+    render(
+      <GameCard
+        type="adversary"
+        item={colossusItem}
+        instances={[tokenInstance]}
+        onUpdate={onUpdate}
+      />
+    )
+    fireEvent.click(screen.getByTitle('Remove a token'))
+    expect(onUpdate).toHaveBeenCalledWith('adv-1', { segmentTokens: { 'ikeri-head': 0 } })
+  })
+
+  it('nested mode: shows a Broken tag when a segment has tokens, even though its HP is untouched', () => {
+    render(
+      <GameCard
+        type="adversary"
+        item={colossusItem}
+        instances={[tokenInstance]}
+        onUpdate={() => {}}
+      />
+    )
+    expect(screen.getByText('Broken')).toBeInTheDocument()
+  })
+
+  it('segments mode: shows and updates the token count on the standalone segment card, keyed off the colossus instance id', () => {
+    const onUpdate = vi.fn()
+    render(
+      <GameCard
+        type="adversary"
+        item={colossusItem}
+        instances={[tokenInstance]}
+        segment={colossusItem.segments[0]}
+        segmentKey="ikeri-head"
+        onUpdate={onUpdate}
+      />
+    )
+    expect(screen.getByText('Broken')).toBeInTheDocument()
+    fireEvent.click(screen.getByTitle('Place a token'))
+    expect(onUpdate).toHaveBeenCalledWith('adv-1', { segmentTokens: { 'ikeri-head': 2 } })
+  })
+
+  it('defaults to zero tokens when segmentTokens is absent from the instance', () => {
+    const onUpdate = vi.fn()
+    const freshInstance = { id: 'adv-2', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true, segmentHp: { 'ikeri-head': 0 } }
+    render(
+      <GameCard
+        type="adversary"
+        item={colossusItem}
+        instances={[freshInstance]}
+        onUpdate={onUpdate}
+      />
+    )
+    expect(screen.queryByText('Broken')).toBeNull()
+    fireEvent.click(screen.getByTitle('Place a token'))
+    expect(onUpdate).toHaveBeenCalledWith('adv-2', { segmentTokens: { 'ikeri-head': 1 } })
+  })
+})
+
 describe('GameCard environment difficulty prominence (#104)', () => {
   const envItem = { id: 'env-1', name: 'Ashen Wastes', type: 'Exploration', tier: 2, difficulty: 15 }
 

@@ -7,7 +7,9 @@ import { generateId, readFromStorage, writeToStorage } from './StorageHelpers'
 // Per-instance fields — everything else lives on the group template
 // segmentHp tracks colossus per-segment HP pips per instance (colossi don't
 // stack, but the value still lives on the instance alongside hp/stress).
-const INSTANCE_FIELDS = new Set(['hp', 'stress', 'isVisible', 'segmentHp'])
+// segmentTokens tracks the "place a token" / "Broken until cleared" counters
+// some colossus segments use (e.g. Daktadae's Head/Forelegs/Hindlegs, #97).
+const INSTANCE_FIELDS = new Set(['hp', 'stress', 'isVisible', 'segmentHp', 'segmentTokens'])
 
 // Migrate old flat-array format → group format
 const migrateToGroups = (flatAdversaries) => {

@@ -11,7 +11,7 @@ import { DASHBOARD_GAP, TAB_HEIGHT } from '../Dashboard/constants'
 import { highlightCardText } from './GameCard/textHighlighter'
 import MergedStatBadge from './GameCard/MergedStatBadge'
 import TabButtons from './GameCard/TabButtons'
-import ColossusSegmentCard, { Divider, FeatureList, HpPips, sortSegments, getSegmentStatus } from './GameCard/ColossusSegmentCard'
+import ColossusSegmentCard, { Divider, FeatureList, sortSegments, NestedSegmentBlock } from './GameCard/ColossusSegmentCard'
 import { EnvironmentFeatureGroup, EnvironmentImpulses, PotentialAdversaries } from './GameCard/EnvironmentFeaturesSection'
 import TouchTarget from '../Shared/TouchTarget'
 
@@ -881,10 +881,19 @@ const GameCard = ({
       if (!inst || !onUpdate) return
       onUpdate(inst.id, { segmentHp: { ...segmentHp, [segmentKey]: i < markedHp ? i : i + 1 } })
     }
+    // Token tracking keys off the single colossus instance id, same as
+    // segmentHp — not the per-segment pseudo-group (#97).
+    const segmentTokens = inst?.segmentTokens || {}
+    const tokenCount = segmentTokens[segmentKey] || 0
+    const handleTokenChange = (count) => {
+      if (!inst || !onUpdate) return
+      onUpdate(inst.id, { segmentTokens: { ...segmentTokens, [segmentKey]: count } })
+    }
     return (
       <ColossusSegmentCard
         colossus={item} segment={segment} segmentKey={segmentKey} markedHp={markedHp}
-        onToggleHpPip={toggleHpPip} onUpdate={onUpdate} onDelete={onDelete}
+        onToggleHpPip={toggleHpPip} tokenCount={tokenCount} onTokenChange={handleTokenChange}
+        onUpdate={onUpdate} onDelete={onDelete}
         getCardStyle={getCardStyle} quickEdit={quickEdit} setQuickEdit={setQuickEdit}
       />
     )
@@ -892,59 +901,11 @@ const GameCard = ({
 
   const renderExpandedColossus = () => {
     const colossus = item
-    // Pull segmentHp from the single instance (colossi don't stack)
+    // Pull segmentHp/segmentTokens from the single instance (colossi don't stack)
     const inst = instances[0]
     const segmentHp = inst?.segmentHp || {}
+    const segmentTokens = inst?.segmentTokens || {}
     const sortedSegments = sortSegments(colossus.segments)
-
-    const SegmentBlock = ({ seg, instanceKey, markedHp }) => {
-      const handlePipToggle = (pipIndex) => {
-        if (!inst || !onUpdate) return
-        const newMarked = pipIndex < markedHp ? pipIndex : pipIndex + 1
-        onUpdate(inst.id, { segmentHp: { ...segmentHp, [instanceKey]: newMarked } })
-      }
-      const { isDestroyed, isBroken } = getSegmentStatus(seg, markedHp)
-
-      return (
-        <div style={{
-          borderRadius: '0.375rem',
-          border: `1px solid ${isDestroyed ? 'var(--danger)' : 'var(--border)'}`,
-          padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
-          opacity: isDestroyed ? 0.6 : 1,
-          backgroundColor: isDestroyed ? 'color-mix(in srgb, var(--danger) 8%, transparent)' : 'transparent',
-        }}>
-          {/* Segment header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '0.25rem', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
-              {seg.name}
-              {isDestroyed && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
-              {!isDestroyed && isBroken && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
-            </span>
-            <div style={{ display: 'flex', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0, alignItems: 'center' }}>
-              <span>Diff {seg.difficulty}</span>
-              {seg.atk != null && <span>ATK +{seg.atk}</span>}
-            </div>
-          </div>
-          {/* HP pips */}
-          {seg.hp ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '0.25rem' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0 }}>HP</span>
-              <HpPips max={seg.hp} marked={markedHp} onToggle={handlePipToggle} />
-            </div>
-          ) : (
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '0.25rem' }}>Invulnerable</div>
-          )}
-          {/* Attack */}
-          {seg.weapon && (
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-              {seg.weapon} · {seg.range} · {seg.damage}
-            </div>
-          )}
-          {/* Features */}
-          <FeatureList features={seg.features} />
-        </div>
-      )
-    }
 
     return (
       <ContainerWithTab
@@ -1106,12 +1067,16 @@ const GameCard = ({
                   return Array.from({ length: count }, (_, idx) => {
                     const key = count > 1 ? `${seg.id}-${idx + 1}` : seg.id
                     const markedHp = segmentHp[key] || 0
+                    const tokenCount = segmentTokens[key] || 0
                     return (
-                      <SegmentBlock
+                      <NestedSegmentBlock
                         key={key}
                         seg={seg}
                         instanceKey={key}
                         markedHp={markedHp}
+                        tokenCount={tokenCount}
+                        inst={inst}
+                        onUpdate={onUpdate}
                       />
                     )
                   })

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Check, Pencil, X } from 'lucide-react'
+import { Check, Pencil, X, Minus, Plus, Circle } from 'lucide-react'
 import ContainerWithTab from '../../Dashboard/ContainerWithTab'
 import MergedStatBadge from './MergedStatBadge'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
@@ -102,12 +102,115 @@ export const getSegmentStatus = (seg, markedHp) => {
   return { isDestroyed, isBroken }
 }
 
+// Token tracker — some colossus segments carry a "place a token" / "Broken
+// until all tokens are cleared" mechanic driven by feature text (e.g.
+// Daktadae's Head, Forelegs, Hindlegs — see colossi.json). Tokens have no
+// fixed max in the data (features place/clear them one at a time), so this
+// is a simple GM-tracked counter rather than a pip row (#97). Token state
+// always keys off the underlying colossus instance id, consistent across
+// both display modes.
+export const TokenCounter = ({ count, onChange }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0 }}>Tokens</span>
+    <button
+      onClick={e => { e.stopPropagation(); onChange(Math.max(0, count - 1)) }}
+      style={tokenBtnStyle}
+      title="Remove a token"
+    >
+      <Minus size={11} />
+    </button>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem', fontWeight: 600, color: count > 0 ? 'var(--warning, #f59e0b)' : 'var(--text-secondary)', minWidth: '1.25rem', justifyContent: 'center' }}>
+      <Circle size={9} fill="currentColor" stroke="none" />
+      {count}
+    </span>
+    <button
+      onClick={e => { e.stopPropagation(); onChange(count + 1) }}
+      style={tokenBtnStyle}
+      title="Place a token"
+    >
+      <Plus size={11} />
+    </button>
+  </div>
+)
+
+const tokenBtnStyle = {
+  width: '1.125rem', height: '1.125rem', padding: 0, flexShrink: 0,
+  border: '1px solid var(--text-secondary)', borderRadius: '0.2rem',
+  background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+}
+
+// One segment's block within the nested (default) colossus card — the
+// bespoke list-item treatment used when colossusDisplayMode is 'nested'.
+// Lives here (rather than GameCard.jsx) to keep that file within its size
+// budget; extracted alongside the standalone ColossusSegmentCard so both
+// segment renderings share the HP-pip/token/status helpers above.
+export const NestedSegmentBlock = ({ seg, instanceKey, markedHp, tokenCount, inst, onUpdate }) => {
+  const handlePipToggle = (pipIndex) => {
+    if (!inst || !onUpdate) return
+    const newMarked = pipIndex < markedHp ? pipIndex : pipIndex + 1
+    onUpdate(inst.id, { segmentHp: { ...(inst.segmentHp || {}), [instanceKey]: newMarked } })
+  }
+  const handleTokenChange = (count) => {
+    if (!inst || !onUpdate) return
+    onUpdate(inst.id, { segmentTokens: { ...(inst.segmentTokens || {}), [instanceKey]: count } })
+  }
+  const { isDestroyed, isBroken } = getSegmentStatus(seg, markedHp)
+  const hasTokens = tokenCount > 0
+
+  return (
+    <div style={{
+      borderRadius: '0.375rem',
+      border: `1px solid ${isDestroyed ? 'var(--danger)' : 'var(--border)'}`,
+      padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+      opacity: isDestroyed ? 0.6 : 1,
+      backgroundColor: isDestroyed ? 'color-mix(in srgb, var(--danger) 8%, transparent)' : 'transparent',
+    }}>
+      {/* Segment header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+        <span style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
+          {seg.name}
+          {isDestroyed && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
+          {!isDestroyed && (isBroken || hasTokens) && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
+        </span>
+        <div style={{ display: 'flex', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0, alignItems: 'center' }}>
+          <span>Diff {seg.difficulty}</span>
+          {seg.atk != null && <span>ATK +{seg.atk}</span>}
+        </div>
+      </div>
+      {/* HP pips */}
+      {seg.hp ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '0.25rem' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0 }}>HP</span>
+          <HpPips max={seg.hp} marked={markedHp} onToggle={handlePipToggle} />
+        </div>
+      ) : (
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '0.25rem' }}>Invulnerable</div>
+      )}
+      {/* Attack */}
+      {seg.weapon && (
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+          {seg.weapon} · {seg.range} · {seg.damage}
+        </div>
+      )}
+      {/* Token tracker — "Broken until cleared" mechanic (#97) */}
+      <div style={{ marginBottom: '0.25rem' }}>
+        <TokenCounter count={tokenCount} onChange={handleTokenChange} />
+      </div>
+      {/* Features */}
+      <FeatureList features={seg.features} />
+    </div>
+  )
+}
+
 const ColossusSegmentCard = ({
   colossus,
   segment: seg,
   segmentKey,
   markedHp,
   onToggleHpPip,
+  tokenCount = 0,
+  onTokenChange,
   onUpdate,
   onDelete,
   getCardStyle,
@@ -115,6 +218,7 @@ const ColossusSegmentCard = ({
   setQuickEdit,
 }) => {
   const { isDestroyed, isBroken } = getSegmentStatus(seg, markedHp)
+  const hasTokens = tokenCount > 0
 
   return (
     <ContainerWithTab
@@ -179,7 +283,7 @@ const ColossusSegmentCard = ({
               }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{seg.name}</span>
                 {isDestroyed && <span style={{ fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
-                {!isDestroyed && isBroken && <span style={{ fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
+                {!isDestroyed && (isBroken || hasTokens) && <span style={{ fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
               </h4>
             </>
           )}
@@ -244,6 +348,13 @@ const ColossusSegmentCard = ({
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Invulnerable</div>
             )}
           </div>
+
+          {/* Token tracker — "Broken until cleared" mechanic (#97) */}
+          {onTokenChange && (
+            <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, paddingTop: CARD_SPACE_V }}>
+              <TokenCounter count={tokenCount} onChange={onTokenChange} />
+            </div>
+          )}
 
           {/* Segment features */}
           <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H }}>
