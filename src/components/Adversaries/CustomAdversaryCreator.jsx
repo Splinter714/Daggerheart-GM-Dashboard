@@ -7,15 +7,17 @@ import ExperienceSection from './GameCard/ExperienceSection'
 import { getDefaultAdversaryValues } from './adversaryDefaults'
 import { typeGuide, stressFearGuide } from './adversaryTypeGuide'
 import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from '../Dashboard/constants'
-import { inputStyle, labelStyle, sectionStyle, DAMAGE_TYPES, parseDamage, buildDamage, reorder, compactCtrlBtnStyle } from './customCreatorConstants'
+import { inputStyle, labelStyle, sectionStyle, parseDamage, buildDamage, reorder, compactCtrlBtnStyle } from './customCreatorConstants'
 import { DragHandle } from './creatorAtoms'
 import { InfoPopover } from './InfoPopover'
 import { StatField } from './StatField'
 import { FeatureList } from './FeatureList'
-import { DamageSelector, selectArrowBg } from './DamageSelector'
 import { TypeSelector } from './TypeSelector'
 import { loadData, adversariesData } from './customAdversaryData'
 import TouchTarget from '../Shared/TouchTarget'
+import { ColossusSegmentEditor } from './ColossusSegmentEditor'
+import { StandardAttackFields } from './StandardAttackFields'
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 const CustomAdversaryCreator = forwardRef(({
@@ -49,7 +51,7 @@ const CustomAdversaryCreator = forwardRef(({
       stressMax: defaults.stressMax,
       atk: defaults.atk,
       weapon: '', range: defaults.range, damage: defaults.damage, damageType: 'Physical',
-      experience: [], features: [],
+      experience: [], features: [], segments: [],
     }
   })
 
@@ -136,6 +138,7 @@ const CustomAdversaryCreator = forwardRef(({
         damageType: parsed.type || 'Physical',
         experience: editingAdversary.experience || [],
         features: editingAdversary.features || [],
+        segments: editingAdversary.segments || [],
       })
       setStatsPulledFromExisting(false)
     } else {
@@ -147,7 +150,7 @@ const CustomAdversaryCreator = forwardRef(({
         thresholds: defaults.thresholds,
         hpMax: defaults.hpMax, stressMax: defaults.stressMax,
         atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage, damageType: 'Physical',
-        experience: [], features: [],
+        experience: [], features: [], segments: [],
       })
       setStatsPulledFromExisting(false)
     }
@@ -217,6 +220,7 @@ const CustomAdversaryCreator = forwardRef(({
       damageType: parsed.type || 'Physical',
       experience: adv.experience ? [...adv.experience] : prev.experience,
       features: adv.features ? [...adv.features] : prev.features,
+      segments: adv.segments ? [...adv.segments] : prev.segments,
     }))
     setStatsPulledFromExisting(true)
     setNameSuggestions([])
@@ -267,6 +271,7 @@ const CustomAdversaryCreator = forwardRef(({
         hp: editingAdversary ? editingAdversary.hp : 0,
         stress: editingAdversary ? editingAdversary.stress : 0,
         source: 'Homebrew',
+        isColossus: formData.type === 'Colossus',
       }
 
       if (editingAdversary) {
@@ -287,7 +292,7 @@ const CustomAdversaryCreator = forwardRef(({
           difficulty: defaults.difficulty, thresholds: defaults.thresholds,
           hpMax: defaults.hpMax, stressMax: defaults.stressMax,
           atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage, damageType: 'Physical',
-          experience: [], features: [],
+          experience: [], features: [], segments: [],
         })
         setStatsPulledFromExisting(false)
       }
@@ -311,6 +316,7 @@ const CustomAdversaryCreator = forwardRef(({
         damage: buildDamage(formData.damage, damageType),
         experience: filterBlank(formData.experience),
         hp: 0, stress: 0, source: 'Homebrew',
+        isColossus: formData.type === 'Colossus',
       }
       const { id, ...dataToSave } = data
       await onSave(dataToSave)
@@ -335,6 +341,7 @@ const CustomAdversaryCreator = forwardRef(({
         damage: buildDamage(formData.damage, damageType),
         experience: filterBlank(formData.experience),
         hp: 0, stress: 0, source: 'Homebrew',
+        isColossus: formData.type === 'Colossus',
       }
       await onSaveAndAdd(data)
     } catch (err) {
@@ -357,6 +364,7 @@ const CustomAdversaryCreator = forwardRef(({
         damage: buildDamage(formData.damage, damageType),
         experience: filterBlank(formData.experience),
         hp: 0, stress: 0, source: 'Homebrew',
+        isColossus: formData.type === 'Colossus',
       }
       await onAddToEncounter(data)
       onCancelEdit?.()
@@ -381,9 +389,10 @@ const CustomAdversaryCreator = forwardRef(({
 
   if (!embedded) {
     const isMinion = formData.type === 'Minion'
+    const isColossus = formData.type === 'Colossus'
     const guide = typeGuide[formData.type]
 
-    const formItem = { ...formData, id: 'creator-form', hp: 0, stress: 0, source: 'Homebrew', name: formData.name || 'Name', weapon: formData.weapon || 'Attack', damage: buildDamage(formData.damage, formData.damageType) }
+    const formItem = { ...formData, id: 'creator-form', hp: 0, stress: 0, source: 'Homebrew', name: formData.name || 'Name', weapon: formData.weapon || 'Attack', damage: buildDamage(formData.damage, formData.damageType), isColossus }
     const previewInstances = [{ ...formItem }]
 
     const canAct = !isSaving && !!formData.name.trim()
@@ -613,58 +622,18 @@ const CustomAdversaryCreator = forwardRef(({
                 </div>
               </div>
 
-              {/* Attack + Difficulty */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <StatField label="Attack Modifier" field="atk" rangeKey="atk" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
-                <StatField label="Difficulty" field="difficulty" rangeKey="difficulty" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
-              </div>
+              {/* Attack + Difficulty — not applicable to Colossus (per-segment instead) */}
+              {!isColossus && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <StatField label="Attack Modifier" field="atk" rangeKey="atk" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+                  <StatField label="Difficulty" field="difficulty" rangeKey="difficulty" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+                </div>
+              )}
 
-              {/* Standard Attack fields — 2×2 grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <div style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Standard Attack</span>
-                  </div>
-                  <input type="text" value={formData.weapon} onChange={e => setFormData(prev => ({ ...prev, weapon: e.target.value }))} placeholder="e.g. Greataxe" style={{ ...inputStyle, minHeight: '44px' }} />
-                </div>
-                <div style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Range</span>
-                  </div>
-                  <select value={formData.range} onChange={e => setFormData(prev => ({ ...prev, range: e.target.value }))} style={{ ...inputStyle, minHeight: '44px', appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.65rem center', paddingRight: '2rem' }}>
-                    {['Melee', 'Very Close', 'Close', 'Far', 'Very Far'].map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                </div>
-                <div style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Damage</span>
-                    <span style={{ visibility: guide?.damageDie ? 'visible' : 'hidden', display: 'flex', alignItems: 'center' }}>
-                      <InfoPopover align="right">
-                        <div style={{ fontWeight: 600, fontSize: '0.75rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Damage Die</div>
-                        <div>{guide?.damageDie}</div>
-                      </InfoPopover>
-                    </span>
-                  </div>
-                  <DamageSelector
-                    damage={formData.damage}
-                    type={formData.type}
-                    tier={formData.tier}
-                    onChange={v => setFormData(prev => ({ ...prev, damage: v }))}
-                  />
-                </div>
-                <div style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Damage Type</span>
-                  </div>
-                  <select
-                    value={formData.damageType || 'Physical'}
-                    onChange={e => setFormData(prev => ({ ...prev, damageType: e.target.value }))}
-                    style={{ ...inputStyle, minHeight: '44px', appearance: 'none', WebkitAppearance: 'none', backgroundImage: selectArrowBg, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.65rem center', paddingRight: '2rem' }}
-                  >
-                    {DAMAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
-              </div>
+              {/* Standard Attack fields — 2×2 grid — not applicable to Colossus (per-segment instead) */}
+              {!isColossus && (
+                <StandardAttackFields formData={formData} setFormData={setFormData} guide={guide} />
+              )}
 
               {/* Thresholds */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
@@ -672,11 +641,21 @@ const CustomAdversaryCreator = forwardRef(({
                 <StatField label="Severe Threshold" field="thresholds" subfield="severe" rangeKey="severe" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
               </div>
 
-              {/* HP + Stress */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <StatField label="HP" field="hpMax" rangeKey="hp" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+              {/* HP + Stress — HP not applicable to Colossus (tracked per-segment instead) */}
+              <div style={{ display: 'grid', gridTemplateColumns: isColossus ? '1fr' : '1fr 1fr', gap: '0.5rem' }}>
+                {!isColossus && (
+                  <StatField label="HP" field="hpMax" rangeKey="hp" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+                )}
                 <StatField label="Stress" field="stressMax" rangeKey="stress" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
               </div>
+
+              {/* Segments — Colossus only */}
+              {isColossus && (
+                <ColossusSegmentEditor
+                  segments={formData.segments}
+                  onChange={segments => setFormData(prev => ({ ...prev, segments }))}
+                />
+              )}
 
               {/* Description + Motives */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>

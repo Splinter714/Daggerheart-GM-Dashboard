@@ -1,6 +1,12 @@
 // Type-specific guidance content derived from adversary-creation-guide.md
 
 export const typeGuide = {
+  Colossus: {
+    summary: 'Massive, multi-segment adversary — a framework stat block plus individual segments (Head, Torso, Legs, etc.), each with its own HP, difficulty, attack, and features.',
+    notes: 'Build the framework stats above (thresholds, stress, experiences, features), then add segments below. Segments track Broken (half HP marked) and Destroyed (all HP marked) independently.',
+    experiences: [],
+    features: [],
+  },
   Standard: {
     summary: 'Makes up the core of enemy forces. Simple abilities and consistent threat.',
     damageDie: 'd6–d8',

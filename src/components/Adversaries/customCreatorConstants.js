@@ -52,7 +52,7 @@ export const compactCtrlBtnStyle = (disabled) => ({
   flexShrink: 0,
 })
 
-export const TYPES = ['Standard', 'Bruiser', 'Horde', 'Leader', 'Minion', 'Ranged', 'Skulk', 'Solo', 'Support', 'Social']
+export const TYPES = ['Standard', 'Bruiser', 'Horde', 'Leader', 'Minion', 'Ranged', 'Skulk', 'Solo', 'Support', 'Social', 'Colossus']
 export const DAMAGE_TYPES = ['Physical', 'Magical', 'Physical/Magical']
 const TYPE_SHORT = { Physical: 'phy', Magical: 'mag', 'Physical/Magical': 'phy/mag' }
 const TYPE_FROM_SHORT = { phy: 'Physical', mag: 'Magical', 'phy/mag': 'Physical/Magical', 'mag/phy': 'Physical/Magical' }
