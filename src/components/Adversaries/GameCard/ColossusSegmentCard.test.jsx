@@ -27,13 +27,20 @@ const segment = {
 }
 const inst = { id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 2, isVisible: true }
 
-const baseProps = {
-  colossus,
-  segment,
-  segmentKey: 'ikeri-head',
+const makeSlot = (overrides = {}) => ({
+  instanceKey: 'ikeri-head',
   instanceNumber: 1,
   markedHp: 0,
   onToggleHpPip: vi.fn(),
+  tokenCount: 0,
+  onTokenChange: vi.fn(),
+  ...overrides,
+})
+
+const baseProps = {
+  colossus,
+  segment,
+  slots: [makeSlot()],
   onUpdate: vi.fn(),
   onDelete: vi.fn(),
   inst,
@@ -45,15 +52,15 @@ const baseProps = {
 describe('ColossusSegmentCard', () => {
   it('renders segment name, difficulty, ATK, and weapon using regular adversary card conventions', () => {
     render(<ColossusSegmentCard {...baseProps} />)
-    expect(screen.getAllByText((_, el) => el?.textContent === 'Head #1').length).toBeGreaterThan(0)
+    expect(screen.getAllByText((_, el) => el?.textContent === 'Head').length).toBeGreaterThan(0)
     expect(screen.getByText('16')).toBeInTheDocument() // difficulty badge value
     expect(screen.getByText('+2')).toBeInTheDocument() // ATK badge value
     expect(screen.getByText('Peck')).toBeInTheDocument()
   })
 
-  it('HP pips are interactable — clicking a pip calls onToggleHpPip with its index', () => {
+  it('HP pips are interactable — clicking a pip calls the slot onToggleHpPip with its index', () => {
     const onToggleHpPip = vi.fn()
-    const { container } = render(<ColossusSegmentCard {...baseProps} onToggleHpPip={onToggleHpPip} />)
+    const { container } = render(<ColossusSegmentCard {...baseProps} slots={[makeSlot({ onToggleHpPip })]} />)
 
     // HP pips render as 5 clickable divs (segment.hp = 5)
     const pips = container.querySelectorAll('[style*="border-radius: 50%"]')
@@ -64,13 +71,13 @@ describe('ColossusSegmentCard', () => {
   })
 
   it('shows Destroyed label when all HP is marked', () => {
-    render(<ColossusSegmentCard {...baseProps} markedHp={5} />)
-    expect(screen.getByText('Destroyed')).toBeInTheDocument()
+    render(<ColossusSegmentCard {...baseProps} slots={[makeSlot({ markedHp: 5 })]} />)
+    expect(screen.getAllByText('Destroyed').length).toBeGreaterThan(0)
   })
 
   it('shows Broken label at half HP marked', () => {
-    render(<ColossusSegmentCard {...baseProps} markedHp={3} />)
-    expect(screen.getByText('Broken')).toBeInTheDocument()
+    render(<ColossusSegmentCard {...baseProps} slots={[makeSlot({ markedHp: 3 })]} />)
+    expect(screen.getAllByText('Broken').length).toBeGreaterThan(0)
   })
 
   it('renders parent colossus name for context', () => {
@@ -78,9 +85,31 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getByText('Ikeri, Injuries Untold')).toBeInTheDocument()
   })
 
-  it('shows the running instance number in the header (#109)', () => {
-    render(<ColossusSegmentCard {...baseProps} instanceNumber={4} />)
+  it('shows the running instance number for each instance slot (#109, #110)', () => {
+    render(<ColossusSegmentCard {...baseProps} slots={[
+      makeSlot({ instanceKey: 'ikeri-head-1', instanceNumber: 3 }),
+      makeSlot({ instanceKey: 'ikeri-head-2', instanceNumber: 4 }),
+    ]} />)
+    expect(screen.getAllByText((_, el) => el?.textContent === 'Head #3').length).toBeGreaterThan(0)
     expect(screen.getAllByText((_, el) => el?.textContent === 'Head #4').length).toBeGreaterThan(0)
+  })
+
+  it('consolidates multiple instances into one card with independent HP pips and tokens per slot (#110)', () => {
+    const onToggleHpPipA = vi.fn()
+    const onToggleHpPipB = vi.fn()
+    const { container } = render(<ColossusSegmentCard {...baseProps} slots={[
+      makeSlot({ instanceKey: 'ikeri-head-1', instanceNumber: 3, markedHp: 1, onToggleHpPip: onToggleHpPipA }),
+      makeSlot({ instanceKey: 'ikeri-head-2', instanceNumber: 4, markedHp: 2, onToggleHpPip: onToggleHpPipB }),
+    ]} />)
+    // Only one card is rendered (single header), but two 5-pip HP rows
+    // (10 pips) plus the shared 6-pip Stress row (framework info, once per
+    // card) = 16 pips total.
+    const pips = container.querySelectorAll('[style*="border-radius: 50%"]')
+    expect(pips.length).toBe(16)
+    // Clicking within the second slot's pip row only calls that slot's handler
+    fireEvent.click(pips[7])
+    expect(onToggleHpPipB).toHaveBeenCalled()
+    expect(onToggleHpPipA).not.toHaveBeenCalled()
   })
 
   it('shows framework-shared Motives & Tactics (#109)', () => {

@@ -29,14 +29,18 @@ describe('useEntityGroups colossus display modes', () => {
     expect(colossusEntries[0].segment).toBeUndefined()
   })
 
-  it('segments mode expands a colossus into one pseudo-group per segment instance', () => {
+  it('segments mode expands a colossus into one pseudo-group per segment ROLE, consolidating same-role instances (#110)', () => {
     const { result } = renderHook(() =>
       useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'type', 'segments')
     )
     const segmentEntries = result.current.entityGroups.filter(g => g.isColossusSegment)
-    // 1 Head + 2 Arms (count: 2) = 3 segment cards
-    expect(segmentEntries).toHaveLength(3)
-    expect(segmentEntries.map(e => e.segmentKey)).toEqual(['ikeri-head', 'ikeri-arm-1', 'ikeri-arm-2'])
+    // 1 Head role + 1 Arm role (count: 2, consolidated into one card) = 2 segment cards
+    expect(segmentEntries).toHaveLength(2)
+    expect(segmentEntries.map(e => e.segment.id)).toEqual(['ikeri-head', 'ikeri-arm'])
+    expect(segmentEntries.map(e => e.segmentInstances.map(i => i.instanceKey))).toEqual([
+      ['ikeri-head'],
+      ['ikeri-arm-1', 'ikeri-arm-2'],
+    ])
   })
 
   it('keeps all segment cards for one colossus grouped under the same groupName (stay adjacent)', () => {
@@ -57,15 +61,14 @@ describe('useEntityGroups colossus display modes', () => {
     expect(goblinEntries[0].isColossusSegment).toBeUndefined()
   })
 
-  it('assigns a running instance number shared across the whole colossus, following sortSegments order (#109)', () => {
+  it('assigns a running instance number shared across the whole colossus, following sortSegments order (#109, #110)', () => {
     const { result } = renderHook(() =>
       useEntityGroups([colossusGroup, regularGroup], [], 'name', 'asc', 'type', 'segments')
     )
     const segmentEntries = result.current.entityGroups.filter(g => g.isColossusSegment)
-    expect(segmentEntries.map(e => [e.segmentKey, e.instanceNumber])).toEqual([
-      ['ikeri-head', 1],
-      ['ikeri-arm-1', 2],
-      ['ikeri-arm-2', 3],
+    expect(segmentEntries.map(e => e.segmentInstances.map(i => [i.instanceKey, i.instanceNumber]))).toEqual([
+      [['ikeri-head', 1]],
+      [['ikeri-arm-1', 2], ['ikeri-arm-2', 3]],
     ])
   })
 

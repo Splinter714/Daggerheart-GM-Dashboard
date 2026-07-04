@@ -2,28 +2,38 @@ import { useCallback, useMemo } from 'react'
 import { applySort, getGroupLabel } from './useDashboardSortGroup'
 import { numberSegmentInstances } from '../../Adversaries/GameCard/ColossusSegmentCard'
 
-// Expand a colossus group into one pseudo-group per segment instance, all
-// sharing a groupName so EntityColumns' existing section-grouping keeps them
-// visually adjacent on the board. Deleting the underlying colossus instance
-// removes every segment card together, since they all reference the same
+// Expand a colossus group into one pseudo-group per segment ROLE (e.g. one
+// "Foreleg" group for Daktadae's 2 Forelegs, not two), all sharing a
+// groupName so EntityColumns' existing section-grouping keeps them visually
+// adjacent on the board. Deleting the underlying colossus instance removes
+// every segment card together, since they all reference the same
 // group/instance data rather than owning separate state.
 //
-// Each segment instance also carries a running `instanceNumber`, shared
-// across the whole colossus (not restarting per segment role) — e.g.
-// Head=1, Torso=2, Arm A=3, Arm B=4 — following the same `sortSegments`
-// order as the nested display mode (#109).
+// Each role's instances carry a running `instanceNumber`, shared across the
+// whole colossus (not restarting per segment role) — e.g. Head=1, Torso=2,
+// Foreleg A=3, Foreleg B=4 — following the same `sortSegments` order as the
+// nested display mode (#109). Same-role instances are consolidated into a
+// single pseudo-group carrying all of that role's numbered instances (#110)
+// so the card renders fixed instance slots instead of separate cards.
 const expandColossusIntoSegmentGroups = (group) => {
   const inst = group.instances[0]
-  return numberSegmentInstances(group.segments).map(({ seg, instanceKey, instanceNumber }) => ({
+  const numbered = numberSegmentInstances(group.segments)
+
+  const byRole = new Map()
+  numbered.forEach(({ seg, instanceKey, instanceNumber }) => {
+    if (!byRole.has(seg.id)) byRole.set(seg.id, { seg, instances: [] })
+    byRole.get(seg.id).instances.push({ instanceKey, instanceNumber })
+  })
+
+  return Array.from(byRole.values()).map(({ seg, instances: segInstances }) => ({
     type: 'adversary',
-    baseName: `${group.baseName}::${instanceKey}`,
+    baseName: `${group.baseName}::${seg.id}`,
     template: group,
     instances: group.instances,
     groupName: `colossus: ${group.baseName.toLowerCase()}`,
     isColossusSegment: true,
     segment: seg,
-    segmentKey: instanceKey,
-    instanceNumber,
+    segmentInstances: segInstances,
     colossusInstanceId: inst?.id,
   }))
 }

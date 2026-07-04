@@ -86,9 +86,8 @@ const GameCard = ({
   onCancelEdit = null, // Handler for canceling edit
   isStockAdversary = false, // Whether this is a stock adversary (needs Save As)
   onDelete = null, // Handler for removing an environment from the session
-  segment = null, // Colossus segment data — set to render this segment as its own standalone card
-  segmentKey = null, // Segment HP tracking key (differs from segment.id when count > 1)
-  instanceNumber = null, // Running instance number shared across the whole colossus (#109), e.g. Arm #4
+  segment = null, // Colossus segment data — set to render this segment role as its own standalone card
+  segmentInstances = null, // Array of { instanceKey, instanceNumber } for this segment role (#110) — one slot per instance
   instanceLabelStyle = 'numeric', // Global display setting (#82): 'numeric' or 'alphabetic'
   isRecentlyAdded = false, // Soft fade-out confirmation pulse on newly-added cards (#55)
 }) => {
@@ -877,23 +876,30 @@ const GameCard = ({
   const renderExpandedColossusSegment = () => {
     const inst = instances[0]
     const segmentHp = inst?.segmentHp || {}
-    const markedHp = segmentHp[segmentKey] || 0
-    const toggleHpPip = (i) => {
-      if (!inst || !onUpdate) return
-      onUpdate(inst.id, { segmentHp: { ...segmentHp, [segmentKey]: i < markedHp ? i : i + 1 } })
-    }
-    // Token tracking keys off the single colossus instance id, same as
-    // segmentHp — not the per-segment pseudo-group (#97).
     const segmentTokens = inst?.segmentTokens || {}
-    const tokenCount = segmentTokens[segmentKey] || 0
-    const handleTokenChange = (count) => {
-      if (!inst || !onUpdate) return
-      onUpdate(inst.id, { segmentTokens: { ...segmentTokens, [segmentKey]: count } })
-    }
+    // One card per segment role, with fixed instance slots (matching
+    // segment.count) each independently tracking HP pips + tokens (#110).
+    const slots = (segmentInstances || []).map(({ instanceKey, instanceNumber }) => {
+      const markedHp = segmentHp[instanceKey] || 0
+      const tokenCount = segmentTokens[instanceKey] || 0
+      return {
+        instanceKey,
+        instanceNumber,
+        markedHp,
+        tokenCount,
+        onToggleHpPip: (i) => {
+          if (!inst || !onUpdate) return
+          onUpdate(inst.id, { segmentHp: { ...segmentHp, [instanceKey]: i < markedHp ? i : i + 1 } })
+        },
+        onTokenChange: (count) => {
+          if (!inst || !onUpdate) return
+          onUpdate(inst.id, { segmentTokens: { ...segmentTokens, [instanceKey]: count } })
+        },
+      }
+    })
     return (
       <ColossusSegmentCard
-        colossus={item} segment={segment} segmentKey={segmentKey} instanceNumber={instanceNumber} markedHp={markedHp}
-        onToggleHpPip={toggleHpPip} tokenCount={tokenCount} onTokenChange={handleTokenChange}
+        colossus={item} segment={segment} slots={slots}
         inst={inst} onUpdate={onUpdate} onDelete={onDelete}
         getCardStyle={getCardStyle} quickEdit={quickEdit} setQuickEdit={setQuickEdit}
       />

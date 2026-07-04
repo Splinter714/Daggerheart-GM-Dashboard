@@ -254,15 +254,46 @@ export const NestedSegmentBlock = ({ seg, instanceKey, instanceNumber, markedHp,
   )
 }
 
+// One instance slot within the consolidated segment-role card — its own
+// header (with running instance number), HP pips, and token counter, all
+// independent per instance (#110). Shared segment-role stats (Difficulty/
+// ATK/weapon, thresholds, framework info, features) render once at the card
+// level instead, outside this component.
+const SegmentInstanceSlot = ({ seg, instanceKey, instanceNumber, markedHp, onToggleHpPip, tokenCount, onTokenChange }) => {
+  const { isDestroyed, isBroken } = getSegmentStatus(seg, markedHp)
+  const hasTokens = tokenCount > 0
+  return (
+    <div style={{
+      borderRadius: '0.375rem',
+      border: `1px solid ${isDestroyed ? 'var(--danger)' : 'var(--border)'}`,
+      padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+      opacity: isDestroyed ? 0.6 : 1,
+      backgroundColor: isDestroyed ? 'color-mix(in srgb, var(--danger) 8%, transparent)' : 'transparent',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+        <span style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
+          {seg.name}{instanceNumber != null && ` #${instanceNumber}`}
+          {isDestroyed && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
+          {!isDestroyed && (isBroken || hasTokens) && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
+        </span>
+      </div>
+      {seg.hp ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '0.25rem' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0 }}>HP</span>
+          <HpPips max={seg.hp} marked={markedHp} onToggle={onToggleHpPip} />
+        </div>
+      ) : (
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '0.25rem' }}>Invulnerable</div>
+      )}
+      <TokenCounter count={tokenCount} onChange={onTokenChange} />
+    </div>
+  )
+}
+
 const ColossusSegmentCard = ({
   colossus,
   segment: seg,
-  segmentKey,
-  instanceNumber,
-  markedHp,
-  onToggleHpPip,
-  tokenCount = 0,
-  onTokenChange,
+  slots,
   inst,
   onUpdate,
   onDelete,
@@ -270,8 +301,15 @@ const ColossusSegmentCard = ({
   quickEdit,
   setQuickEdit,
 }) => {
-  const { isDestroyed, isBroken } = getSegmentStatus(seg, markedHp)
-  const hasTokens = tokenCount > 0
+  // Card-level status badge reflects whether ANY instance slot is
+  // destroyed/broken, so the header still surfaces at-a-glance state.
+  const anyDestroyed = (slots || []).some(s => getSegmentStatus(seg, s.markedHp).isDestroyed)
+  const anyBroken = (slots || []).some(s => {
+    const { isDestroyed, isBroken } = getSegmentStatus(seg, s.markedHp)
+    return !isDestroyed && (isBroken || s.tokenCount > 0)
+  })
+  const isDestroyed = anyDestroyed
+  const isBroken = anyBroken
 
   return (
     <ContainerWithTab
@@ -308,7 +346,7 @@ const ColossusSegmentCard = ({
                 </TouchTarget>
               )}
               <span style={{ flex: 1, minWidth: 0, textAlign: 'center', fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {seg.name}{instanceNumber != null && ` #${instanceNumber}`}
+                {seg.name}
               </span>
               <TouchTarget
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
@@ -334,9 +372,9 @@ const ColossusSegmentCard = ({
                 textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem',
               }}>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{seg.name}{instanceNumber != null && ` #${instanceNumber}`}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{seg.name}</span>
                 {isDestroyed && <span style={{ fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
-                {!isDestroyed && (isBroken || hasTokens) && <span style={{ fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
+                {!isDestroyed && isBroken && <span style={{ fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
               </h4>
             </>
           )}
@@ -396,24 +434,22 @@ const ColossusSegmentCard = ({
             )}
           </div>
 
-          {/* HP pips */}
-          <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, paddingTop: CARD_SPACE_V }}>
-            {seg.hp ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0 }}>HP</span>
-                <HpPips max={seg.hp} marked={markedHp} onToggle={onToggleHpPip} />
-              </div>
-            ) : (
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Invulnerable</div>
-            )}
+          {/* Instance slots — one per segment.count, each with its own
+              independent HP pips + token counter (#110) */}
+          <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, paddingTop: CARD_SPACE_V, display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
+            {(slots || []).map((slot) => (
+              <SegmentInstanceSlot
+                key={slot.instanceKey}
+                seg={seg}
+                instanceKey={slot.instanceKey}
+                instanceNumber={slot.instanceNumber}
+                markedHp={slot.markedHp}
+                onToggleHpPip={slot.onToggleHpPip}
+                tokenCount={slot.tokenCount}
+                onTokenChange={slot.onTokenChange}
+              />
+            ))}
           </div>
-
-          {/* Token tracker — "Broken until cleared" mechanic (#97) */}
-          {onTokenChange && (
-            <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, paddingTop: CARD_SPACE_V }}>
-              <TokenCounter count={tokenCount} onChange={onTokenChange} />
-            </div>
-          )}
 
           {/* Framework-shared info (Motives, Experience, Stress) — repeated
               on every segment card so each is self-contained (#109) */}

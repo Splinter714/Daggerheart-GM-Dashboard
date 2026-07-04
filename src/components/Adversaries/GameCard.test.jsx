@@ -49,8 +49,7 @@ describe('GameCard colossus display modes', () => {
         item={colossusItem}
         instances={[colossusInstance]}
         segment={colossusItem.segments[0]}
-        segmentKey="ikeri-head"
-        instanceNumber={1}
+        segmentInstances={[{ instanceKey: 'ikeri-head', instanceNumber: 1 }]}
         onUpdate={onUpdate}
       />
     )
@@ -120,11 +119,11 @@ describe('GameCard colossus token tracking (#97)', () => {
         item={colossusItem}
         instances={[tokenInstance]}
         segment={colossusItem.segments[0]}
-        segmentKey="ikeri-head"
+        segmentInstances={[{ instanceKey: 'ikeri-head', instanceNumber: 1 }]}
         onUpdate={onUpdate}
       />
     )
-    expect(screen.getByText('Broken')).toBeInTheDocument()
+    expect(screen.getAllByText('Broken').length).toBeGreaterThan(0)
     fireEvent.click(screen.getByTitle('Place a token'))
     expect(onUpdate).toHaveBeenCalledWith('adv-1', { segmentTokens: { 'ikeri-head': 2 } })
   })
