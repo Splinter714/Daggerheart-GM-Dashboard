@@ -46,7 +46,7 @@ function serviceWorkerVersionPlugin() {
 export default defineConfig({
   plugins: [react(), serviceWorkerVersionPlugin()],
   root: path.resolve(__dirname, './src'),
-  base: process.env.NODE_ENV === 'production' ? '/Daggerheart/' : '/', // GitHub Pages subdirectory only in production
+  base: process.env.NODE_ENV === 'production' ? '/Daggerheart-GM-Dashboard/' : '/', // GitHub Pages subdirectory only in production
   publicDir: path.resolve(__dirname, './public'), // Point to public directory relative to project root
   define: {
     __APP_VERSION__: JSON.stringify(`${getPackageVersion()} (${getGitCommitHash()})`)
