@@ -135,7 +135,7 @@ const EntityColumns = ({
           type={group.type}
           item={
             group.type === 'adversary'
-              ? { ...group.template, name: group.baseName, hp: 0, stress: 0, isDead: false }
+              ? { ...group.template, name: group.isColossusSegment ? group.template?.baseName : group.baseName, hp: 0, stress: 0, isDead: false }
               : { ...group.instances[0], name: group.instances[0]?.name || group.baseName }
           }
           segment={group.segment} segmentKey={group.segmentKey} mode="expanded" instanceLabelStyle={instanceLabelStyle}

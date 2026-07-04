@@ -156,3 +156,63 @@ describe('EntityColumns colossus add/remove suppression (#96)', () => {
     expect(props.onRemoveInstance).toBeUndefined()
   })
 })
+
+// #108: standalone segment cards (colossus display mode "segments") must show
+// the plain colossus name in their parent-context pill, not the synthetic
+// `baseName::segmentKey` pseudo-group identity used internally for
+// section-grouping (see expandColossusIntoSegmentGroups in useEntityGroups.js).
+describe('EntityColumns colossus segment item name (#108)', () => {
+  const baseProps = {
+    columnWidth: 300,
+    scrollContainerRef: createRef(),
+    onScroll: noop,
+    newCards: new Set(),
+    removingCardSpacer: null,
+    spacerShrinking: false,
+    editingAdversaryId: null,
+    handleSaveCustomAdversary: noop,
+    handleCancelEdit: noop,
+    updateAdversary: noop,
+    updateEnvironment: noop,
+    adversaries: [],
+    handleEditAdversary: noop,
+    createAdversary: noop,
+    createAdversariesBulk: noop,
+    pcCount: 4,
+    smoothScrollTo: noop,
+    deleteAdversary: noop,
+    deleteEnvironment: noop,
+    setRemovingCardSpacer: noop,
+    setSpacerShrinking: noop,
+  }
+
+  it('passes the plain colossus name (not the synthetic ::segmentKey suffix) as item.name', () => {
+    const colossusInstance = { id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true, segmentHp: { 'daktadae-head': 0 } }
+    const colossusTemplate = { baseName: 'Daktadae, the Cleaver', isColossus: true, segments: [{ id: 'daktadae-head', name: 'Head', hp: 5 }] }
+    const segmentGroup = {
+      type: 'adversary',
+      baseName: 'Daktadae, the Cleaver::daktadae-head',
+      template: colossusTemplate,
+      instances: [colossusInstance],
+      groupName: 'colossus: daktadae, the cleaver',
+      isColossusSegment: true,
+      segment: colossusTemplate.segments[0],
+      segmentKey: 'daktadae-head',
+      colossusInstanceId: colossusInstance.id,
+    }
+    const entityGroups = [segmentGroup]
+
+    render(
+      <EntityColumns
+        {...baseProps}
+        entityGroups={entityGroups}
+        browserOpenAtPosition={null}
+        getEntityGroups={() => entityGroups}
+      />
+    )
+
+    const props = GameCard.mock.calls.at(-1)[0]
+    expect(props.item.name).toBe('Daktadae, the Cleaver')
+    expect(props.item.name).not.toContain('::')
+  })
+})
