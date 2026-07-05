@@ -340,17 +340,11 @@ const ColossusSegmentCard = ({
               </TouchTarget>
             </div>
           ) : (
-            <>
-              <TouchTarget
-                onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
-                title="Edit"
-                wrapperStyle={{ position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}
-                style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--text-secondary)', transition: 'all 0.15s ease' }}
-              >
-                <Pencil size={12} />
-              </TouchTarget>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {/* Spacer balances the pencil's width so the name stays centered (#30) */}
+              <div style={{ width: '1.5rem', flexShrink: 0 }} />
               <h4 style={{
-                margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)',
+                margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', flex: 1, minWidth: 0,
                 textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem',
               }}>
@@ -358,7 +352,17 @@ const ColossusSegmentCard = ({
                 {isDestroyed && <span style={{ fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
                 {!isDestroyed && isBroken && <span style={{ fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
               </h4>
-            </>
+              {/* Edit toggle — sits inline right after the name it edits, instead of
+                  floating absolutely in the corner disconnected from the title (#30). */}
+              <TouchTarget
+                onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
+                title="Edit"
+                wrapperStyle={{ flexShrink: 0 }}
+                style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--text-secondary)', transition: 'all 0.15s ease' }}
+              >
+                <Pencil size={12} />
+              </TouchTarget>
+            </div>
           )}
         </div>
 

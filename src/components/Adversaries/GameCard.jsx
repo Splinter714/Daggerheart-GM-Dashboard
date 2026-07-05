@@ -456,18 +456,46 @@ const GameCard = ({
               />
               {(onRemoveInstance || onAddInstance) && (
                 <>
-                  <TouchTarget
-                    onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
-                    title="Remove one"
-                    wrapperStyle={{ flexShrink: 0 }}
-                    style={{
-                      width: '1.5rem', height: '1.5rem',
-                      background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
-                      color: 'white',
-                    }}
-                  >
-                    <Minus size={12} />
-                  </TouchTarget>
+                  {/* At 1 instance, minus has nothing left to decrement to — show delete-with-
+                      confirm in its slot instead of a separate, redundant delete button (#30). */}
+                  {instances.length <= 1 && onDelete ? (
+                    <TouchTarget
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (deleteConfirm) {
+                          onDelete()
+                        } else {
+                          setDeleteConfirm(true)
+                          setTimeout(() => setDeleteConfirm(false), 3000)
+                        }
+                      }}
+                      title={deleteConfirm ? 'Click again to confirm' : 'Remove'}
+                      wrapperStyle={{ flexShrink: 0 }}
+                      style={{
+                        width: '1.5rem', height: '1.5rem',
+                        background: deleteConfirm ? 'var(--danger)' : 'var(--gray-700)',
+                        border: deleteConfirm ? 'none' : '1px solid var(--gray-600)',
+                        borderRadius: '0.25rem',
+                        color: 'white',
+                        transition: 'background 0.15s, color 0.15s',
+                      }}
+                    >
+                      <X size={12} />
+                    </TouchTarget>
+                  ) : (
+                    <TouchTarget
+                      onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
+                      title="Remove one"
+                      wrapperStyle={{ flexShrink: 0 }}
+                      style={{
+                        width: '1.5rem', height: '1.5rem',
+                        background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
+                        color: 'white',
+                      }}
+                    >
+                      <Minus size={12} />
+                    </TouchTarget>
+                  )}
                   <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'white', flexShrink: 0, display: 'inline-block', minWidth: '0.9rem', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
                     {instances.length}
                   </span>
@@ -485,7 +513,9 @@ const GameCard = ({
                   </TouchTarget>
                 </>
               )}
-              {onDelete && (
+              {/* Standalone delete — only when there's no instance-count row to fold it into
+                  (e.g. colossus/environment single-entity cards), or when count > 1 (#30). */}
+              {onDelete && (!(onRemoveInstance || onAddInstance) || instances.length > 1) && (
                 <TouchTarget
                   onClick={(e) => {
                     e.stopPropagation()
@@ -524,13 +554,38 @@ const GameCard = ({
               </TouchTarget>
             </div>
           ) : (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: isDead ? 1 : 'auto' }}>
+              {/* Spacer balances the pencil's width so the name/count stays centered (#30) */}
+              <div style={{ width: '1.5rem', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
+                <h4 style={{
+                  ...styles.rowTitle,
+                  color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
+                  margin: 0,
+                  fontSize: '1rem',
+                  height: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.25rem',
+                  minWidth: 0,
+                }}>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+                  </span>
+                  {(onAddInstance || onRemoveInstance) && (
+                    <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-secondary)', flexShrink: 0 }}>
+                      ({instances.length})
+                    </span>
+                  )}
+                </h4>
+              </div>
+              {/* Edit toggle — sits inline right after the name/count it edits, instead of
+                  floating absolutely in the corner disconnected from the title row (#30). */}
               <TouchTarget
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
                 title="Edit"
-                wrapperStyle={{
-                  position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                }}
+                wrapperStyle={{ flexShrink: 0 }}
                 style={{
                   width: '1.5rem', height: '1.5rem',
                   background: 'transparent', borderRadius: '0.25rem',
@@ -540,34 +595,7 @@ const GameCard = ({
               >
                 <Pencil size={12} />
               </TouchTarget>
-              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: isDead ? 1 : 'auto', padding: 0, gap: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                  <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
-                    <h4 style={{
-                      ...styles.rowTitle,
-                      color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
-                      margin: 0,
-                      fontSize: '1rem',
-                      height: '1.5rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.25rem',
-                      minWidth: 0,
-                    }}>
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
-                      </span>
-                      {(onAddInstance || onRemoveInstance) && (
-                        <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-secondary)', flexShrink: 0 }}>
-                          ({instances.length})
-                        </span>
-                      )}
-                    </h4>
-                  </div>
-                </div>
-              </div>
-            </>
+            </div>
           )}
         </div>
 
@@ -835,23 +863,27 @@ const GameCard = ({
                 </TouchTarget>
               </div>
             ) : (
-              <>
-                <TouchTarget
-                  onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
-                  title="Edit"
-                  wrapperStyle={{ position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}
-                  style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--text-secondary)', transition: 'all 0.15s ease' }}
-                >
-                  <Pencil size={12} />
-                </TouchTarget>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {/* Spacer balances the pencil's width so the name stays centered (#30) */}
+                <div style={{ width: '1.5rem', flexShrink: 0 }} />
                 <h4 style={{
-                  ...styles.rowTitle, margin: 0, fontSize: '1rem',
+                  ...styles.rowTitle, margin: 0, fontSize: '1rem', flex: 1, minWidth: 0,
                   textAlign: 'center',
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>
                   {env.name}
                 </h4>
-              </>
+                {/* Edit toggle — sits inline right after the name it edits, instead of
+                    floating absolutely in the corner disconnected from the title (#30). */}
+                <TouchTarget
+                  onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
+                  title="Edit"
+                  wrapperStyle={{ flexShrink: 0 }}
+                  style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--text-secondary)', transition: 'all 0.15s ease' }}
+                >
+                  <Pencil size={12} />
+                </TouchTarget>
+              </div>
             )}
           </div>
 
@@ -982,22 +1014,26 @@ const GameCard = ({
                 </TouchTarget>
               </div>
             ) : (
-              <>
-                <TouchTarget
-                  onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
-                  title="Edit"
-                  wrapperStyle={{ position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}
-                  style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--text-secondary)', transition: 'all 0.15s ease' }}
-                >
-                  <Pencil size={12} />
-                </TouchTarget>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {/* Spacer balances the pencil's width so the name stays centered (#30) */}
+                <div style={{ width: '1.5rem', flexShrink: 0 }} />
                 <h4 style={{
-                  ...styles.rowTitle, margin: 0, fontSize: '1rem',
+                  ...styles.rowTitle, margin: 0, fontSize: '1rem', flex: 1, minWidth: 0,
                   textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>
                   {colossus.name}
                 </h4>
-              </>
+                {/* Edit toggle — sits inline right after the name it edits, instead of
+                    floating absolutely in the corner disconnected from the title (#30). */}
+                <TouchTarget
+                  onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
+                  title="Edit"
+                  wrapperStyle={{ flexShrink: 0 }}
+                  style={{ width: '1.5rem', height: '1.5rem', background: 'transparent', borderRadius: '0.25rem', color: 'var(--text-secondary)', transition: 'all 0.15s ease' }}
+                >
+                  <Pencil size={12} />
+                </TouchTarget>
+              </div>
             )}
           </div>
 

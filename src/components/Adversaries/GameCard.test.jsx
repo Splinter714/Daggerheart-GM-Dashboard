@@ -337,3 +337,60 @@ describe('GameCard vertical scroll-to-reveal on new instance (#50)', () => {
     expect(call.top).toBeGreaterThan(0)
   })
 })
+
+describe('GameCard quick-edit pencil placement (#30)', () => {
+  const adversaryItem = { id: 'grp-1', name: 'Goblin', hpMax: 10, stressMax: 3 }
+  const instances = [{ id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, hpMax: 10, stressMax: 3 }]
+
+  it('renders the Edit toggle inline with the name/count row, not as a free-floating absolute overlay', () => {
+    const { container } = render(
+      <GameCard type="adversary" item={adversaryItem} instances={instances} onAddInstance={vi.fn()} onRemoveInstance={vi.fn()} />
+    )
+    const editBtn = screen.getByTitle('Edit')
+    // The old placement pinned the button with `position: absolute`; the
+    // fixed version sits in normal flex flow next to the title instead.
+    expect(editBtn.closest('[style*="position: absolute"]')).toBeNull()
+  })
+})
+
+describe('GameCard quick-edit delete/minus swap at 1 instance (#30)', () => {
+  const adversaryItem = { id: 'grp-1', name: 'Goblin', hpMax: 10, stressMax: 3 }
+  const oneInstance = [{ id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, hpMax: 10, stressMax: 3 }]
+  const twoInstances = [
+    ...oneInstance,
+    { id: 'adv-2', duplicateNumber: 2, hp: 0, stress: 0, hpMax: 10, stressMax: 3 },
+  ]
+
+  it('at 1 instance: shows delete-with-confirm in the minus slot instead of both buttons separately', () => {
+    const onDelete = vi.fn()
+    render(
+      <GameCard
+        type="adversary" item={adversaryItem} instances={oneInstance}
+        onAddInstance={vi.fn()} onRemoveInstance={vi.fn()} onDelete={onDelete}
+      />
+    )
+    fireEvent.click(screen.getByTitle('Edit'))
+
+    expect(screen.queryByTitle('Remove one')).toBeNull()
+    expect(screen.queryByTitle('Remove all')).toBeNull()
+    expect(screen.getByTitle('Remove')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTitle('Remove'))
+    fireEvent.click(screen.getByTitle('Click again to confirm'))
+    expect(onDelete).toHaveBeenCalledTimes(1)
+  })
+
+  it('at 2+ instances: shows the normal minus button plus a separate delete-all button', () => {
+    render(
+      <GameCard
+        type="adversary" item={adversaryItem} instances={twoInstances}
+        onAddInstance={vi.fn()} onRemoveInstance={vi.fn()} onDelete={vi.fn()}
+      />
+    )
+    fireEvent.click(screen.getByTitle('Edit'))
+
+    expect(screen.getByTitle('Remove one')).toBeInTheDocument()
+    expect(screen.getByTitle('Remove all')).toBeInTheDocument()
+    expect(screen.queryByTitle('Remove')).toBeNull()
+  })
+})
