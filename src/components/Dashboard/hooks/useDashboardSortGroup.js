@@ -20,12 +20,12 @@ const DEFAULTS = {
 }
 
 // Default sort direction when a field is first selected. Fields where higher
-// values are more relevant/dangerous (HP, difficulty, attack, threshold)
-// default to descending (high-to-low); alphabetical/ordinal fields default
-// to ascending (A-Z / low tier-index first).
+// values are more relevant/dangerous (HP, difficulty, attack, threshold, tier)
+// default to descending (high-to-low); alphabetical fields default to
+// ascending (A-Z).
 const DEFAULT_SORT_DIR = {
   name: 'asc',
-  tier: 'asc',
+  tier: 'desc',
   type: 'asc',
   hp: 'desc',
   difficulty: 'desc',

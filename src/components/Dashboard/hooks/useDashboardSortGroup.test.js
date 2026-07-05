@@ -9,11 +9,11 @@ describe('defaultDirFor', () => {
     expect(defaultDirFor('difficulty')).toBe('desc')
     expect(defaultDirFor('atk')).toBe('desc')
     expect(defaultDirFor('threshold')).toBe('desc')
+    expect(defaultDirFor('tier')).toBe('desc')
   })
 
-  it('defaults alphabetical/ordinal fields to ascending', () => {
+  it('defaults alphabetical fields to ascending', () => {
     expect(defaultDirFor('name')).toBe('asc')
-    expect(defaultDirFor('tier')).toBe('asc')
     expect(defaultDirFor('type')).toBe('asc')
   })
 
@@ -33,6 +33,14 @@ describe('useDashboardSortGroup', () => {
     act(() => result.current.setSortBy('name'))
     expect(result.current.sortBy).toBe('name')
     expect(result.current.sortDir).toBe('asc')
+  })
+
+  it('selecting tier starts descending (#114), matching other numeric fields', () => {
+    const { result } = renderHook(() => useDashboardSortGroup())
+
+    act(() => result.current.setSortBy('tier'))
+    expect(result.current.sortBy).toBe('tier')
+    expect(result.current.sortDir).toBe('desc')
   })
 
   it('clicking the same field again toggles direction', () => {
