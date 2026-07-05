@@ -492,7 +492,7 @@ const CustomAdversaryCreator = forwardRef(({
       <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '0.55rem 0.6rem', borderTop: '1px solid var(--border)', gap: '0.35rem' }}>
         <button
           onClick={() => setActiveTab(v => v === 'build' ? 'preview' : 'build')}
-          style={{ ...secondaryBtnStyle, background: activeTab === 'preview' ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent', border: `1px solid ${activeTab === 'preview' ? 'var(--purple)' : 'var(--border)'}`, color: activeTab === 'preview' ? 'var(--purple)' : 'var(--text-secondary)' }}
+          style={{ ...secondaryBtnStyle, minWidth: '5.6rem' /* #67: fits 'Preview' so toggling to 'Form' doesn't shrink and shift the row */, background: activeTab === 'preview' ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent', border: `1px solid ${activeTab === 'preview' ? 'var(--purple)' : 'var(--border)'}`, color: activeTab === 'preview' ? 'var(--purple)' : 'var(--text-secondary)' }}
         ><Eye size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>{activeTab === 'preview' ? 'Form' : 'Preview'}</span></button>
 
         {onCancelEdit && (

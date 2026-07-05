@@ -103,6 +103,23 @@ describe('CustomAdversaryCreator — mobile action bar hierarchy (#67)', () => {
 
     expect(screen.queryByText('New')).not.toBeInTheDocument()
   })
+
+  // #67 follow-up: the Eye toggle's label swaps 'Preview' <-> 'Form' as the
+  // active tab changes. Since the mobile action bar sizes buttons to content
+  // width, that swap used to change the button's width and shift the rest
+  // of the row. A fixed min-width keeps the button's footprint stable.
+  it('gives the Preview/Form toggle button a stable min-width across both tab states', () => {
+    render(<CustomAdversaryCreator onSave={vi.fn()} onCancelEdit={vi.fn()} />)
+
+    const previewToggleBtn = screen.getByText('Preview').closest('button')
+    expect(previewToggleBtn.style.minWidth).toBeTruthy()
+    const minWidthWhenShowingPreview = previewToggleBtn.style.minWidth
+
+    fireEvent.click(previewToggleBtn)
+
+    const formToggleBtn = screen.getByText('Form').closest('button')
+    expect(formToggleBtn.style.minWidth).toBe(minWidthWhenShowingPreview)
+  })
 })
 
 describe('CustomAdversaryCreator — font-size review (#123)', () => {
