@@ -57,3 +57,41 @@ describe('CustomAdversaryCreator — live preview pill (#56)', () => {
     expect(screen.getByTestId('preview-rail-border')).toBeInTheDocument()
   })
 })
+
+describe('CustomAdversaryCreator — mobile action bar hierarchy (#67)', () => {
+  it('gives Save more flex weight than the secondary actions so it reads as the dominant button', () => {
+    render(<CustomAdversaryCreator onSave={vi.fn()} onCancelEdit={vi.fn()} onSaveAndAdd={vi.fn()} onAddToEncounter={vi.fn()} />)
+
+    const saveBtn = screen.getByText('Save').closest('button')
+    const cancelBtn = screen.getByText('Cancel').closest('button')
+    const previewBtn = screen.getByText('Preview').closest('button')
+
+    const saveFlex = parseFloat(saveBtn.style.flex)
+    const cancelFlex = parseFloat(cancelBtn.style.flex)
+    const previewFlex = parseFloat(previewBtn.style.flex)
+
+    expect(saveFlex).toBeGreaterThan(cancelFlex)
+    expect(saveFlex).toBeGreaterThan(previewFlex)
+    expect(saveBtn.style.fontWeight).toBe('700')
+  })
+
+  it('shows a Save As New action on mobile when editing a homebrew adversary, matching desktop parity', () => {
+    const editingAdversary = { id: 'adv-1', name: 'Test Adversary', baseName: 'Test Adversary', type: 'Standard', tier: 1 }
+    render(
+      <CustomAdversaryCreator
+        onSave={vi.fn()}
+        onCancelEdit={vi.fn()}
+        editingAdversary={editingAdversary}
+        isStockAdversary={false}
+      />
+    )
+
+    expect(screen.getByText('New')).toBeInTheDocument()
+  })
+
+  it('does not show Save As New when creating a brand-new adversary (no editingAdversary)', () => {
+    render(<CustomAdversaryCreator onSave={vi.fn()} onCancelEdit={vi.fn()} />)
+
+    expect(screen.queryByText('New')).not.toBeInTheDocument()
+  })
+})

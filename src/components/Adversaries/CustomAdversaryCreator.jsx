@@ -497,45 +497,44 @@ const CustomAdversaryCreator = forwardRef(({
       flexShrink: 0, whiteSpace: 'nowrap',
     }
 
-    // Compact icon + short-label button so all four actions fit in one row
-    // without clipping on narrow viewports.
+    // Compact icon + short-label buttons. Save gets extra flex weight + bold
+    // so it reads as dominant; secondary actions (Preview/Cancel/Save As New)
+    // share equal, smaller weight — all still fit in one row without
+    // clipping on narrow viewports (#67).
     const mobileBtnBase = {
-      ...btnBase, padding: '0.3rem 0.5rem', minWidth: 0, flex: '1 1 0', overflow: 'hidden',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
+      ...btnBase, padding: '0.4rem 0.4rem', minWidth: 0, flex: '1 1 0', overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', fontSize: '0.78rem',
     }
     const mobileBtnLabel = { overflow: 'hidden', textOverflow: 'ellipsis' }
+    const secondaryBtnStyle = mobileBtnBase
+    const saveBtnStyle = { ...mobileBtnBase, flex: '1.6 1 0', padding: '0.4rem 0.5rem' }
+    const secondaryVisual = { background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)' }
 
     const MobileActionBar = () => (
-      <div style={{
-        flex: '0 0 auto', display: 'flex', alignItems: 'center',
-        padding: '0.5rem 0.75rem', borderTop: '1px solid var(--border)', gap: '0.4rem',
-      }}>
+      <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '0.55rem 0.6rem', borderTop: '1px solid var(--border)', gap: '0.35rem' }}>
         <button
           onClick={() => setActiveTab(v => v === 'build' ? 'preview' : 'build')}
-          style={{
-            ...mobileBtnBase,
-            background: activeTab === 'preview' ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent',
-            border: `1px solid ${activeTab === 'preview' ? 'var(--purple)' : 'var(--border)'}`,
-            color: activeTab === 'preview' ? 'var(--purple)' : 'var(--text-secondary)',
-          }}
+          style={{ ...secondaryBtnStyle, background: activeTab === 'preview' ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent', border: `1px solid ${activeTab === 'preview' ? 'var(--purple)' : 'var(--border)'}`, color: activeTab === 'preview' ? 'var(--purple)' : 'var(--text-secondary)' }}
         ><Eye size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>{activeTab === 'preview' ? 'Form' : 'Preview'}</span></button>
 
         {onCancelEdit && (
-          <button onClick={onCancelEdit} style={{ ...mobileBtnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+          <button onClick={onCancelEdit} style={{ ...secondaryBtnStyle, ...secondaryVisual }}>
             <X size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>Cancel</span>
           </button>
         )}
+        {/* Save As New — only when editing a homebrew adversary, mirrors desktop ActionBar (#67) */}
+        {editingAdversary && !isStockAdversary && (
+          <button onClick={handleSaveAs} disabled={!canAct} style={{ ...secondaryBtnStyle, ...secondaryVisual, ...(canAct ? {} : disabledStyle) }}>
+            <Plus size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>New</span></button>
+        )}
         {onSaveAndAdd && (
-          <button
-            onClick={handleSaveAndAdd}
-            disabled={!canAct}
-            style={{ ...mobileBtnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)', ...(canAct ? {} : disabledStyle) }}
-          ><Plus size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>{isSaving ? 'Saving…' : 'Add'}</span></button>
+          <button onClick={handleSaveAndAdd} disabled={!canAct} style={{ ...secondaryBtnStyle, ...secondaryVisual, ...(canAct ? {} : disabledStyle) }}>
+            <Plus size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>{isSaving ? 'Saving…' : 'Add'}</span></button>
         )}
         <button
           onClick={handleSave}
           disabled={!canAct}
-          style={{ ...mobileBtnBase, background: canAct ? 'var(--purple)' : 'var(--gray-600)', border: 'none', color: 'white', fontWeight: '600', ...(canAct ? {} : disabledStyle) }}
+          style={{ ...saveBtnStyle, background: canAct ? 'var(--purple)' : 'var(--gray-600)', border: 'none', color: 'white', fontWeight: '700', ...(canAct ? {} : disabledStyle) }}
         ><Check size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>{isSaving ? 'Saving…' : 'Save'}</span></button>
       </div>
     )
