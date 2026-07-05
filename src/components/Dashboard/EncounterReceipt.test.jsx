@@ -17,13 +17,13 @@ describe('EncounterReceipt', () => {
   const isOwnText = (content, el) =>
     el?.textContent === content && Array.from(el.children).every(child => child.textContent !== content)
 
-  it('formats minion rows as "{group count} {name} ({instances per group}) = {total instances}" (#87)', () => {
+  it('formats minion rows as "{group count} {name} ({instances per group})" (#87)', () => {
     const encounterItems = [
       { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Giant Rat' }, quantity: 2, instanceCount: 6 },
     ]
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
 
-    expect(screen.getByText((_, el) => isOwnText('2 Giant Rat (3) = 6', el))).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('2 Giant Rat (3)', el))).toBeTruthy()
   })
 
   it('keeps each minion group row independently formatted when multiple groups of different types exist (#87)', () => {
@@ -33,8 +33,8 @@ describe('EncounterReceipt', () => {
     ]
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
 
-    expect(screen.getByText((_, el) => isOwnText('1 Sniper (4) = 4', el))).toBeTruthy()
-    expect(screen.getByText((_, el) => isOwnText('2 Grunt (4) = 8', el))).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('1 Sniper (4)', el))).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('2 Grunt (4)', el))).toBeTruthy()
   })
 
   it('formats a single minion group with 1 instance per group correctly', () => {
@@ -43,7 +43,7 @@ describe('EncounterReceipt', () => {
     ]
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
 
-    expect(screen.getByText((_, el) => isOwnText('1 Sniper (1) = 1', el))).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('1 Sniper (1)', el))).toBeTruthy()
   })
 
   it('renders colossi as separate rows, marks them not BP-costed, and hides the stepper controls (#99)', () => {

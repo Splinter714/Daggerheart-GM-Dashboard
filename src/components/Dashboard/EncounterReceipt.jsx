@@ -263,9 +263,9 @@ const EncounterReceipt = ({
               </div>
               {items.map((encounterItem) => {
                 const isZero = encounterItem.quantity === 0
-                // Minion rows use the "{group count} {name} ({instances per group}) = {total instances}"
+                // Minion rows use the "{group count} {name} ({instances per group})"
                 // format, e.g. 2 groups of Giant Rat with 3 instances each renders as
-                // "2 Giant Rat (3) = 6" (#87).
+                // "2 Giant Rat (3)" (#87).
                 const totalInstances = isMinion ? (encounterItem.instanceCount ?? encounterItem.quantity) : null
                 const perGroupInstances = isMinion && encounterItem.quantity > 0
                   ? Math.round(totalInstances / encounterItem.quantity)
@@ -284,7 +284,6 @@ const EncounterReceipt = ({
                       <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {encounterItem.quantity} {encounterItem.item.name || encounterItem.item.baseName}
                         {perGroupInstances != null && ` (${perGroupInstances})`}
-                        {' = '}{totalInstances}
                       </span>
                     ) : (
                       <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
