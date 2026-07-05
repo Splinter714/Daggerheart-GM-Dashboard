@@ -117,8 +117,19 @@ const SegmentCard = ({ segment, index, onChange, onRemove, onMove, canMoveUp, ca
         <div style={sectionStyle}>
           <label style={labelStyle}>Count</label>
           <input
-            type="number" min={1} value={segment.count ?? 1}
-            onChange={e => patch({ count: Math.max(1, parseInt(e.target.value, 10) || 1) })}
+            type="number" min={1}
+            value={segment.count === '' ? '' : (segment.count ?? 1)}
+            onChange={e => {
+              const raw = e.target.value
+              if (raw === '') { patch({ count: '' }); return }
+              const parsed = parseInt(raw, 10)
+              if (Number.isNaN(parsed)) return
+              patch({ count: parsed })
+            }}
+            onBlur={e => {
+              if (e.target.value === '') { patch({ count: 1 }); return }
+              patch({ count: Math.max(1, parseInt(e.target.value, 10) || 1) })
+            }}
             style={{ ...inputStyle, minHeight: '40px' }}
           />
         </div>
