@@ -104,3 +104,11 @@ describe('CustomAdversaryCreator — mobile action bar hierarchy (#67)', () => {
     expect(screen.queryByText('New')).not.toBeInTheDocument()
   })
 })
+
+describe('CustomAdversaryCreator — font-size review (#123)', () => {
+  it('applies a fixed-size class so the creator form can scope placeholder font-size below input value size', () => {
+    const { container } = render(<CustomAdversaryCreator onSave={vi.fn()} />)
+
+    expect(container.querySelector('.adversary-creator')).toBeInTheDocument()
+  })
+})

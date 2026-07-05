@@ -15,11 +15,14 @@ export const inputStyle = {
 }
 
 export const labelStyle = {
-  fontSize: '0.75rem',
+  // #123: reduced from 0.75rem/0.5px letter-spacing — narrow two-column
+  // stat fields (e.g. "ATTACK MODIFIER", "MAJOR THRESHOLD") were wrapping
+  // onto multiple lines too readily at the old size.
+  fontSize: '0.68rem',
   fontWeight: '600',
   color: 'var(--text-secondary)',
   textTransform: 'uppercase',
-  letterSpacing: '0.5px',
+  letterSpacing: '0.3px',
   marginBottom: '0.3rem',
   display: 'block',
 }

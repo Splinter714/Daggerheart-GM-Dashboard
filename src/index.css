@@ -872,4 +872,13 @@ input[type="number"] {
   -ms-user-select: none;
 }
 
+/* Adversary/Environment custom creator: placeholder text (#123) — the
+   value font-size (1rem) made placeholders like "Name — or search to
+   import from existing" and "e.g. Greataxe" look oversized relative to
+   real entered values. */
+.adversary-creator input::placeholder,
+.adversary-creator textarea::placeholder {
+  font-size: 0.85em;
+}
+
 /* Specialized styles */

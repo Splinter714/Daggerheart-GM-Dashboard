@@ -789,7 +789,7 @@ const CustomAdversaryCreator = forwardRef(({
 
     if (isNarrow) {
       return (
-        <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
+        <div ref={containerRef} className="adversary-creator" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
           {contentTypeTabs}
           {activeTab === 'build'
             ? formScrollContent
@@ -802,7 +802,7 @@ const CustomAdversaryCreator = forwardRef(({
 
     // Wide: preview sits unboxed, form keeps its card panel
     return (
-      <div ref={containerRef} style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%', overflow: 'hidden', gap: '12px' }}>
+      <div ref={containerRef} className="adversary-creator" style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%', overflow: 'hidden', gap: '12px' }}>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {previewContent}
         </div>
