@@ -44,7 +44,7 @@ describe('EncounterReceipt', () => {
     expect(screen.getAllByText('Ikeri, Injuries Untold')).toHaveLength(2)
   })
 
-  it('tags auto-detected adjustments distinctly from manual toggles (#78)', () => {
+  it('tags auto-detected adjustments distinctly from manual toggles, with the auto badge on the left (#78)', () => {
     const encounterItems = [
       { type: 'adversary', item: { id: 's1', type: 'Solo', name: 'Solo A' }, quantity: 2 },
     ]
@@ -52,7 +52,24 @@ describe('EncounterReceipt', () => {
 
     // "2+ Solos" auto-adjustment is active and carries the "auto" tag.
     expect(screen.getByText('2+ Solos')).toBeTruthy()
-    expect(screen.getAllByText('auto').length).toBeGreaterThan(0)
+    const autoTags = screen.getAllByText('auto')
+    expect(autoTags.length).toBeGreaterThan(0)
+
+    // The "auto" badge sits to the left of its row label (not the fill-circle indicator).
+    const label = screen.getByText('2+ Solos')
+    const row = label.closest('div')
+    const autoTagInRow = autoTags.find(tag => row.contains(tag))
+    expect(autoTagInRow).toBeTruthy()
+    const rowChildren = Array.from(row.children)
+    expect(rowChildren.indexOf(autoTagInRow)).toBeLessThan(rowChildren.indexOf(label))
+  })
+
+  it('marks "No Major Threats" active even when the board is empty (#78)', () => {
+    render(<EncounterReceipt {...baseProps} encounterItems={[]} />)
+
+    const label = screen.getByText('No Major Threats')
+    // Active rows render the label in primary (not secondary/dimmed) text color.
+    expect(label.style.color).toBe('var(--text-primary)')
   })
 
   it('makes Remaining the dominant footer figure, with Budget and Used as smaller supporting lines (#78)', () => {

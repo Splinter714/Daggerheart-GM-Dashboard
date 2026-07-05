@@ -136,19 +136,6 @@ const AppCheckbox = ({ checked, onChange }) => (
   </div>
 )
 
-// Read-only auto adjustment indicator (circle = auto, square = manual)
-const AutoIndicator = ({ active }) => (
-  <div style={{
-    width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
-    border: `2px solid ${active ? 'var(--purple)' : 'var(--border)'}`,
-    backgroundColor: active ? 'var(--purple)' : 'transparent',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    transition: 'background 0.1s, border-color 0.1s',
-  }}>
-    {active && <Check size={9} strokeWidth={3} color="white" />}
-  </div>
-)
-
 const formatModifier = (value) => value > 0 ? `+${value} BP` : `${value} BP`
 
 // Small badge marking a row as auto-detected/read-only, distinct from the
@@ -197,7 +184,9 @@ const EncounterReceipt = ({
   const hasMajorThreats = adversaryItems.some(i =>
     ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(i.item.type) && i.quantity > 0
   )
-  const noMajorThreats = adversaryItems.length > 0 && !hasMajorThreats
+  // Active whenever there are no major threats present — including an empty board,
+  // not just a board with only non-major adversaries (#78).
+  const noMajorThreats = !hasMajorThreats
 
   const currentSortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label || 'Name'
   const baseBP = (3 * pcCount) + 2
@@ -332,11 +321,10 @@ const EncounterReceipt = ({
 
           {/* Auto adjustment: 2+ Solos */}
           <div style={autoRowStyle}>
-            <AutoIndicator active={twoOrMoreSolos} />
+            <AutoTag />
             <span style={{ flex: 1, fontSize: '0.85rem', color: twoOrMoreSolos ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
               2+ Solos
             </span>
-            <AutoTag />
             <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: twoOrMoreSolos ? 'var(--danger)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
               {twoOrMoreSolos ? formatModifier(BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos) : '—'}
             </span>
@@ -344,11 +332,10 @@ const EncounterReceipt = ({
 
           {/* Auto adjustment: no major threats */}
           <div style={autoRowStyle}>
-            <AutoIndicator active={noMajorThreats} />
+            <AutoTag />
             <span style={{ flex: 1, fontSize: '0.85rem', color: noMajorThreats ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
               No Major Threats
             </span>
-            <AutoTag />
             <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: noMajorThreats ? 'var(--success)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
               {noMajorThreats ? formatModifier(BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos) : '—'}
             </span>
