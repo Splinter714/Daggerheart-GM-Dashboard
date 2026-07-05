@@ -201,4 +201,21 @@ describe('ColossusSegmentCard', () => {
     const thresholdsPill = thresholdsLabel.parentElement
     expect(thresholdsPill.getAttribute('style')).toContain('flex: 1 1 0%')
   })
+
+  // #109 round 3: when a segment has no attack, the empty ATK/weapon row
+  // wrapper must not render at all — otherwise its own paddingTop stacks
+  // with the DIFF/Thresholds row's paddingTop, doubling the visual gap
+  // above DIFF/Thresholds compared to when an attack row IS present.
+  it('does not render the ATK/weapon row wrapper when the segment has no attack (#109)', () => {
+    const noAttackSegment = { ...segment, atk: null, weapon: null, range: null, damage: null }
+    const { container } = render(<ColossusSegmentCard {...baseProps} segment={noAttackSegment} />)
+    // The DIFF badge should be the first paddingTop-bearing row in the body.
+    const diffBadge = screen.getByText('16')
+    const rowWithPaddingTop = diffBadge.closest('[style*="padding-top"]')
+    expect(rowWithPaddingTop).toBeTruthy()
+    // No sibling row above it should also carry the CARD_SPACE_V paddingTop
+    // meant for the ATK row — i.e. DIFF's row is the first such element.
+    const allPaddedRows = Array.from(container.querySelectorAll('[style*="padding-top"]'))
+    expect(allPaddedRows[0]).toBe(rowWithPaddingTop)
+  })
 })

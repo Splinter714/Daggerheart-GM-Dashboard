@@ -372,34 +372,39 @@ const ColossusSegmentCard = ({
               it's redundant with the card's own header and the "COLOSSUS: <name>"
               group header shown above the whole set of segment cards. */}
 
-          {/* Row 1: Attack Modifier | Standard Attack (#109) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, paddingTop: CARD_SPACE_V, paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, flexWrap: 'wrap' }}>
-            {seg.atk != null && (
-              <MergedStatBadge shape="diamond" label="ATK" value={seg.atk >= 0 ? `+${seg.atk}` : seg.atk} />
-            )}
-            {seg.weapon && (
-              <div style={{
-                display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center',
-                gap: '0.35rem', fontSize: '0.75rem', fontWeight: 400, lineHeight: 1.3,
-                backgroundColor: 'black', border: '1px solid var(--text-secondary)', borderRadius: '0.25rem',
-                minHeight: '1.375rem', padding: '0.2rem 0.4rem', flex: '1 1 160px', minWidth: 0,
-              }}>
-                <span style={{ color: 'white', overflowWrap: 'normal', textAlign: 'center' }}>{seg.weapon}</span>
-                {seg.range && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', whiteSpace: 'nowrap' }}>
-                    <span style={{ display: 'inline-block', width: '1px', height: '1em', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
-                    <span style={{ color: 'white' }}>{highlightCardText(seg.range)}</span>
-                  </span>
-                )}
-                {seg.damage && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', whiteSpace: 'nowrap' }}>
-                    <span style={{ display: 'inline-block', width: '1px', height: '1em', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
-                    <span style={{ color: 'white' }}>{highlightCardText(seg.damage)}</span>
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Row 1: Attack Modifier | Standard Attack (#109). Only rendered when
+              the segment actually has an attack — otherwise this div would
+              still contribute its own paddingTop even while empty, doubling
+              up with Row 2's paddingTop below it (#109 round 3). */}
+          {(seg.atk != null || seg.weapon) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, paddingTop: CARD_SPACE_V, paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, flexWrap: 'wrap' }}>
+              {seg.atk != null && (
+                <MergedStatBadge shape="diamond" label="ATK" value={seg.atk >= 0 ? `+${seg.atk}` : seg.atk} />
+              )}
+              {seg.weapon && (
+                <div style={{
+                  display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center',
+                  gap: '0.35rem', fontSize: '0.75rem', fontWeight: 400, lineHeight: 1.3,
+                  backgroundColor: 'black', border: '1px solid var(--text-secondary)', borderRadius: '0.25rem',
+                  minHeight: '1.375rem', padding: '0.2rem 0.4rem', flex: '1 1 160px', minWidth: 0,
+                }}>
+                  <span style={{ color: 'white', overflowWrap: 'normal', textAlign: 'center' }}>{seg.weapon}</span>
+                  {seg.range && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', whiteSpace: 'nowrap' }}>
+                      <span style={{ display: 'inline-block', width: '1px', height: '1em', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
+                      <span style={{ color: 'white' }}>{highlightCardText(seg.range)}</span>
+                    </span>
+                  )}
+                  {seg.damage && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', whiteSpace: 'nowrap' }}>
+                      <span style={{ display: 'inline-block', width: '1px', height: '1em', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
+                      <span style={{ color: 'white' }}>{highlightCardText(seg.damage)}</span>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Row 2: Difficulty | Thresholds (#109) — matches the regular
               adversary card's DIFF+ThresholdPill row exactly (StatusSection.jsx) */}
