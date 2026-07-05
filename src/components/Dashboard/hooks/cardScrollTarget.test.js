@@ -64,20 +64,20 @@ describe('getCardScrollTarget', () => {
     expect(target).toBeLessThan(1200)
   })
 
-  // #50: Jackson reported the horizontal auto-scroll landing at "kinda the
-  // wrong spot" for a card hidden past the right edge, so the browser's own
-  // scroll-snap then corrected it — a visible lurch. The container's
-  // scroll-padding-left equals DASHBOARD_GAP (see DashboardView.css), so a
-  // valid snap point is any `cardContentLeft - DASHBOARD_GAP`. The old
-  // "align trailing edge to viewport's right edge" math for the
-  // hidden-on-the-right case did not generally land on one of those points;
-  // this asserts the target now always aligns the card's own leading edge
-  // (a real snap point) instead, whichever direction it's hidden in.
-  it('lands exactly on the card leading-edge snap point when hidden past the right edge (no post-hoc snap correction)', () => {
+  // #121: Jackson felt landing a hidden-right reveal at the card's leading
+  // (left) edge — with a wall of newly-revealed cards trailing off to its
+  // right — felt less natural than seeing the card arrive at the rightmost
+  // visible position. The container's scroll-padding-right equals
+  // DASHBOARD_GAP (see DashboardView.css), so aligning the card's trailing
+  // edge to `effectiveWidth - DASHBOARD_GAP` lands on that same
+  // scroll-padding boundary, avoiding the #50 post-hoc snap-correction
+  // lurch while landing the card rightmost instead of leftmost.
+  it('lands the card at the rightmost visible position (trailing-edge snap point) when hidden past the right edge', () => {
     const { container, addCard } = makeContainer({ scrollLeft: 0, clientWidth: 900 })
     addCard('adversary-Dragon', { left: 1500, width: 300 })
     const target = getCardScrollTarget({ container, cardKey: 'adversary-Dragon', columnWidth: 300 })
-    expect(target).toBe(1500 - DASHBOARD_GAP)
+    const cardEnd = 1500 + 300
+    expect(target).toBe(cardEnd - 900 + DASHBOARD_GAP)
   })
 
   it('lands exactly on the card leading-edge snap point when hidden before the left edge', () => {

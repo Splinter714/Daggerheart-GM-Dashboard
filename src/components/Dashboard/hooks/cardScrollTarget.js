@@ -46,17 +46,26 @@ export function getCardScrollTarget({
 
   if (isVisible) return null
 
-  // Every column has scroll-snap-align: 'start' and the container's
-  // scroll-padding-left equals DASHBOARD_GAP, so `cardPosition - DASHBOARD_GAP`
-  // is itself a valid snap point (it's exactly where the browser would snap
-  // this card's leading edge to). Landing there directly — whether the card
-  // is hidden past the right edge or before the left edge — means no
-  // corrective snap runs afterward. An earlier version aligned the card's
-  // *trailing* edge to the viewport's right edge when hidden-right, which
-  // is generally not a snap point, so the browser's own snapping would then
-  // jump the scroll position a second time once the programmatic scroll
-  // settled — a visible lurch (#50).
-  const targetScroll = cardPosition - DASHBOARD_GAP
+  // Hidden-right (card sits past the visible viewport, so we're scrolling
+  // right to reveal it): land the card at the *rightmost* visible position
+  // instead of the leftmost (#121 — Jackson felt landing it leftmost, with
+  // a wall of newly-revealed cards to its right, felt less natural than
+  // seeing it arrive at the trailing edge). The container's
+  // scroll-padding-right equals DASHBOARD_GAP (see DashboardView.css), so
+  // aligning the card's trailing edge to `effectiveWidth - DASHBOARD_GAP`
+  // lands on that same scroll-padding boundary the browser already respects,
+  // avoiding the corrective post-hoc snap lurch #50 originally fixed.
+  //
+  // Hidden-left (card sits before the current scroll position) keeps the
+  // original leading-edge alignment — `cardPosition - DASHBOARD_GAP` is a
+  // valid snap point (every column has scroll-snap-align: 'start'), and
+  // landing a leftward reveal at its leading edge is still the natural
+  // "scroll left until you see it appear at the left" behavior Jackson
+  // hasn't asked to change.
+  const isHiddenRight = cardEnd > currentScroll + effectiveWidth + margin
+  const targetScroll = isHiddenRight
+    ? cardEnd - effectiveWidth + DASHBOARD_GAP
+    : cardPosition - DASHBOARD_GAP
 
   return Math.max(0, targetScroll)
 }
