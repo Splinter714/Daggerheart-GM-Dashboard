@@ -456,19 +456,22 @@ const GameCard = ({
               />
               {(onRemoveInstance || onAddInstance) && (
                 <>
-                  {/* The minus button is the only removal control, at every instance
-                      count — no separate delete/X button ever appears alongside it
-                      (#30). Decrementing past 1 removes the whole card/group; that's
-                      handled by onRemoveInstance itself (see EntityColumns.jsx), not
-                      by swapping in a different button here. */}
+                  {/* Minus is the only removal control, at every count (#30). 2+
+                      decrements immediately; at 1 it arms the shared deleteConfirm. */}
                   <TouchTarget
-                    onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
-                    title="Remove one"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (instances.length > 1) { onRemoveInstance?.(item.id); return }
+                      if (deleteConfirm) { setDeleteConfirm(false); onRemoveInstance?.(item.id); return }
+                      setDeleteConfirm(true)
+                      setTimeout(() => setDeleteConfirm(false), 3000)
+                    }}
+                    title={instances.length <= 1 && deleteConfirm ? 'Click again to confirm' : 'Remove one'}
                     wrapperStyle={{ flexShrink: 0 }}
                     style={{
-                      width: '1.5rem', height: '1.5rem',
-                      background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
-                      color: 'white',
+                      width: '1.5rem', height: '1.5rem', borderRadius: '0.25rem', color: 'white', transition: 'background 0.15s, border 0.15s',
+                      background: instances.length <= 1 && deleteConfirm ? 'var(--danger)' : 'var(--gray-700)',
+                      border: instances.length <= 1 && deleteConfirm ? 'none' : '1px solid var(--gray-600)',
                     }}
                   >
                     <Minus size={12} />
@@ -481,19 +484,16 @@ const GameCard = ({
                     title="Add one"
                     wrapperStyle={{ flexShrink: 0 }}
                     style={{
-                      width: '1.5rem', height: '1.5rem',
+                      width: '1.5rem', height: '1.5rem', color: 'white',
                       background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
-                      color: 'white',
                     }}
                   >
                     <Plus size={12} />
                   </TouchTarget>
                 </>
               )}
-              {/* Standalone delete — only when there's no instance-count row to fold
-                  removal into at all (e.g. colossus/environment single-entity cards
-                  with no onAddInstance/onRemoveInstance). Never shown alongside the
-                  minus button (#30). */}
+              {/* Standalone delete — only when there's no instance-count row at all
+                  (no onAddInstance/onRemoveInstance). Never alongside minus (#30). */}
               {onDelete && !(onRemoveInstance || onAddInstance) && (
                 <TouchTarget
                   onClick={(e) => {

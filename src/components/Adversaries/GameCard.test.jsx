@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import GameCard from './GameCard'
 
 const colossusItem = {
@@ -363,11 +363,14 @@ describe('GameCard quick-edit: minus is the only removal control, at every insta
 
   // Round-3 playtest feedback (#30): the fully separate delete/X button must
   // be absent always, not just at 1 instance — the minus button is the only
-  // removal control at every count. Decrementing past 1 (i.e. clicking minus
-  // at 1 instance) removes the whole card/group; that behavior lives in
-  // onRemoveInstance itself (see EntityColumns.jsx), so GameCard just always
-  // calls it — no local delete-with-confirm swap.
-  it('at 1 instance: shows only the minus button, no separate delete button, and minus calls onRemoveInstance', () => {
+  // removal control at every count.
+  //
+  // Round-4 playtest feedback (#30): at exactly 1 instance, removing takes the
+  // whole card/group with it, so that destructive action needs the same
+  // two-stage confirm safety net used elsewhere (deleteConfirm pattern) —
+  // first click arms it, second click actually calls onRemoveInstance. At 2+
+  // instances, minus still decrements immediately with no confirmation step.
+  it('at 1 instance: shows only the minus button, no separate delete button, and minus requires a two-stage confirm before calling onRemoveInstance', () => {
     const onRemoveInstance = vi.fn()
     const onDelete = vi.fn()
     render(
@@ -381,16 +384,45 @@ describe('GameCard quick-edit: minus is the only removal control, at every insta
     expect(screen.queryByTitle('Remove all')).toBeNull()
     expect(screen.getByTitle('Remove one')).toBeInTheDocument()
 
+    // First click arms the confirm state — no removal yet.
     fireEvent.click(screen.getByTitle('Remove one'))
+    expect(onRemoveInstance).not.toHaveBeenCalled()
+    expect(screen.getByTitle('Click again to confirm')).toBeInTheDocument()
+    expect(screen.queryByTitle('Remove one')).toBeNull()
+
+    // Second click actually removes.
+    fireEvent.click(screen.getByTitle('Click again to confirm'))
     expect(onRemoveInstance).toHaveBeenCalledTimes(1)
     expect(onDelete).not.toHaveBeenCalled()
   })
 
-  it('at 2+ instances: shows only the minus button, still no separate delete-all button', () => {
+  it('at 1 instance: the armed confirm state resets automatically after 3 seconds', () => {
+    vi.useFakeTimers()
+    const onRemoveInstance = vi.fn()
+    render(
+      <GameCard
+        type="adversary" item={adversaryItem} instances={oneInstance}
+        onAddInstance={vi.fn()} onRemoveInstance={onRemoveInstance} onDelete={vi.fn()}
+      />
+    )
+    fireEvent.click(screen.getByTitle('Edit'))
+    fireEvent.click(screen.getByTitle('Remove one'))
+    expect(screen.getByTitle('Click again to confirm')).toBeInTheDocument()
+
+    act(() => { vi.advanceTimersByTime(3000) })
+
+    expect(screen.getByTitle('Remove one')).toBeInTheDocument()
+    expect(screen.queryByTitle('Click again to confirm')).toBeNull()
+    expect(onRemoveInstance).not.toHaveBeenCalled()
+    vi.useRealTimers()
+  })
+
+  it('at 2+ instances: shows only the minus button, still no separate delete-all button, and decrements immediately with no confirm step', () => {
+    const onRemoveInstance = vi.fn()
     render(
       <GameCard
         type="adversary" item={adversaryItem} instances={twoInstances}
-        onAddInstance={vi.fn()} onRemoveInstance={vi.fn()} onDelete={vi.fn()}
+        onAddInstance={vi.fn()} onRemoveInstance={onRemoveInstance} onDelete={vi.fn()}
       />
     )
     fireEvent.click(screen.getByTitle('Edit'))
@@ -398,6 +430,10 @@ describe('GameCard quick-edit: minus is the only removal control, at every insta
     expect(screen.getByTitle('Remove one')).toBeInTheDocument()
     expect(screen.queryByTitle('Remove all')).toBeNull()
     expect(screen.queryByTitle('Remove')).toBeNull()
+
+    fireEvent.click(screen.getByTitle('Remove one'))
+    expect(onRemoveInstance).toHaveBeenCalledTimes(1)
+    expect(screen.queryByTitle('Click again to confirm')).toBeNull()
   })
 
   it('adversary card without onAddInstance/onRemoveInstance at all (e.g. a colossus) falls back to the standalone delete button', () => {
