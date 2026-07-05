@@ -456,46 +456,23 @@ const GameCard = ({
               />
               {(onRemoveInstance || onAddInstance) && (
                 <>
-                  {/* At 1 instance, minus has nothing left to decrement to — show delete-with-
-                      confirm in its slot instead of a separate, redundant delete button (#30). */}
-                  {instances.length <= 1 && onDelete ? (
-                    <TouchTarget
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (deleteConfirm) {
-                          onDelete()
-                        } else {
-                          setDeleteConfirm(true)
-                          setTimeout(() => setDeleteConfirm(false), 3000)
-                        }
-                      }}
-                      title={deleteConfirm ? 'Click again to confirm' : 'Remove'}
-                      wrapperStyle={{ flexShrink: 0 }}
-                      style={{
-                        width: '1.5rem', height: '1.5rem',
-                        background: deleteConfirm ? 'var(--danger)' : 'var(--gray-700)',
-                        border: deleteConfirm ? 'none' : '1px solid var(--gray-600)',
-                        borderRadius: '0.25rem',
-                        color: 'white',
-                        transition: 'background 0.15s, color 0.15s',
-                      }}
-                    >
-                      <X size={12} />
-                    </TouchTarget>
-                  ) : (
-                    <TouchTarget
-                      onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
-                      title="Remove one"
-                      wrapperStyle={{ flexShrink: 0 }}
-                      style={{
-                        width: '1.5rem', height: '1.5rem',
-                        background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
-                        color: 'white',
-                      }}
-                    >
-                      <Minus size={12} />
-                    </TouchTarget>
-                  )}
+                  {/* The minus button is the only removal control, at every instance
+                      count — no separate delete/X button ever appears alongside it
+                      (#30). Decrementing past 1 removes the whole card/group; that's
+                      handled by onRemoveInstance itself (see EntityColumns.jsx), not
+                      by swapping in a different button here. */}
+                  <TouchTarget
+                    onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
+                    title="Remove one"
+                    wrapperStyle={{ flexShrink: 0 }}
+                    style={{
+                      width: '1.5rem', height: '1.5rem',
+                      background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
+                      color: 'white',
+                    }}
+                  >
+                    <Minus size={12} />
+                  </TouchTarget>
                   <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'white', flexShrink: 0, display: 'inline-block', minWidth: '0.9rem', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
                     {instances.length}
                   </span>
@@ -513,9 +490,11 @@ const GameCard = ({
                   </TouchTarget>
                 </>
               )}
-              {/* Standalone delete — only when there's no instance-count row to fold it into
-                  (e.g. colossus/environment single-entity cards), or when count > 1 (#30). */}
-              {onDelete && (!(onRemoveInstance || onAddInstance) || instances.length > 1) && (
+              {/* Standalone delete — only when there's no instance-count row to fold
+                  removal into at all (e.g. colossus/environment single-entity cards
+                  with no onAddInstance/onRemoveInstance). Never shown alongside the
+                  minus button (#30). */}
+              {onDelete && !(onRemoveInstance || onAddInstance) && (
                 <TouchTarget
                   onClick={(e) => {
                     e.stopPropagation()

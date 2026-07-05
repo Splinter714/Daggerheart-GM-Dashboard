@@ -353,7 +353,7 @@ describe('GameCard quick-edit pencil placement (#30)', () => {
   })
 })
 
-describe('GameCard quick-edit delete/minus swap at 1 instance (#30)', () => {
+describe('GameCard quick-edit: minus is the only removal control, at every instance count (#30)', () => {
   const adversaryItem = { id: 'grp-1', name: 'Goblin', hpMax: 10, stressMax: 3 }
   const oneInstance = [{ id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, hpMax: 10, stressMax: 3 }]
   const twoInstances = [
@@ -361,26 +361,32 @@ describe('GameCard quick-edit delete/minus swap at 1 instance (#30)', () => {
     { id: 'adv-2', duplicateNumber: 2, hp: 0, stress: 0, hpMax: 10, stressMax: 3 },
   ]
 
-  it('at 1 instance: shows delete-with-confirm in the minus slot instead of both buttons separately', () => {
+  // Round-3 playtest feedback (#30): the fully separate delete/X button must
+  // be absent always, not just at 1 instance — the minus button is the only
+  // removal control at every count. Decrementing past 1 (i.e. clicking minus
+  // at 1 instance) removes the whole card/group; that behavior lives in
+  // onRemoveInstance itself (see EntityColumns.jsx), so GameCard just always
+  // calls it — no local delete-with-confirm swap.
+  it('at 1 instance: shows only the minus button, no separate delete button, and minus calls onRemoveInstance', () => {
+    const onRemoveInstance = vi.fn()
     const onDelete = vi.fn()
     render(
       <GameCard
         type="adversary" item={adversaryItem} instances={oneInstance}
-        onAddInstance={vi.fn()} onRemoveInstance={vi.fn()} onDelete={onDelete}
+        onAddInstance={vi.fn()} onRemoveInstance={onRemoveInstance} onDelete={onDelete}
       />
     )
     fireEvent.click(screen.getByTitle('Edit'))
 
-    expect(screen.queryByTitle('Remove one')).toBeNull()
     expect(screen.queryByTitle('Remove all')).toBeNull()
-    expect(screen.getByTitle('Remove')).toBeInTheDocument()
+    expect(screen.getByTitle('Remove one')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByTitle('Remove'))
-    fireEvent.click(screen.getByTitle('Click again to confirm'))
-    expect(onDelete).toHaveBeenCalledTimes(1)
+    fireEvent.click(screen.getByTitle('Remove one'))
+    expect(onRemoveInstance).toHaveBeenCalledTimes(1)
+    expect(onDelete).not.toHaveBeenCalled()
   })
 
-  it('at 2+ instances: shows the normal minus button plus a separate delete-all button', () => {
+  it('at 2+ instances: shows only the minus button, still no separate delete-all button', () => {
     render(
       <GameCard
         type="adversary" item={adversaryItem} instances={twoInstances}
@@ -390,7 +396,22 @@ describe('GameCard quick-edit delete/minus swap at 1 instance (#30)', () => {
     fireEvent.click(screen.getByTitle('Edit'))
 
     expect(screen.getByTitle('Remove one')).toBeInTheDocument()
-    expect(screen.getByTitle('Remove all')).toBeInTheDocument()
+    expect(screen.queryByTitle('Remove all')).toBeNull()
     expect(screen.queryByTitle('Remove')).toBeNull()
+  })
+
+  it('adversary card without onAddInstance/onRemoveInstance at all (e.g. a colossus) falls back to the standalone delete button', () => {
+    const onDelete = vi.fn()
+    render(
+      <GameCard
+        type="adversary" item={adversaryItem} instances={oneInstance}
+        onDelete={onDelete}
+      />
+    )
+    fireEvent.click(screen.getByTitle('Edit'))
+    expect(screen.getByTitle('Remove all')).toBeInTheDocument()
+    fireEvent.click(screen.getByTitle('Remove all'))
+    fireEvent.click(screen.getByTitle('Click again to confirm'))
+    expect(onDelete).toHaveBeenCalledTimes(1)
   })
 })
