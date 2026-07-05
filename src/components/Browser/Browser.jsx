@@ -12,7 +12,7 @@ import BrowserTableHeader from './BrowserTableHeader'
 import BrowserRow from './BrowserRow'
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary, filterCustom = false, showCustomToggle = false, onToggleCustom, onExportCustomAdversaries, onImportCustomAdversaries, autoFocus = false, hideImportExport = false, onClose = null, searchPlaceholder = "Search" }) => {
+const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary, filterCustom = false, showCustomToggle = false, onToggleCustom, onExportCustomAdversaries, onImportCustomAdversaries, autoFocus = false, hideImportExport = false, onClose = null, searchPlaceholder = "Search", onOpenReceipt = null }) => {
   const { addCustomAdversary, updateCustomAdversary, deleteCustomAdversary, customContent, adversaries, deleteAdversary } = useGameState()
   const [editingAdversary, setEditingAdversary] = useState(null)
   const [deleteConfirmations, setDeleteConfirmations] = useState({}) // Track which encounters are in delete confirmation state
@@ -614,7 +614,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             autoFocus={autoFocus}
             onClose={onClose}
             placeholder={searchPlaceholder}
-            remainingBudget={type === 'adversary' ? remainingBudget : null}
+            remainingBudget={type === 'adversary' ? remainingBudget : null} onOpenReceipt={onOpenReceipt}
           />
           {!hideImportExport && (
           <BrowserButtonRow

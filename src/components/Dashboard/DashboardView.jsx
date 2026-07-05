@@ -491,7 +491,7 @@ const DashboardContent = () => {
             groupBy={groupBy}
             onSortBy={setSortBy}
             onGroupBy={setGroupBy} colossusDisplayMode={colossusDisplayMode} onColossusDisplayModeChange={setColossusDisplayMode}
-            instanceLabelStyle={instanceLabelStyle} onInstanceLabelStyleChange={setInstanceLabelStyle}
+            instanceLabelStyle={instanceLabelStyle} onInstanceLabelStyleChange={setInstanceLabelStyle} onOpenReceipt={() => handleNavAction('receipt')}
           />
         <EntityColumns
           entityGroups={entityGroups}

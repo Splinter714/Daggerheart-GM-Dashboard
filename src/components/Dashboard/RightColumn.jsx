@@ -202,6 +202,7 @@ const RightColumn = ({
   sortBy, sortDir, groupBy, onSortBy, onGroupBy,
   colossusDisplayMode, onColossusDisplayModeChange,
   instanceLabelStyle, onInstanceLabelStyleChange,
+  onOpenReceipt,
 }) => {
 
   const encounterItems = groupsToEncounterItems(adversaryGroups, pcCount)
@@ -260,6 +261,7 @@ const RightColumn = ({
               searchPlaceholder="Search adversaries"
               encounterItems={encounterItems}
               pcCount={pcCount}
+              onOpenReceipt={onOpenReceipt}
             />
           ) : (
             <Browser
