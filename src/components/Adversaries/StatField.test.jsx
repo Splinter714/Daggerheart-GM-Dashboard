@@ -44,4 +44,24 @@ describe('StatField — compact number display (#41)', () => {
     const input = screen.getByDisplayValue('2')
     expect(input.style.width).toBe('2.5rem')
   })
+
+  // #122 follow-up: Jackson asked for the -/number/+ button group to be
+  // center-aligned within its column, not left-aligned.
+  it('center-aligns the stepper button group within its column (#122)', () => {
+    render(
+      <StatField
+        label="Attack Modifier"
+        field="atk"
+        rangeKey="atk"
+        formData={baseFormData}
+        setFormData={vi.fn()}
+        adversaryType="Standard"
+        currentTier={1}
+      />
+    )
+
+    const input = screen.getByDisplayValue('2')
+    const stepperRow = input.parentElement
+    expect(stepperRow.style.justifyContent).toBe('center')
+  })
 })

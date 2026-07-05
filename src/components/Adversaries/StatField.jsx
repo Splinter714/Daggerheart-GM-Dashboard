@@ -99,7 +99,7 @@ export const StatField = ({ label, field, subfield, rangeKey, disabled, formData
           </InfoPopover>
         </span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
         {stepBtn(-1)}
         <input
           type="number"
