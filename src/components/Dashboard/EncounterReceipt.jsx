@@ -242,11 +242,6 @@ const EncounterReceipt = ({
           const isColossus = key === 'Colossus'
           const isMinion = key === 'Minion'
           const cost = BATTLE_POINT_COSTS[key]
-          // Total minion instance count across all minion groups — independent of the
-          // BP-group math, since minions are N instances per 1 BP (#87).
-          const totalMinionInstances = isMinion
-            ? items.reduce((sum, i) => sum + (i.instanceCount ?? i.quantity), 0)
-            : 0
           return (
             <React.Fragment key={key}>
               <div style={{ padding: '0.3rem 0 0.1rem', display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
@@ -262,33 +257,35 @@ const EncounterReceipt = ({
                     ({cost} BP each)
                   </span>
                 )}
-                {isMinion && (
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 400 }}>
-                    · {totalMinionInstances} instance{totalMinionInstances === 1 ? '' : 's'}
-                  </span>
-                )}
               </div>
               {items.map((encounterItem) => {
                 const isZero = encounterItem.quantity === 0
-                // Per-group instance count stays visible on its own row — the section-header
-                // total is only a smaller supporting figure, not a replacement (#87).
-                const rowInstanceCount = isMinion ? (encounterItem.instanceCount ?? encounterItem.quantity) : null
+                // Minion rows use the "{group count} {name} ({instances per group}) = {total instances}"
+                // format, e.g. 2 groups of Giant Rat with 3 instances each renders as
+                // "2 Giant Rat (3) = 6" (#87).
+                const totalInstances = isMinion ? (encounterItem.instanceCount ?? encounterItem.quantity) : null
+                const perGroupInstances = isMinion && encounterItem.quantity > 0
+                  ? Math.round(totalInstances / encounterItem.quantity)
+                  : null
                 return (
                   <div key={`${encounterItem.item.id}-${encounterItem.type}`} className="receipt-item" style={itemRowStyle}>
                     <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={actionBtn(isColossus || isZero)}>
                       {isColossus || isZero ? <X size={13} /> : <Minus size={13} />}
                     </button>
-                    {!isColossus && (
+                    {!isColossus && !isMinion && (
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', minWidth: '1rem', textAlign: 'center', flexShrink: 0 }}>
                         {encounterItem.quantity}
                       </span>
                     )}
-                    <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {encounterItem.item.name || encounterItem.item.baseName}
-                    </span>
-                    {isMinion && (
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', flexShrink: 0 }}>
-                        {rowInstanceCount} instance{rowInstanceCount === 1 ? '' : 's'}
+                    {isMinion ? (
+                      <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {encounterItem.quantity} {encounterItem.item.name || encounterItem.item.baseName}
+                        {perGroupInstances != null && ` (${perGroupInstances})`}
+                        {' = '}{totalInstances}
+                      </span>
+                    ) : (
+                      <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {encounterItem.item.name || encounterItem.item.baseName}
                       </span>
                     )}
                     {!isColossus && (

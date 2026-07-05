@@ -14,46 +14,36 @@ const baseProps = {
 }
 
 describe('EncounterReceipt', () => {
-  it('shows the total minion instance count as a supporting figure alongside the BP-group quantity (#87)', () => {
+  const isOwnText = (content, el) =>
+    el?.textContent === content && Array.from(el.children).every(child => child.textContent !== content)
+
+  it('formats minion rows as "{group count} {name} ({instances per group}) = {total instances}" (#87)', () => {
+    const encounterItems = [
+      { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Giant Rat' }, quantity: 2, instanceCount: 6 },
+    ]
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
+
+    expect(screen.getByText((_, el) => isOwnText('2 Giant Rat (3) = 6', el))).toBeTruthy()
+  })
+
+  it('keeps each minion group row independently formatted when multiple groups of different types exist (#87)', () => {
     const encounterItems = [
       { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Sniper' }, quantity: 1, instanceCount: 4 },
       { type: 'adversary', item: { id: 'm2', type: 'Minion', name: 'Grunt' }, quantity: 2, instanceCount: 8 },
     ]
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
 
-    expect(screen.getByText((_, el) => el?.textContent === '· 12 instances')).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('1 Sniper (4) = 4', el))).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('2 Grunt (4) = 8', el))).toBeTruthy()
   })
 
-  it('singularizes the total instance count label when exactly one instance', () => {
+  it('formats a single minion group with 1 instance per group correctly', () => {
     const encounterItems = [
       { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Sniper' }, quantity: 1, instanceCount: 1 },
     ]
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
 
-    expect(screen.getByText((_, el) => el?.textContent === '· 1 instance')).toBeTruthy()
-  })
-
-  it('keeps each minion group row showing its own instance count, not just the section total (#87)', () => {
-    const encounterItems = [
-      { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Sniper' }, quantity: 1, instanceCount: 4 },
-      { type: 'adversary', item: { id: 'm2', type: 'Minion', name: 'Grunt' }, quantity: 2, instanceCount: 8 },
-    ]
-    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
-
-    // Per-row instance counts are visible independently of the header total.
-    expect(screen.getByText('4 instances')).toBeTruthy()
-    expect(screen.getByText('8 instances')).toBeTruthy()
-    // The header total (12) remains present as the smaller supporting figure.
-    expect(screen.getByText((_, el) => el?.textContent === '· 12 instances')).toBeTruthy()
-  })
-
-  it('singularizes the per-row instance count label when exactly one instance', () => {
-    const encounterItems = [
-      { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Sniper' }, quantity: 1, instanceCount: 1 },
-    ]
-    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
-
-    expect(screen.getByText('1 instance')).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('1 Sniper (1) = 1', el))).toBeTruthy()
   })
 
   it('renders colossi as separate rows, marks them not BP-costed, and hides the stepper controls (#99)', () => {
