@@ -58,6 +58,14 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getByText('Peck')).toBeInTheDocument()
   })
 
+  // #112: Jackson confirmed after #108's fix landed that the parent-colossus
+  // context pill isn't needed at all — remove it entirely.
+  it('does not render a parent-colossus context pill (#112)', () => {
+    render(<ColossusSegmentCard {...baseProps} />)
+    expect(screen.queryByText('Ikeri, Injuries Untold')).not.toBeInTheDocument()
+    expect(screen.queryByText((_, el) => el?.textContent === 'T1 Colossus')).not.toBeInTheDocument()
+  })
+
   // #109: exact row order from the 2026-07-04 playtest spec — row 1 =
   // Attack + Standard Attack, row 2 = Difficulty + Thresholds, row 3 =
   // Motives + Experience, then the instance mini-cards.

@@ -352,19 +352,9 @@ const ColossusSegmentCard = ({
 
         {/* Scrollable body */}
         <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }} className="invisible-scrollbar">
-          {/* Parent colossus pill, for context since this segment is its own card */}
-          <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
-            <div style={{
-              display: 'inline-flex', gap: '0.35rem', alignItems: 'center',
-              fontSize: '0.75rem', backgroundColor: 'black',
-              border: '1px solid var(--text-secondary)', borderRadius: '0.25rem',
-              height: '1.5rem', padding: '0 10px',
-            }}>
-              <span style={{ color: 'white' }}>{colossus.name}</span>
-              <span style={{ color: 'var(--text-secondary)' }}>·</span>
-              <span style={{ color: 'white' }}>T{colossus.tier} Colossus</span>
-            </div>
-          </div>
+          {/* Parent colossus pill intentionally removed (#112) — Jackson confirmed
+              it's redundant with the card's own header and the "COLOSSUS: <name>"
+              group header shown above the whole set of segment cards. */}
 
           {/* Row 1: Attack Modifier | Standard Attack (#109) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, paddingTop: CARD_SPACE_V, paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, flexWrap: 'wrap' }}>

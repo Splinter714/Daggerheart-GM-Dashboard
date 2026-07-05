@@ -54,8 +54,9 @@ describe('GameCard colossus display modes', () => {
       />
     )
     expect(screen.getAllByText((_, el) => el?.textContent === 'Head #1').length).toBeGreaterThan(0)
-    // The standalone segment card also shows the parent colossus name for context
-    expect(screen.getByText('Ikeri, Injuries Untold')).toBeInTheDocument()
+    // The parent-colossus context pill was removed (#112) — Jackson confirmed
+    // it's redundant with the card header and the group-level header.
+    expect(screen.queryByText('Ikeri, Injuries Untold')).not.toBeInTheDocument()
 
     // HP is rendered as an instance-style +/- adjuster mirroring regular
     // adversary card instance rows (#109), not click-pips.
