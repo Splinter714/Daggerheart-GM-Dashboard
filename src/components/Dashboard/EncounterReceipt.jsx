@@ -1,8 +1,7 @@
 import React from 'react'
-import { Plus, Minus, X, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Check } from 'lucide-react'
+import { Plus, Minus, X, Check } from 'lucide-react'
 import { BATTLE_POINT_ADJUSTMENTS, BATTLE_POINT_COSTS } from './BattlePointsCalculator'
 import { TYPE_ORDER } from './constants'
-import { useState } from 'react'
 
 const actionBtn = (danger) => ({
   background: danger ? 'var(--danger)' : 'var(--bg-secondary)',
@@ -47,15 +46,6 @@ const MANUAL_ADJUSTMENTS = [
   },
 ]
 
-
-const SORT_OPTIONS = [
-  { value: 'name',       label: 'Name'      },
-  { value: 'tier',       label: 'Tier'      },
-  { value: 'hp',         label: 'HP'        },
-  { value: 'difficulty', label: 'Difficulty'},
-  { value: 'atk',        label: 'Attack'    },
-  { value: 'threshold',  label: 'Threshold' },
-]
 
 const rowBpCost = (item, quantity, pcCount) => {
   const cost = BATTLE_POINT_COSTS[item.type] || 2
@@ -104,21 +94,6 @@ const sectionLabel = {
   fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em',
   textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.35rem',
 }
-
-const optRow = (selected) => ({
-  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-  gap: '0.4rem', padding: '0.2rem 0.4rem', borderRadius: '5px', cursor: 'pointer',
-  background: selected ? 'color-mix(in srgb, var(--purple) 12%, transparent)' : 'transparent',
-  color: selected ? 'var(--purple)' : 'var(--text-primary)',
-  fontSize: '0.8rem', userSelect: 'none',
-})
-
-const dot = (selected) => ({
-  width: 12, height: 12, borderRadius: '50%', flexShrink: 0,
-  border: `2px solid ${selected ? 'var(--purple)' : 'var(--border)'}`,
-  backgroundColor: selected ? 'var(--purple)' : 'transparent',
-  transition: 'background 0.1s, border-color 0.1s',
-})
 
 // Custom styled checkbox matching app aesthetic
 const AppCheckbox = ({ checked, onChange }) => (
@@ -171,10 +146,7 @@ const EncounterReceipt = ({
   spentBattlePoints,
   sortBy = 'name',
   sortDir = 'asc',
-  onSortBy,
 }) => {
-  const [sortOpen, setSortOpen] = useState(false)
-
   const adversaryItems = encounterItems.filter(i => i.type === 'adversary')
   const groups = groupByType(adversaryItems, sortBy, sortDir)
 
@@ -191,51 +163,10 @@ const EncounterReceipt = ({
   // not just a board with only non-major adversaries (#78).
   const noMajorThreats = !hasMajorThreats
 
-  const currentSortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label || 'Name'
   const baseBP = (3 * pcCount) + 2
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-
-      {/* Sort — pinned at top */}
-      <div style={{ flexShrink: 0, borderBottom: '1px solid var(--border)', padding: '0 1rem' }}>
-        <button
-          type="button"
-          onClick={() => setSortOpen(v => !v)}
-          style={{
-            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            padding: '0.4rem 0', color: 'var(--text-secondary)',
-          }}
-        >
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            Sort within group
-            <span style={{ color: 'var(--text-secondary)', fontWeight: 400, fontSize: '0.72rem' }}>
-              {currentSortLabel} {sortDir === 'asc' ? '↑' : '↓'}
-            </span>
-          </span>
-          {sortOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-        </button>
-
-        {sortOpen && (
-          <div style={{ paddingBottom: '0.6rem' }}>
-            <div style={sectionLabel}>Sort by</div>
-            {SORT_OPTIONS.map(({ value, label }) => {
-              const sel = sortBy === value
-              return (
-                <div key={value} style={optRow(sel)} onClick={() => onSortBy(value)}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <div style={dot(sel)} />{label}
-                  </div>
-                  {sel && (sortDir === 'asc'
-                    ? <ArrowUp size={11} strokeWidth={2.5} />
-                    : <ArrowDown size={11} strokeWidth={2.5} />)}
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
 
       {/* Scrollable: adversary rows + adjustments + party size */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '0 1rem' }}>

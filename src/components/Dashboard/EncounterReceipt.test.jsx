@@ -10,7 +10,6 @@ const baseProps = {
   onChangeBpAdjustments: vi.fn(),
   availableBattlePoints: 14,
   spentBattlePoints: 0,
-  onSortBy: vi.fn(),
 }
 
 describe('EncounterReceipt', () => {

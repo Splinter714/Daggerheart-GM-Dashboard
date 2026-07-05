@@ -310,7 +310,6 @@ const RightColumn = ({
             spentBattlePoints={spentBattlePoints}
             sortBy={sortBy}
             sortDir={sortDir}
-            onSortBy={onSortBy}
           />
         </>
       )}
