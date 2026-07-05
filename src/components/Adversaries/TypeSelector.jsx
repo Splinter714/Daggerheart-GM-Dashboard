@@ -2,11 +2,26 @@ import React, { useState } from 'react'
 import { TYPES } from './customCreatorConstants'
 import { typeGuide } from './adversaryTypeGuide'
 
-// Type dropdown for the custom adversary creator. Extracted verbatim from
-// CustomAdversaryCreator.jsx (Phase 4).
+// Content for the InfoPopover next to the "Type" label in
+// CustomAdversaryCreator.jsx — lists every type with its summary. Per-row
+// type descriptions in the dropdown itself were removed (#125) in favor of
+// this single popover, so picking a type doesn't require reading a
+// paragraph per row.
+export const TypeInfoContent = ({ selectedType }) => (
+  <>
+    <div style={{ fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>Adversary Types</div>
+    {TYPES.map(t => (
+      <div key={t} style={{ padding: '0.25rem 0', color: t === selectedType ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+        <span style={{ fontWeight: t === selectedType ? 700 : 600 }}>{t}</span>
+        {typeGuide[t]?.summary && <div style={{ marginTop: '0.1rem' }}>{typeGuide[t].summary}</div>}
+      </div>
+    ))}
+  </>
+)
+
+// Type dropdown for the custom adversary creator.
 export const TypeSelector = ({ selectedType, onTypeChange }) => {
   const [typeOpen, setTypeOpen] = useState(false)
-  const tGuide = typeGuide[selectedType]
   return (
     <div style={{ position: 'relative' }}>
       <button type="button" onClick={() => setTypeOpen(v => !v)} style={{
@@ -31,7 +46,6 @@ export const TypeSelector = ({ selectedType, onTypeChange }) => {
           boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
         }}>
           {TYPES.map(t => {
-            const tg = typeGuide[t]
             const isSelected = selectedType === t
             return (
               <button key={t} type="button" onClick={() => { onTypeChange(t); setTypeOpen(false) }} style={{
@@ -39,9 +53,9 @@ export const TypeSelector = ({ selectedType, onTypeChange }) => {
                 background: isSelected ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent',
                 border: 'none', borderBottom: '1px solid var(--border)',
                 padding: '0.4rem 0.6rem', cursor: 'pointer', minHeight: '44px',
+                fontWeight: 600, fontSize: '0.85rem', color: isSelected ? 'var(--purple)' : 'var(--text-primary)',
               }}>
-                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: isSelected ? 'var(--purple)' : 'var(--text-primary)', marginBottom: tg?.summary ? '0.1rem' : 0 }}>{t}</div>
-                {tg?.summary && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tg.summary}</div>}
+                {t}
               </button>
             )
           })}

@@ -12,7 +12,7 @@ import { DragHandle } from './creatorAtoms'
 import { InfoPopover } from './InfoPopover'
 import { StatField } from './StatField'
 import { FeatureList } from './FeatureList'
-import { TypeSelector } from './TypeSelector'
+import { TypeSelector, TypeInfoContent } from './TypeSelector'
 import { loadData, adversariesData } from './customAdversaryData'
 import TouchTarget from '../Shared/TouchTarget'
 import { ColossusSegmentEditor } from './ColossusSegmentEditor'
@@ -382,7 +382,6 @@ const CustomAdversaryCreator = forwardRef(({
     canSave: formData.name.trim().length > 0,
   }))
 
-  // ─────────────────────────────────────────────────────────────────────────────
   // RESPONSIVE LAYOUT (embedded={false})
   // Narrow  (<760px): single panel, tabs to switch between Build / Preview / Guide
   // Wide   (≥760px): Build (flex:2) + visible side panels; tab pills toggle them
@@ -592,8 +591,9 @@ const CustomAdversaryCreator = forwardRef(({
                   </div>
                 </div>
                 <div style={{ ...sectionStyle, flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
                     <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Type</span>
+                    <InfoPopover align="right"><TypeInfoContent selectedType={formData.type} /></InfoPopover>
                   </div>
                   <TypeSelector selectedType={formData.type} onTypeChange={handleTypeChange} />
                 </div>
