@@ -30,19 +30,19 @@ const itemRowStyle = {
 
 const MANUAL_ADJUSTMENTS = [
   {
+    key: 'moreDangerous',
+    label: 'More Difficult',
+    value: BATTLE_POINT_ADJUSTMENTS.moreDangerous,
+  },
+  {
     key: 'lessDifficult',
     label: 'Less Difficult',
     value: BATTLE_POINT_ADJUSTMENTS.lessDifficult,
   },
   {
     key: 'increasedDamage',
-    label: 'Increased Damage',
+    label: '+1d4 Damage',
     value: BATTLE_POINT_ADJUSTMENTS.increasedDamage,
-  },
-  {
-    key: 'moreDangerous',
-    label: 'More Dangerous',
-    value: BATTLE_POINT_ADJUSTMENTS.moreDangerous,
   },
 ]
 
@@ -242,7 +242,7 @@ const EncounterReceipt = ({
           {/* Manual adjustment rows */}
           {onChangeBpAdjustments && MANUAL_ADJUSTMENTS.map(({ key, label, value }) => {
             const checked = !!bpAdjustments[key]
-            // More Dangerous and Less Difficult are mutually exclusive (#78):
+            // More Difficult and Less Difficult are mutually exclusive (#78):
             // when one is checked, the other is disabled/greyed out.
             const opposingKey = key === 'moreDangerous' ? 'lessDifficult'
               : key === 'lessDifficult' ? 'moreDangerous'

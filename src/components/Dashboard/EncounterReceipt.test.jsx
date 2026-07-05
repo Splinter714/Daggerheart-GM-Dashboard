@@ -174,11 +174,11 @@ describe('EncounterReceipt', () => {
     expect(forbiddenColors).not.toContain(majorThreatsValueSpan.style.color)
   })
 
-  it('makes "More Dangerous" and "Less Difficult" mutually exclusive (#78)', () => {
+  it('makes "More Difficult" and "Less Difficult" mutually exclusive (#78)', () => {
     const encounterItems = []
     const onChangeBpAdjustments = vi.fn()
 
-    // "Less Difficult" is checked — "More Dangerous" should be disabled (greyed out, not clickable).
+    // "Less Difficult" is checked — "More Difficult" should be disabled (greyed out, not clickable).
     const { rerender } = render(
       <EncounterReceipt
         {...baseProps}
@@ -188,14 +188,14 @@ describe('EncounterReceipt', () => {
       />
     )
 
-    const moreDangerousLabel = screen.getByText('More Dangerous')
+    const moreDangerousLabel = screen.getByText('More Difficult')
     const moreDangerousRow = moreDangerousLabel.closest('div')
     expect(Number(moreDangerousRow.style.opacity)).toBeLessThan(1)
 
     moreDangerousRow.click()
     expect(onChangeBpAdjustments).not.toHaveBeenCalled()
 
-    // Flip: "More Dangerous" checked — "Less Difficult" should now be disabled instead.
+    // Flip: "More Difficult" checked — "Less Difficult" should now be disabled instead.
     rerender(
       <EncounterReceipt
         {...baseProps}
@@ -208,7 +208,7 @@ describe('EncounterReceipt', () => {
     const lessDifficultRow = lessDifficultLabel.closest('div')
     expect(Number(lessDifficultRow.style.opacity)).toBeLessThan(1)
 
-    const moreDangerousLabel2 = screen.getByText('More Dangerous')
+    const moreDangerousLabel2 = screen.getByText('More Difficult')
     const moreDangerousRow2 = moreDangerousLabel2.closest('div')
     expect(Number(moreDangerousRow2.style.opacity)).toBe(1)
   })
