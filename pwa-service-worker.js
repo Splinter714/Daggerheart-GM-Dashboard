@@ -1,7 +1,7 @@
-// b0853a2-1783236142024 is replaced at build time (see vite.config.js) so every deploy gets a
+// eb0325f-1783236348422 is replaced at build time (see vite.config.js) so every deploy gets a
 // unique cache name and the SW auto-updates / purges old caches. In dev the placeholder
 // stays literal, which is a perfectly valid constant string.
-const CACHE_NAME = 'daggerheart-gm-b0853a2-1783236142024'
+const CACHE_NAME = 'daggerheart-gm-eb0325f-1783236348422'
 
 // Minimal precache: just the shell entry. Hashed assets are cached opportunistically
 // on first fetch (their names change every build, so they can't be listed statically).
