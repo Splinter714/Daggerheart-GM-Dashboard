@@ -153,9 +153,19 @@ export const getSegmentStatus = (seg, markedHp) => {
 // is a simple GM-tracked counter rather than a pip row (#97). Token state
 // always keys off the underlying colossus instance id, consistent across
 // both display modes.
+// Tooltip text explaining the mechanic (#97) — Jackson's playtest feedback
+// was "what even are these tokens? I don't get it", so the label itself
+// carries a native title tooltip on hover explaining what tokens track.
+const TOKENS_TOOLTIP = 'This segment counts as Broken until all tokens are cleared.'
+
 export const TokenCounter = ({ count, onChange }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0 }}>Tokens</span>
+    <span
+      style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0, cursor: 'help', borderBottom: '1px dotted var(--text-secondary)' }}
+      title={TOKENS_TOOLTIP}
+    >
+      Tokens
+    </span>
     <button
       onClick={e => { e.stopPropagation(); onChange(Math.max(0, count - 1)) }}
       style={tokenBtnStyle}

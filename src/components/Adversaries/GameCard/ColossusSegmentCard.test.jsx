@@ -85,6 +85,15 @@ describe('ColossusSegmentCard', () => {
     expect(position(motives)).toBeLessThan(position(experience))
   })
 
+  // #97: Jackson's playtest feedback was "what even are these tokens? I
+  // don't get it" — the Tokens label now carries a hover tooltip explaining
+  // the Broken-until-cleared mechanic.
+  it('explains what the Tokens counter tracks via a hover tooltip (#97)', () => {
+    render(<ColossusSegmentCard {...baseProps} />)
+    const tokensLabel = screen.getByText('Tokens')
+    expect(tokensLabel).toHaveAttribute('title', expect.stringContaining('Broken until all tokens are cleared'))
+  })
+
   it('renders an HP adjuster (+/- buttons) for each instance mini-card, calling onToggleHpPip with the new marked count', () => {
     const onToggleHpPip = vi.fn()
     render(<ColossusSegmentCard {...baseProps} slots={[makeSlot({ markedHp: 2, onToggleHpPip })]} />)
