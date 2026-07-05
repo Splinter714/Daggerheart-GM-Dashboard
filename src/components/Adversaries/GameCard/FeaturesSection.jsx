@@ -2,31 +2,10 @@ import React from 'react'
 import ReorderControls from './ReorderControls'
 import { CARD_SPACE_H, CARD_SPACE_V, CARD_INDENT } from './constants'
 import { highlightCardText } from './textHighlighter'
+import SectionHeader from './SectionHeader'
 
-const FeatureDivider = ({ title }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H }}>
-    <hr
-      style={{
-        flex: 1,
-        border: 'none',
-        borderTop: '1px solid var(--border)',
-        margin: 0,
-      }}
-    />
-    <h4
-      style={{
-        margin: 0,
-        fontSize: '0.75rem',
-        fontWeight: 400,
-        color: 'var(--text-primary)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-      }}
-    >
-      {title}
-    </h4>
-  </div>
-)
+// Shared with environment and colossus cards (#100/#109) — see SectionHeader.jsx.
+const FeatureDivider = SectionHeader
 
 const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick, deleteConfirmations, getFeatureKey }) => {
   const hasStandardAttack = isEditMode || (item.atk !== undefined && item.weapon)

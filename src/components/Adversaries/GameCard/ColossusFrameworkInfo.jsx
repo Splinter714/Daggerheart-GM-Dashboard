@@ -1,5 +1,7 @@
 import React from 'react'
-import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
+import { CARD_SPACE_H } from './constants'
+import ThresholdPill from './ThresholdPill'
+import MotivesExperienceRow from './MotivesExperience'
 
 // Framework-level info shared by every segment of a colossus — Thresholds,
 // Motives & Tactics, Experience, and Stress. Jackson confirmed (#109) this
@@ -9,39 +11,14 @@ import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 // segment cards read/write the same `inst.stress` field, so toggling a pip
 // on one card is reflected on every other segment card for the same colossus.
 //
-// Rendered as plain text (not MergedStatBadge) — that badge's fixed-width
-// pill is sized for short DIFF/ATK values and overflows a Major/Severe pair.
+// Per #109's round-2 playtest feedback ("re-use the actual adversary-card
+// threshold pill, motives display, and experience display"), these now
+// render via the exact same shared components/styles as the regular
+// adversary card (ThresholdPill, MotivesExperienceRow) instead of bespoke
+// plain-text renderings that had visually drifted from the adversary card.
 export const ColossusThresholdsBadge = ({ colossus }) => (
-  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-    Major {colossus.thresholds?.major ?? '-'} / Severe {colossus.thresholds?.severe ?? '-'}
-  </span>
+  <ThresholdPill major={colossus.thresholds?.major} severe={colossus.thresholds?.severe} flex={false} />
 )
-
-export const ColossusMotives = ({ colossus }) => {
-  if (!colossus.motivesAndTactics?.trim()) return null
-  return (
-    <div style={{ fontSize: '0.75rem', lineHeight: 1.4, color: 'var(--text-secondary)' }}>
-      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Motives &amp; Tactics </span>
-      {colossus.motivesAndTactics}
-    </div>
-  )
-}
-
-export const ColossusExperience = ({ colossus }) => {
-  if (!colossus.experience?.length) return null
-  return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-      {colossus.experience.map((e, i) => (
-        <span key={i} style={{
-          fontSize: '0.75rem', color: 'var(--text-secondary)',
-          border: '1px solid var(--border)', borderRadius: '0.1875rem', padding: '1px 6px',
-        }}>
-          {e.name} {e.modifier >= 0 ? `+${e.modifier}` : e.modifier}
-        </span>
-      ))}
-    </div>
-  )
-}
 
 // Shared Stress pip row — reads/writes `inst.stress` directly (the same
 // framework-level field the nested colossus card already used), so toggling
@@ -84,15 +61,10 @@ export const ColossusStress = ({ colossus, inst, onUpdate }) => {
 // (row 3 of the adversary-card-mirroring layout, #109) above the
 // instance-style mini-cards. Thresholds/Stress are rendered elsewhere by the
 // caller (Thresholds inline with Difficulty in row 2; Stress inside each
-// instance mini-card via ColossusStressAdjuster).
-const ColossusFrameworkInfo = ({ colossus }) => {
-  if (!colossus.motivesAndTactics?.trim() && !colossus.experience?.length) return null
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
-      <ColossusMotives colossus={colossus} />
-      <ColossusExperience colossus={colossus} />
-    </div>
-  )
-}
+// instance mini-card via ColossusStressAdjuster). Now backed by the same
+// MotivesExperienceRow component the regular adversary card uses (#109).
+const ColossusFrameworkInfo = ({ colossus }) => (
+  <MotivesExperienceRow motives={colossus.motivesAndTactics} experience={colossus.experience} />
+)
 
 export default ColossusFrameworkInfo

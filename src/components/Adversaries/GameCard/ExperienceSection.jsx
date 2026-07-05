@@ -1,5 +1,6 @@
 import React from 'react'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
+import { ExperienceTags } from './MotivesExperience'
 
 const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, setDeleteConfirmations }) => {
   const getExperienceKey = (exp, index) => {
@@ -349,35 +350,8 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
     )
   }
 
-  const renderReadOnlyExperiences = () => {
-    if (!item.experience || item.experience.length === 0) return null
-
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
-        {item.experience.map((exp, index) => {
-          let label
-          if (typeof exp === 'string') {
-            label = exp
-          } else {
-            const mod = typeof exp.modifier === 'number'
-              ? (exp.modifier >= 0 ? `+${exp.modifier}` : `${exp.modifier}`)
-              : exp.modifier
-            label = mod != null ? `${exp.name} ${mod}` : exp.name
-          }
-          return (
-            <span key={index} style={{
-              display: 'inline-flex', alignItems: 'center',
-              fontSize: '0.66rem', fontWeight: 400, color: 'white', whiteSpace: 'nowrap',
-              backgroundColor: 'black', border: '1px solid var(--text-secondary)',
-              borderRadius: '0.1875rem', height: '0.95rem', padding: '0 0.3rem',
-            }}>
-              {label}
-            </span>
-          )
-        })}
-      </div>
-    )
-  }
+  // Shared with colossus cards (#109) — see MotivesExperience.jsx.
+  const renderReadOnlyExperiences = () => <ExperienceTags experience={item.experience} />
 
   return (
     <div style={{ paddingTop: '0' }}>

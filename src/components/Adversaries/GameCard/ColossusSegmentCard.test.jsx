@@ -159,9 +159,15 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getByText('Huge +2')).toBeInTheDocument()
   })
 
-  it('shows framework-shared Thresholds (#109)', () => {
+  // #109 round 2: thresholds now render via the shared ThresholdPill
+  // component (same Minor/Major/Severe pill the regular adversary card
+  // uses) instead of a bespoke "Major X / Severe Y" plain-text badge.
+  it('shows framework-shared Thresholds using the shared adversary-card threshold pill (#109)', () => {
     render(<ColossusSegmentCard {...baseProps} />)
-    expect(screen.getByText('Major 11 / Severe 22')).toBeInTheDocument()
+    expect(screen.getByText('Major')).toBeInTheDocument()
+    expect(screen.getByText('Severe')).toBeInTheDocument()
+    expect(screen.getByText('11')).toBeInTheDocument()
+    expect(screen.getByText('22')).toBeInTheDocument()
   })
 
   it('shows both segment-specific and framework-wide features, clearly distinguished (#109)', () => {
@@ -180,9 +186,10 @@ describe('ColossusSegmentCard', () => {
   it('does not let the thresholds badge or weapon pill shrink to fit — thresholds is flex-shrink 0 and the weapon pill has a wrap-forcing flex-basis (#79)', () => {
     const { container } = render(<ColossusSegmentCard {...baseProps} />)
 
-    const thresholdsText = screen.getByText('Major 11 / Severe 22')
-    const thresholdsWrapper = thresholdsText.parentElement
-    expect(thresholdsWrapper.style.flexShrink).toBe('0')
+    const thresholdsLabel = screen.getByText('Major')
+    // ThresholdPill (rendered non-flex here) is the pill div itself.
+    const thresholdsPill = thresholdsLabel.parentElement
+    expect(thresholdsPill.style.flexShrink).toBe('0')
 
     const weaponPill = container.querySelector('[style*="flex: 1 1 160px"]')
     expect(weaponPill).toBeTruthy()

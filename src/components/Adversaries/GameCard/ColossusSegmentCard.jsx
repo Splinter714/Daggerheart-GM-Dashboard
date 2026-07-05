@@ -4,6 +4,7 @@ import ContainerWithTab from '../../Dashboard/ContainerWithTab'
 import MergedStatBadge from './MergedStatBadge'
 import ColossusFrameworkInfo, { ColossusThresholdsBadge, ColossusStress } from './ColossusFrameworkInfo'
 import SegmentInstanceSlot from './SegmentInstanceSlot'
+import SectionHeader from './SectionHeader'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 import { DASHBOARD_GAP } from '../../Dashboard/constants'
 import { highlightCardText } from './textHighlighter'
@@ -45,12 +46,13 @@ export const numberSegmentInstances = (segments) =>
     instanceNumber: i + 1,
   }))
 
+// Shared with adversary and environment cards (#100/#109) — see SectionHeader.jsx.
+// Callers here add their own marginTop wrapper via this thin wrapper to
+// preserve existing spacing at call sites (Divider was previously used with
+// an implicit marginTop baked in, unlike the adversary/environment version).
 export const Divider = ({ title }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginTop: CARD_SPACE_V }}>
-    <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)', margin: 0 }} />
-    <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-      {title}
-    </span>
+  <div style={{ marginTop: CARD_SPACE_V }}>
+    <SectionHeader title={title} />
   </div>
 )
 

@@ -2,21 +2,10 @@ import React from 'react'
 import { Heart, Activity } from 'lucide-react'
 import Pips from '../../Shared/Pips'
 import MergedStatBadge from './MergedStatBadge'
-import ExperienceSection from './ExperienceSection'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 import { formatInstanceLabel } from '../../Dashboard/hooks/useDashboardSortGroup'
-
-const ThresholdSep = () => (
-  <span style={{ display: 'inline-block', width: '1px', height: '1em', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
-)
-
-const ThresholdTag = ({ value }) => (
-  <>
-    <ThresholdSep />
-    <span style={{ color: 'white' }}>{value}</span>
-    <ThresholdSep />
-  </>
-)
+import ThresholdPill, { ThresholdLabel, ThresholdSep } from './ThresholdPill'
+import MotivesExperienceRow from './MotivesExperience'
 
 const StatusSection = ({
   item,
@@ -186,29 +175,7 @@ const StatusSection = ({
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H }}>
         {item.difficulty && <MergedStatBadge shape="hex" label="DIFF" value={item.difficulty} />}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.35rem',
-            fontSize: '0.75rem',
-            fontWeight: 400,
-            lineHeight: 1,
-            backgroundColor: 'black',
-            border: '1px solid var(--text-secondary)',
-            borderRadius: '0.25rem',
-            padding: '0 0.4rem',
-            height: '1.375rem',
-            flex: 1,
-          }}
-        >
-          <ThresholdLabel text="Minor" />
-          <ThresholdTag value={item.thresholds?.major || 7} />
-          <ThresholdLabel text="Major" />
-          <ThresholdTag value={item.thresholds?.severe || 14} />
-          <ThresholdLabel text="Severe" />
-        </div>
+        <ThresholdPill major={item.thresholds?.major} severe={item.thresholds?.severe} />
       </div>
     )
   }
@@ -229,33 +196,7 @@ const StatusSection = ({
         if (!thresholdsEl) return null
         return thresholdsEl
       })()}
-      {!isEditMode && (item.experience?.length > 0 || item.motives?.trim()) && (
-        <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'stretch' }}>
-          {/* Motive slot — keeps its left line even when empty (as long as the row shows);
-              centered when there are no experiences, left-aligned (quote block) when there are */}
-          <div style={{
-            flex: 1,
-            fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
-            textAlign: item.experience?.length > 0 ? 'left' : 'center', textWrap: 'balance',
-            borderLeft: '1px solid var(--border)',
-            paddingLeft: CARD_SPACE_H,
-            display: 'flex', alignItems: 'center',
-            justifyContent: item.experience?.length > 0 ? 'flex-start' : 'center',
-          }}>
-            {item.motives?.trim() ? item.motives + (!item.motives.endsWith('.') ? '.' : '') : ''}
-          </div>
-          {/* Experience slot — keeps its right line even when empty */}
-          <div style={{
-            flexShrink: 0, display: 'flex', alignItems: 'center',
-            borderRight: '1px solid var(--border)',
-            paddingRight: CARD_SPACE_H,
-          }}>
-            {item.experience?.length > 0 && (
-              <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
-            )}
-          </div>
-        </div>
-      )}
+      {!isEditMode && <MotivesExperienceRow motives={item.motives} experience={item.experience} />}
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (
@@ -353,18 +294,6 @@ const counterBtnStyle = {
   fontSize: '1.1rem', lineHeight: 1, cursor: 'pointer',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 }
-
-const ThresholdLabel = ({ text }) => (
-  <span
-    style={{
-      color: 'white',
-      fontSize: '0.75rem',
-      fontWeight: 400,
-    }}
-  >
-    {text}
-  </span>
-)
 
 const ThresholdInput = ({ label, value, onChange }) => (
   <>
