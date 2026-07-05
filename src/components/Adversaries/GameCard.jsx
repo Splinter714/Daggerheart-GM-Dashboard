@@ -68,7 +68,13 @@ const styles = {
 const GameCard = ({
   item,
   type, // 'adversary'
-  mode = 'expanded', // 'expanded', 'edit'
+  // 'expanded' (default) — normal read display. 'edit' — used only by
+  // CustomAdversaryCreator's embedded live-preview card; renders edit-mode-only
+  // sections (stat inputs, feature editors) instead of read-only ones. This is
+  // unrelated to `quickEdit` below, a separate long-press UI toggle on regular
+  // expanded cards (#116). No 'compact' mode exists — that's dead terminology
+  // from an earlier design; only 'expanded' and 'edit' are ever passed.
+  mode = 'expanded',
   onClick,
   onApplyDamage,
   onApplyHealing,
@@ -122,7 +128,14 @@ const GameCard = ({
     })
   }, [instances.length])
 
-  // Quick edit mode — local toggle, saves immediately via onUpdate, no Save/Cancel needed
+  // Quick edit mode — a local, per-card UI toggle triggered by long-press (see
+  // onMouseDown/onTouchStart below), NOT the same concept as the `mode="edit"`
+  // prop. quickEdit just reveals inline name/color/delete controls on an
+  // already-rendered expanded card and saves immediately via onUpdate, with
+  // no Save/Cancel step. `mode="edit"` is a completely different rendering
+  // path used only by CustomAdversaryCreator's embedded live-preview card
+  // (see effectiveMode below) — it swaps in edit-mode-only sections (stat
+  // inputs, feature editors) rather than toggling a control overlay (#116).
   const [quickEdit, setQuickEdit] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -359,7 +372,7 @@ const GameCard = ({
             }} />
           </>
         )}
-        {/* Fixed Header Section - Identical to Compact View */}
+        {/* Fixed Header Section */}
         <div className="border-b" style={{
           paddingTop: CARD_SPACE_V,
           paddingBottom: CARD_SPACE_V,
@@ -1212,8 +1225,9 @@ const GameCard = ({
     return segment ? renderExpandedColossusSegment() : renderExpandedColossus()
   }
 
-  // When showCustomCreator is true, use edit mode instead
-  // This eliminates the double container issue
+  // When showCustomCreator is true, force the 'edit' rendering path (see the
+  // `mode` prop doc comment above) regardless of the passed-in `mode` value.
+  // This eliminates the double container issue.
   const effectiveMode = showCustomCreator ? 'edit' : mode
 
   // Render expanded view for adversaries
