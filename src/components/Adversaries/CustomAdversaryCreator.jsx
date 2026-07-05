@@ -475,17 +475,17 @@ const CustomAdversaryCreator = forwardRef(({
       flexShrink: 0, whiteSpace: 'nowrap',
     }
 
-    // Compact icon + short-label buttons. Save gets extra flex weight + bold
-    // so it reads as dominant; secondary actions (Preview/Cancel/Save As New)
-    // share equal, smaller weight — all still fit in one row without
-    // clipping on narrow viewports (#67).
+    // Icon + short-label buttons, sized to their natural content width (not
+    // equal flex-division) so text is never clipped by ellipsis — each
+    // button is only as wide as its icon + label need (#67). Save still
+    // reads as dominant via bold + fill color, not extra forced width.
     const mobileBtnBase = {
-      ...btnBase, padding: '0.4rem 0.4rem', minWidth: 0, flex: '1 1 0', overflow: 'hidden',
+      ...btnBase, padding: '0.4rem 0.5rem', minWidth: 0, flex: '0 1 auto', overflow: 'visible',
       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', fontSize: '0.78rem',
     }
-    const mobileBtnLabel = { overflow: 'hidden', textOverflow: 'ellipsis' }
+    const mobileBtnLabel = { whiteSpace: 'nowrap' }
     const secondaryBtnStyle = mobileBtnBase
-    const saveBtnStyle = { ...mobileBtnBase, flex: '1.6 1 0', padding: '0.4rem 0.5rem' }
+    const saveBtnStyle = mobileBtnBase
     const secondaryVisual = { background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)' }
 
     const MobileActionBar = () => (
@@ -512,7 +512,7 @@ const CustomAdversaryCreator = forwardRef(({
         <button
           onClick={handleSave}
           disabled={!canAct}
-          style={{ ...saveBtnStyle, background: canAct ? 'var(--purple)' : 'var(--gray-600)', border: 'none', color: 'white', fontWeight: '700', ...(canAct ? {} : disabledStyle) }}
+          style={{ ...saveBtnStyle, flex: '0 1 auto', marginLeft: 'auto', background: canAct ? 'var(--purple)' : 'var(--gray-600)', border: 'none', color: 'white', fontWeight: '700', ...(canAct ? {} : disabledStyle) }}
         ><Check size={14} style={{ flexShrink: 0 }} /><span style={mobileBtnLabel}>{isSaving ? 'Saving…' : 'Save'}</span></button>
       </div>
     )

@@ -59,19 +59,28 @@ describe('CustomAdversaryCreator — live preview pill (#56)', () => {
 })
 
 describe('CustomAdversaryCreator — mobile action bar hierarchy (#67)', () => {
-  it('gives Save more flex weight than the secondary actions so it reads as the dominant button', () => {
+  it('sizes buttons to their natural content width instead of equal flex division, so labels are never ellipsis-clipped', () => {
     render(<CustomAdversaryCreator onSave={vi.fn()} onCancelEdit={vi.fn()} onSaveAndAdd={vi.fn()} onAddToEncounter={vi.fn()} />)
 
     const saveBtn = screen.getByText('Save').closest('button')
     const cancelBtn = screen.getByText('Cancel').closest('button')
     const previewBtn = screen.getByText('Preview').closest('button')
 
-    const saveFlex = parseFloat(saveBtn.style.flex)
-    const cancelFlex = parseFloat(cancelBtn.style.flex)
-    const previewFlex = parseFloat(previewBtn.style.flex)
+    for (const btn of [saveBtn, cancelBtn, previewBtn]) {
+      // flex: '0 1 auto' — content-sized, not equal flex-basis:0 division (root cause of #67 clipping).
+      expect(btn.style.flexGrow).toBe('0')
+      expect(btn.style.flexBasis).toBe('auto')
+    }
 
-    expect(saveFlex).toBeGreaterThan(cancelFlex)
-    expect(saveFlex).toBeGreaterThan(previewFlex)
+    const previewLabel = screen.getByText('Preview')
+    const cancelLabel = screen.getByText('Cancel')
+    // Labels must not use ellipsis/hidden-overflow truncation — that's what silently clipped
+    // text under equal-width flex division before.
+    expect(previewLabel.style.textOverflow).not.toBe('ellipsis')
+    expect(previewLabel.style.whiteSpace).toBe('nowrap')
+    expect(cancelLabel.style.textOverflow).not.toBe('ellipsis')
+    expect(cancelLabel.style.whiteSpace).toBe('nowrap')
+
     expect(saveBtn.style.fontWeight).toBe('700')
   })
 
