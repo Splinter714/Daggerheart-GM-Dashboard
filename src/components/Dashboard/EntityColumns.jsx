@@ -4,6 +4,7 @@ import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
 import { getCardScrollTarget } from './hooks/cardScrollTarget'
 import { isColossusGroup, buildAdversaryItem } from './hooks/useEntityGroups'
+import { RECENTLY_ADDED_DURATION_MS } from './hooks/useAdversaryAddition'
 
 // Collect consecutive same-groupName entries into sections (any entity type).
 function buildSections(entityGroups) {
@@ -55,7 +56,7 @@ const EntityColumns = ({
   deleteEnvironment,
   setRemovingCardSpacer,
   setSpacerShrinking,
-  onOpenBrowser, instanceLabelStyle = 'numeric', recentlyAddedCards = new Set(),
+  onOpenBrowser, instanceLabelStyle = 'numeric', recentlyAddedCards = new Set(), setRecentlyAddedCards,
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
 
@@ -240,6 +241,18 @@ const EntityColumns = ({
                 } else {
                   createAdversary(item)
                 }
+                // Soft "just added" confirmation pulse — also fires when adding
+                // another instance to an already-open existing card, not just
+                // on first-time card creation (#55).
+                const addedCardKey = `adversary-${group.baseName}`
+                setRecentlyAddedCards?.(prev => new Set(prev).add(addedCardKey))
+                setTimeout(() => {
+                  setRecentlyAddedCards?.(prev => {
+                    const next = new Set(prev)
+                    next.delete(addedCardKey)
+                    return next
+                  })
+                }, RECENTLY_ADDED_DURATION_MS)
                 setTimeout(() => {
                   requestAnimationFrame(() => requestAnimationFrame(() => {
                     if (!scrollContainerRef.current) return

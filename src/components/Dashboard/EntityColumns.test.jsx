@@ -361,3 +361,63 @@ describe('EntityColumns preserves colossus stress track length (#109)', () => {
     expect(props.item.stress).toBe(0)
   })
 })
+
+// #55: playtested 2026-07-04 — the "just added" confirmation pulse worked
+// for a brand-new card but not when adding another instance to an existing
+// card via the open card's own +/- controls (EntityColumns' onAddInstance
+// handler, wired through GameCard/TabButtons/StatusSection). Verifies
+// onAddInstance also flags the card key in setRecentlyAddedCards.
+describe('EntityColumns re-pulses on adding an instance to an existing card (#55)', () => {
+  const baseProps = {
+    columnWidth: 300,
+    scrollContainerRef: createRef(),
+    onScroll: noop,
+    newCards: new Set(),
+    removingCardSpacer: null,
+    spacerShrinking: false,
+    editingAdversaryId: null,
+    handleSaveCustomAdversary: noop,
+    handleCancelEdit: noop,
+    updateAdversary: noop,
+    updateEnvironment: noop,
+    adversaries: [],
+    handleEditAdversary: noop,
+    createAdversariesBulk: noop,
+    pcCount: 4,
+    smoothScrollTo: noop,
+    deleteAdversary: noop,
+    deleteEnvironment: noop,
+    setRemovingCardSpacer: noop,
+    setSpacerShrinking: noop,
+  }
+
+  it('calls setRecentlyAddedCards with the card key when onAddInstance fires', () => {
+    const template = { baseName: 'Bear', type: 'Bruiser', hpMax: 5, stressMax: 2 }
+    const instance = { id: 'Bear-1', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true }
+    const existingGroup = { type: 'adversary', baseName: 'Bear', template, instances: [instance] }
+    const entityGroups = [existingGroup]
+    const setRecentlyAddedCards = vi.fn()
+    const createAdversary = vi.fn()
+
+    render(
+      <EntityColumns
+        {...baseProps}
+        entityGroups={entityGroups}
+        browserOpenAtPosition={0}
+        getEntityGroups={() => entityGroups}
+        createAdversary={createAdversary}
+        setRecentlyAddedCards={setRecentlyAddedCards}
+      />
+    )
+
+    const props = GameCard.mock.calls.at(-1)[0]
+    expect(props.onAddInstance).toBeInstanceOf(Function)
+    props.onAddInstance(template)
+
+    expect(createAdversary).toHaveBeenCalledWith(template)
+    expect(setRecentlyAddedCards).toHaveBeenCalled()
+    const updater = setRecentlyAddedCards.mock.calls[0][0]
+    const result = updater(new Set())
+    expect(result.has('adversary-Bear')).toBe(true)
+  })
+})

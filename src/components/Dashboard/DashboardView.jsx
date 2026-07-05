@@ -500,7 +500,7 @@ const DashboardContent = () => {
           isNarrow={isNarrow}
           scrollContainerRef={scrollContainerRef}
           onScroll={handleScroll}
-          newCards={newCards} recentlyAddedCards={recentlyAddedCards}
+          newCards={newCards} recentlyAddedCards={recentlyAddedCards} setRecentlyAddedCards={setRecentlyAddedCards}
           removingCardSpacer={removingCardSpacer}
           spacerShrinking={spacerShrinking}
           browserOpenAtPosition={browserOpenAtPosition}
