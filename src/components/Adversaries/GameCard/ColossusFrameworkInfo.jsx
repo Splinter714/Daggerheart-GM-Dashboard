@@ -17,7 +17,7 @@ import MotivesExperienceRow from './MotivesExperience'
 // adversary card (ThresholdPill, MotivesExperienceRow) instead of bespoke
 // plain-text renderings that had visually drifted from the adversary card.
 export const ColossusThresholdsBadge = ({ colossus }) => (
-  <ThresholdPill major={colossus.thresholds?.major} severe={colossus.thresholds?.severe} flex={false} />
+  <ThresholdPill major={colossus.thresholds?.major} severe={colossus.thresholds?.severe} />
 )
 
 // Shared Stress pip row — reads/writes `inst.stress` directly (the same

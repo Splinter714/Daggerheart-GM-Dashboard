@@ -401,16 +401,13 @@ const ColossusSegmentCard = ({
             )}
           </div>
 
-          {/* Row 2: Difficulty | Thresholds (#109) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, paddingTop: CARD_SPACE_V, paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, flexWrap: 'wrap' }}>
+          {/* Row 2: Difficulty | Thresholds (#109) — matches the regular
+              adversary card's DIFF+ThresholdPill row exactly (StatusSection.jsx) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, paddingTop: CARD_SPACE_V, paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H }}>
             {seg.difficulty != null && (
               <MergedStatBadge shape="hex" label="DIFF" value={seg.difficulty} />
             )}
-            {colossus.thresholds && (
-              <span style={{ flexShrink: 0 }}>
-                <ColossusThresholdsBadge colossus={colossus} />
-              </span>
-            )}
+            {colossus.thresholds && <ColossusThresholdsBadge colossus={colossus} />}
           </div>
 
           {/* Row 3: Motives | Experience (framework-shared, #109) */}

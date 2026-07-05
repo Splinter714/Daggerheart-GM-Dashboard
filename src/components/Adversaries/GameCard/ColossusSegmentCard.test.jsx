@@ -177,22 +177,28 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getByText('Colossus Features')).toBeInTheDocument()
   })
 
-  // #79: the DIFF/thresholds badges are fixed-size and must not shrink —
-  // only the weapon pill should give way, wrapping onto its own line at
-  // narrow widths instead of being squeezed illegibly small. Verifies the
-  // structural styles (flexShrink/flexBasis) rather than pixel layout, since
-  // jsdom doesn't compute real flex-wrap — the live 375px-viewport check in
-  // this session confirmed the visual wrap.
-  it('does not let the thresholds badge or weapon pill shrink to fit — thresholds is flex-shrink 0 and the weapon pill has a wrap-forcing flex-basis (#79)', () => {
+  // #79: the weapon pill (row 1) must not be squeezed illegibly small at
+  // narrow widths — it has a wrap-forcing flex-basis so it gives way onto
+  // its own line instead. Verifies the structural style rather than pixel
+  // layout, since jsdom doesn't compute real flex-wrap — the live
+  // 375px-viewport check in this session confirmed the visual wrap.
+  it('gives the weapon pill a wrap-forcing flex-basis so it does not shrink to fit (#79)', () => {
     const { container } = render(<ColossusSegmentCard {...baseProps} />)
-
-    const thresholdsLabel = screen.getByText('Major')
-    // ThresholdPill (rendered non-flex here) is the pill div itself.
-    const thresholdsPill = thresholdsLabel.parentElement
-    expect(thresholdsPill.style.flexShrink).toBe('0')
 
     const weaponPill = container.querySelector('[style*="flex: 1 1 160px"]')
     expect(weaponPill).toBeTruthy()
     expect(weaponPill.textContent).toContain('Peck')
+  })
+
+  // #109 round 2: the thresholds pill (row 2) must render via the exact same
+  // shared ThresholdPill component/styling the regular adversary card uses
+  // (flex: 1, stretching to fill the row) rather than the earlier
+  // flex-shrink:0/shrink-to-content variant, which visually diverged in
+  // width and alignment from the adversary card's threshold pill.
+  it('renders the thresholds pill with the same flex:1 stretch behavior as the regular adversary card (#109)', () => {
+    render(<ColossusSegmentCard {...baseProps} />)
+    const thresholdsLabel = screen.getByText('Major', { selector: 'span' })
+    const thresholdsPill = thresholdsLabel.parentElement
+    expect(thresholdsPill.getAttribute('style')).toContain('flex: 1 1 0%')
   })
 })
