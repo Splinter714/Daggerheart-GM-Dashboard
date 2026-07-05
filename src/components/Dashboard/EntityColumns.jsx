@@ -436,29 +436,27 @@ const EntityColumns = ({
             if (isFirst) firstGroupSeen = true
             return (
               <div style={{
-                height: groupTabBarHeight, display: 'flex',
-                alignItems: 'flex-start', position: 'relative',
+                height: groupTabBarHeight, position: 'relative',
               }}>
-                <div style={{
-                  position: 'absolute', top: groupLineY, left: 0, right: 0, bottom: 6,
-                  borderTop: '1px solid var(--text-secondary)',
-                  borderRight: '1px solid var(--text-secondary)',
-                  borderTopRightRadius: 4, pointerEvents: 'none',
-                }} />
-                {/* Rail's left edge, pinned like the pill (sticky) so it can't peek out
-                    past its left side (#86). width: 0 keeps it out of flex layout. */}
-                <div style={{
-                  position: 'sticky', left: 0, top: groupLineY, width: 0,
+                {/* Sticky (not absolute) with an explicit width so its left edge
+                    tracks the pinned pill instead of the wrapper's scrolled-away
+                    edge — absolute + left:0/right:0 let the top border draw past
+                    the pill once scrolled (#86). Needs a non-flex parent for the
+                    100% width to resolve against the wrapper. */}
+                <div data-testid="group-rail-border" style={{
+                  position: 'sticky', top: groupLineY, left: 0, width: '100%',
                   height: `calc(100% - ${groupLineY}px - 6px)`,
+                  borderTop: '1px solid var(--text-secondary)',
                   borderLeft: '1px solid var(--text-secondary)',
-                  pointerEvents: 'none', flexShrink: 0, zIndex: 1,
+                  borderRight: '1px solid var(--text-secondary)',
+                  borderTopRightRadius: 4, pointerEvents: 'none', boxSizing: 'border-box', zIndex: 1,
                 }} />
                 <span
                   ref={isFirst ? pillMeasureRef : undefined}
                   style={{
                     position: 'sticky',
                     left: 0,
-                    flexShrink: 0,
+                    display: 'inline-block',
                     zIndex: 1,
                     marginTop: GROUP_TAB_TOP_SPACE,
                     fontSize: '0.75rem',

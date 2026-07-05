@@ -8,12 +8,19 @@ vi.mock('../Adversaries/GameCard', () => ({
 }))
 
 // Covers #86: the grouper rail's left edge must be pinned the same way as the
-// group-name pill (sticky), not a plain absolute box spanning the whole
-// section wrapper — otherwise, once the section scrolls partway offscreen,
-// the rail's left edge trails behind the pinned pill and peeks out past its
-// left side. jsdom doesn't compute real sticky layout, so this test asserts
-// the structural fix (a separate sticky left-edge element) rather than
-// pixel positions, which the browser-level check in this session verified.
+// group-name pill (position: sticky with an explicit width), not a plain
+// absolute box with left:0/right:0 spanning the whole section wrapper —
+// otherwise, once the section scrolls partway offscreen, the rail's left
+// edge trails behind the pinned pill and peeks out past its left side.
+// (An earlier fix split the rail into an absolute top/right box plus a
+// separate zero-width sticky hairline for the left edge, but the absolute
+// box's own left:0 still tracked the wrapper's scrolled-away edge, so its
+// top border kept drawing past the pill — that's the regression Jackson
+// saw. Making the whole rail box sticky removes the need for the separate
+// hairline.) jsdom doesn't compute real sticky layout, so this test asserts
+// the structural fix (a single sticky, explicitly-widthed rail box) rather
+// than pixel positions, which the browser-level check in this session
+// verified across multiple groups and scroll positions.
 
 const group = (baseName, type) => ({
   type: 'adversary',
@@ -26,7 +33,7 @@ const group = (baseName, type) => ({
 const noop = () => {}
 
 describe('EntityColumns grouper rail (#86)', () => {
-  it('renders the rail left-edge as its own sticky element, separate from the absolute-positioned top/right rail', () => {
+  it('renders the rail as a single sticky, explicitly-widthed box (not absolute with left:0/right:0)', () => {
     const entityGroups = [group('Bear', 'Bruiser'), group('Head Guard', 'Leader')]
 
     const { container } = render(
@@ -62,11 +69,19 @@ describe('EntityColumns grouper rail (#86)', () => {
     expect(wrappers.length).toBe(2)
 
     wrappers.forEach((wrapper) => {
-      const stickyLeftEdge = wrapper.querySelector('div[style*="position: sticky"][style*="left: 0"]')
-      expect(stickyLeftEdge).toBeTruthy()
-      // Must not carry a right/width that would make it double as the full rail —
-      // it should be a hairline pinned to the left, independent of the pill.
-      expect(stickyLeftEdge.style.width).toBe('0px')
+      const railBox = wrapper.querySelector('[data-testid="group-rail-border"]')
+      expect(railBox).toBeTruthy()
+      // Sticky (not absolute), pinned to the same left:0 edge as the pill.
+      expect(railBox.style.position).toBe('sticky')
+      expect(railBox.style.left).toBe('0px')
+      // Must have an explicit width (not left:0/right:0 auto-stretch, which
+      // is how the original regression reintroduced the wrapper-relative
+      // left edge) so its size resolves against the wrapper independent of
+      // its own sticky offset.
+      expect(railBox.style.width).toBe('100%')
+      // Draws its own left border now that its left edge is correctly
+      // pinned — no separate hairline element needed.
+      expect(railBox.style.borderLeft).toBeTruthy()
     })
   })
 })
