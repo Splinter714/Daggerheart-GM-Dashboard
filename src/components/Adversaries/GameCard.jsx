@@ -14,6 +14,7 @@ import TabButtons from './GameCard/TabButtons'
 import ColossusSegmentCard, { Divider, FeatureList, numberSegmentInstances, NestedSegmentBlock } from './GameCard/ColossusSegmentCard'
 import { EnvironmentFeatureGroup, EnvironmentImpulses, PotentialAdversaries } from './GameCard/EnvironmentFeaturesSection'
 import TouchTarget from '../Shared/TouchTarget'
+import { useMinionGroupCount } from './GameCard/hooks/useMinionGroupCount'
 
 const INSTANCE_COLORS = [
   { value: 'var(--red)',    label: 'Red' },
@@ -96,12 +97,14 @@ const GameCard = ({
   segmentInstances = null, // Array of { instanceKey, instanceNumber } for this segment role (#110) — one slot per instance
   instanceLabelStyle = 'numeric', // Global display setting (#82): 'numeric' or 'alphabetic'
   isRecentlyAdded = false, // Soft fade-out confirmation pulse on newly-added cards (#55)
+  pcCount = 1, // Party size — Minions add/remove in groups of pcCount per click (1 Battle Point == 1 group, #30)
 }) => {
   const nameInputRef = useRef(null)
   const customCreatorRef = useRef(null)
   const cardRef = useRef(null)
   const scrollableRef = useRef(null)
   const prevInstancesLengthRef = useRef(instances.length)
+  const groupCount = useMinionGroupCount(item, instances, pcCount)
 
   // Scroll newly added instance into view (minimum scroll, only if needed)
   useEffect(() => {
@@ -456,28 +459,27 @@ const GameCard = ({
               />
               {(onRemoveInstance || onAddInstance) && (
                 <>
-                  {/* Minus is the only removal control, at every count (#30). 2+
-                      decrements immediately; at 1 it arms the shared deleteConfirm. */}
+                  {/* Minus is the only removal control (#30); 2+ groups decrements immediately, the last group arms deleteConfirm. */}
                   <TouchTarget
                     onClick={(e) => {
                       e.stopPropagation()
-                      if (instances.length > 1) { onRemoveInstance?.(item.id); return }
+                      if (groupCount > 1) { onRemoveInstance?.(item.id); return }
                       if (deleteConfirm) { setDeleteConfirm(false); onRemoveInstance?.(item.id); return }
                       setDeleteConfirm(true)
                       setTimeout(() => setDeleteConfirm(false), 3000)
                     }}
-                    title={instances.length <= 1 && deleteConfirm ? 'Click again to confirm' : 'Remove one'}
+                    title={groupCount <= 1 && deleteConfirm ? 'Click again to confirm' : 'Remove one'}
                     wrapperStyle={{ flexShrink: 0 }}
                     style={{
                       width: '1.5rem', height: '1.5rem', borderRadius: '0.25rem', color: 'white', transition: 'background 0.15s, border 0.15s',
-                      background: instances.length <= 1 && deleteConfirm ? 'var(--danger)' : 'var(--gray-700)',
-                      border: instances.length <= 1 && deleteConfirm ? 'none' : '1px solid var(--gray-600)',
+                      background: groupCount <= 1 && deleteConfirm ? 'var(--danger)' : 'var(--gray-700)',
+                      border: groupCount <= 1 && deleteConfirm ? 'none' : '1px solid var(--gray-600)',
                     }}
                   >
                     <Minus size={12} />
                   </TouchTarget>
                   <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'white', flexShrink: 0, display: 'inline-block', minWidth: '0.9rem', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
-                    {instances.length}
+                    {groupCount}
                   </span>
                   <TouchTarget
                     onClick={(e) => { e.stopPropagation(); onAddInstance?.(item) }}
@@ -554,7 +556,7 @@ const GameCard = ({
                   </span>
                   {(onAddInstance || onRemoveInstance) && (
                     <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-secondary)', flexShrink: 0 }}>
-                      ({instances.length})
+                      ({groupCount})
                     </span>
                   )}
                 </h4>

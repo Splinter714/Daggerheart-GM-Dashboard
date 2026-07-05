@@ -421,3 +421,48 @@ describe('EntityColumns re-pulses on adding an instance to an existing card (#55
     expect(result.has('adversary-Bear')).toBe(true)
   })
 })
+
+// #30 playtest 2026-07-05: GameCard's quick-edit stepper needs pcCount to display
+// and gate Minion add/remove in party-size groups rather than raw instances —
+// verify EntityColumns actually forwards it as a prop, since onAddInstance/
+// onRemoveInstance already compute isMinion ? pcCount : 1 correctly on their own.
+describe('EntityColumns forwards pcCount to GameCard (#30)', () => {
+  it('passes the current pcCount through as a GameCard prop', () => {
+    const template = { baseName: 'Skulk', type: 'Minion', hpMax: 1, stressMax: 1 }
+    const instance = { id: 'Skulk-1', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true }
+    const existingGroup = { type: 'adversary', baseName: 'Skulk', template, instances: [instance] }
+    const entityGroups = [existingGroup]
+
+    render(
+      <EntityColumns
+        entityGroups={entityGroups}
+        columnWidth={300}
+        scrollContainerRef={createRef()}
+        onScroll={noop}
+        newCards={new Set()}
+        removingCardSpacer={null}
+        spacerShrinking={false}
+        browserOpenAtPosition={0}
+        editingAdversaryId={null}
+        handleSaveCustomAdversary={noop}
+        handleCancelEdit={noop}
+        updateAdversary={noop}
+        updateEnvironment={noop}
+        adversaries={[]}
+        handleEditAdversary={noop}
+        createAdversary={noop}
+        createAdversariesBulk={noop}
+        pcCount={4}
+        smoothScrollTo={noop}
+        getEntityGroups={() => entityGroups}
+        deleteAdversary={noop}
+        deleteEnvironment={noop}
+        setRemovingCardSpacer={noop}
+        setSpacerShrinking={noop}
+      />
+    )
+
+    const props = GameCard.mock.calls.at(-1)[0]
+    expect(props.pcCount).toBe(4)
+  })
+})

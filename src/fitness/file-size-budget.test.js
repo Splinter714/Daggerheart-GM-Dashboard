@@ -16,7 +16,7 @@ const SRC_ROOT = join(process.cwd(), 'src')
 const BUDGETS = {
   'src/components/Browser/Browser.jsx': 882,
   'src/components/Adversaries/CustomAdversaryCreator.jsx': 932,
-  'src/components/Adversaries/GameCard.jsx': 1255,
+  'src/components/Adversaries/GameCard.jsx': 1257, // #30: +1 prop (pcCount), +1 import; group-size calc extracted to GameCard/hooks/useMinionGroupCount.js
   'src/components/Dashboard/DashboardView.jsx': 581,
   'src/components/Dashboard/EntityColumns.jsx': 585,
 }

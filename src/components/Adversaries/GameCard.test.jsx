@@ -451,3 +451,83 @@ describe('GameCard quick-edit: minus is the only removal control, at every insta
     expect(onDelete).toHaveBeenCalledTimes(1)
   })
 })
+
+// #30 playtest 2026-07-05: Minions add/remove in groups of pcCount per click
+// (1 Battle Point == 1 group of party-size minions, mirroring EntityColumns.jsx's
+// isMinion ? pcCount : 1 logic, which already calls onAddInstance/onRemoveInstance
+// once per click regardless of type). The quick-edit stepper's displayed count and
+// its "last one left" delete-confirm threshold must speak in groups for Minions
+// (raw instances.length is the wrong unit — a 2-group, 8-minion card should read
+// "2" and only arm the confirm once decremented to the last group of 4, not the
+// last individual minion).
+describe('GameCard quick-edit: Minion stepper counts and confirms in party-size groups (#30)', () => {
+  const minionItem = { id: 'grp-1', name: 'Sniper', type: 'Minion', hpMax: 1, stressMax: 1 }
+  const makeInstances = (n) =>
+    Array.from({ length: n }, (_, i) => ({ id: `adv-${i + 1}`, duplicateNumber: i + 1, hp: 0, stress: 0, hpMax: 1, stressMax: 1 }))
+
+  it('displays the group count (instances / pcCount), not the raw minion count', () => {
+    render(
+      <GameCard
+        type="adversary" item={minionItem} instances={makeInstances(8)} pcCount={4}
+        onAddInstance={vi.fn()} onRemoveInstance={vi.fn()} onDelete={vi.fn()}
+      />
+    )
+    fireEvent.click(screen.getByTitle('Edit'))
+    // 8 minions at pcCount=4 is 2 groups (2 Battle Points), not "8". The stepper's
+    // count sits between the minus and plus buttons in the quick-edit row.
+    const stepperCount = screen.getByTitle('Remove one').nextSibling
+    expect(stepperCount).toHaveTextContent('2')
+  })
+
+  it('at 2+ groups (e.g. 8 minions, pcCount 4): minus decrements one call, no confirm step', () => {
+    const onRemoveInstance = vi.fn()
+    render(
+      <GameCard
+        type="adversary" item={minionItem} instances={makeInstances(8)} pcCount={4}
+        onAddInstance={vi.fn()} onRemoveInstance={onRemoveInstance} onDelete={vi.fn()}
+      />
+    )
+    fireEvent.click(screen.getByTitle('Edit'))
+    fireEvent.click(screen.getByTitle('Remove one'))
+    expect(onRemoveInstance).toHaveBeenCalledTimes(1)
+    expect(screen.queryByTitle('Click again to confirm')).toBeNull()
+  })
+
+  it('at exactly 1 group left (e.g. 4 minions, pcCount 4): minus requires the two-stage confirm, matching the last-instance behavior for non-Minions', () => {
+    const onRemoveInstance = vi.fn()
+    render(
+      <GameCard
+        type="adversary" item={minionItem} instances={makeInstances(4)} pcCount={4}
+        onAddInstance={vi.fn()} onRemoveInstance={onRemoveInstance} onDelete={vi.fn()}
+      />
+    )
+    fireEvent.click(screen.getByTitle('Edit'))
+
+    // First click arms — no removal yet, even though 4 raw instances remain.
+    fireEvent.click(screen.getByTitle('Remove one'))
+    expect(onRemoveInstance).not.toHaveBeenCalled()
+    expect(screen.getByTitle('Click again to confirm')).toBeInTheDocument()
+
+    // Second click removes the whole last group in one onRemoveInstance call.
+    fireEvent.click(screen.getByTitle('Click again to confirm'))
+    expect(onRemoveInstance).toHaveBeenCalledTimes(1)
+  })
+
+  it('non-Minion adversaries are unaffected by pcCount — group size stays 1', () => {
+    const onRemoveInstance = vi.fn()
+    render(
+      <GameCard
+        type="adversary" item={{ id: 'grp-2', name: 'Goblin', hpMax: 10, stressMax: 3 }}
+        instances={makeInstances(4)} pcCount={4}
+        onAddInstance={vi.fn()} onRemoveInstance={onRemoveInstance} onDelete={vi.fn()}
+      />
+    )
+    fireEvent.click(screen.getByTitle('Edit'))
+    // 4 individual (non-Minion) instances still display as "4", not collapsed into 1 group.
+    const stepperCount = screen.getByTitle('Remove one').nextSibling
+    expect(stepperCount).toHaveTextContent('4')
+    fireEvent.click(screen.getByTitle('Remove one'))
+    expect(onRemoveInstance).toHaveBeenCalledTimes(1)
+    expect(screen.queryByTitle('Click again to confirm')).toBeNull()
+  })
+})

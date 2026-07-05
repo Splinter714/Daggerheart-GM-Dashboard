@@ -140,6 +140,7 @@ const EntityColumns = ({
               : { ...group.instances[0], name: group.instances[0]?.name || group.baseName }
           }
           segment={group.segment} segmentInstances={group.segmentInstances} mode="expanded" instanceLabelStyle={instanceLabelStyle}
+          pcCount={pcCount}
           isRecentlyAdded={group.type === 'adversary' && recentlyAddedCards.has(`adversary-${group.baseName}`)}
           instances={
             group.type === 'adversary'
