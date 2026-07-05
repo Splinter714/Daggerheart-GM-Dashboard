@@ -14,11 +14,11 @@ const AdversaryToast = ({ message }) => {
       style={{
         position: 'fixed',
         left: '50%',
-        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 4.5rem)',
+        top: 'calc(env(safe-area-inset-top, 0px) + 1rem)',
         transform: 'translateX(-50%)',
         zIndex: 200,
         pointerEvents: 'none',
-        backgroundColor: 'var(--bg-primary)',
+        backgroundColor: 'var(--bg-card)',
         border: '1px solid var(--border)',
         borderRadius: '999px',
         padding: '0.5rem 1rem',
