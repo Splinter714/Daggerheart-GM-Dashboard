@@ -108,10 +108,13 @@ export const StatField = ({ label, field, subfield, rangeKey, disabled, formData
           onChange={e => set(e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
           style={{
             ...inputStyle,
-            // Slimmed to match quick-edit mode's tighter number treatment (#41):
-            // smaller font, tighter padding, height aligned to the 1.5rem stepper buttons.
+            // Slimmed to match quick-edit mode's tighter number treatment (#41
+            // vertically, #122 horizontally): smaller font, tighter padding,
+            // height aligned to the 1.5rem stepper buttons, and a fixed
+            // narrow width matching quick-edit's VitalRow number input
+            // (StatusSection.jsx) instead of stretching to fill the row.
             textAlign: 'center', opacity: disabled ? 0.4 : 1, borderColor: color,
-            width: '100%', minWidth: 0,
+            width: '2.5rem', minWidth: 0, flexShrink: 0,
             fontSize: '0.85rem', fontWeight: 500, padding: '0.15rem 0.3rem',
             height: '1.5rem', boxSizing: 'border-box', fontVariantNumeric: 'tabular-nums',
           }}
