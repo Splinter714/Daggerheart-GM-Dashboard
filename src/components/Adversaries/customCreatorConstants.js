@@ -27,6 +27,17 @@ export const labelStyle = {
   display: 'block',
 }
 
+// #123: label style variant for fields whose label doubles as an
+// InfoPopover trigger (dashed-underline on the label text itself, replacing
+// the old separate circular "i" icon button). `color` and `marginBottom`
+// are left to the InfoPopover trigger button / wrapping row instead of the
+// label span, so the button's open/hover purple can show through.
+export const popoverLabelStyle = {
+  ...labelStyle,
+  color: 'inherit',
+  marginBottom: 0,
+}
+
 export const sectionStyle = {
   display: 'flex',
   flexDirection: 'column',

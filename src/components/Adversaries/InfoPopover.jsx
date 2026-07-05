@@ -2,9 +2,15 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 
 // Hover-style info popover used across the custom adversary creator form.
 // Extracted verbatim from CustomAdversaryCreator.jsx (Phase 4).
-// align: 'left' anchors popover to the left edge of the button (default)
+// align: 'left' anchors popover to the left edge of the trigger (default)
 //        'right' anchors to the right edge — use for fields near the right of the form
-export const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
+//
+// #123 (2026-07-05 playtest): the trigger used to be a separate circular "i"
+// icon button sitting next to the plain label text. That icon ate horizontal
+// space labels needed to avoid wrapping, so the trigger is now the label
+// text itself — rendered with a dashed underline — and `label` replaces the
+// plain <span>{label}</span> call sites used to render next to the icon.
+export const InfoPopover = ({ children, label, align = 'left', minWidth = 220 }) => {
   const [open, setOpen] = useState(false)
   const [adjust, setAdjust] = useState({ dx: 0, flipUp: false })
   const containerRef = useRef(null)
@@ -54,25 +60,21 @@ export const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
+        onMouseEnter={() => setOpen(true)}
         style={{
-          width: '44px', height: '44px',
           border: 'none', background: 'transparent',
           cursor: 'pointer', padding: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-          marginTop: '-12px', marginRight: '-12px', marginBottom: '-12px', marginLeft: 0,
+          display: 'flex', alignItems: 'center',
+          minHeight: '44px',
+          font: 'inherit', textAlign: 'left',
+          color: open ? 'var(--purple)' : 'var(--text-secondary)',
+          textDecoration: 'underline',
+          textDecorationStyle: 'dashed',
+          textDecorationColor: open ? 'var(--purple)' : 'var(--border)',
+          textUnderlineOffset: '3px',
         }}
       >
-        <span style={{
-          width: '20px', height: '20px',
-          borderRadius: '50%',
-          border: `1px solid ${open ? 'var(--purple)' : 'var(--border)'}`,
-          background: open ? 'var(--purple)' : 'var(--bg-secondary)',
-          color: open ? 'white' : 'var(--text-secondary)',
-          fontSize: '0.66rem', fontWeight: 600,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          pointerEvents: 'none', flexShrink: 0,
-        }}>i</span>
+        {label}
       </button>
       {open && (
         <div ref={popoverRef} style={{

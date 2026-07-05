@@ -7,7 +7,7 @@ import ExperienceSection from './GameCard/ExperienceSection'
 import { getDefaultAdversaryValues } from './adversaryDefaults'
 import { typeGuide, stressFearGuide } from './adversaryTypeGuide'
 import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from '../Dashboard/constants'
-import { inputStyle, labelStyle, sectionStyle, parseDamage, buildDamage, reorder, compactCtrlBtnStyle } from './customCreatorConstants'
+import { inputStyle, labelStyle, popoverLabelStyle, sectionStyle, parseDamage, buildDamage, reorder, compactCtrlBtnStyle } from './customCreatorConstants'
 import { DragHandle } from './creatorAtoms'
 import { InfoPopover } from './InfoPopover'
 import { StatField } from './StatField'
@@ -564,9 +564,8 @@ const CustomAdversaryCreator = forwardRef(({
               {/* Tier + Type */}
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                 <div style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Tier</span>
-                    <InfoPopover>
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.3rem', minHeight: '20px' }}>
+                    <InfoPopover label={<span style={popoverLabelStyle}>Tier</span>}>
                       <div style={{ fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>PC Levels by Tier</div>
                       {[['1','1'],['2','2–4'],['3','5–7'],['4','8–10']].map(([t, lvls]) => (
                         <div key={t} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '0.15rem 0', color: parseInt(t) === formData.tier ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: parseInt(t) === formData.tier ? 600 : 400, backgroundColor: parseInt(t) === formData.tier ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent', borderRadius: '0.25rem', paddingLeft: '0.2rem', paddingRight: '0.2rem' }}>
@@ -591,9 +590,10 @@ const CustomAdversaryCreator = forwardRef(({
                   </div>
                 </div>
                 <div style={{ ...sectionStyle, flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Type</span>
-                    <InfoPopover align="right"><TypeInfoContent selectedType={formData.type} /></InfoPopover>
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.3rem', minHeight: '20px' }}>
+                    <InfoPopover align="right" label={<span style={popoverLabelStyle}>Type</span>}>
+                      <TypeInfoContent selectedType={formData.type} />
+                    </InfoPopover>
                   </div>
                   <TypeSelector selectedType={formData.type} onTypeChange={handleTypeChange} />
                 </div>
@@ -649,8 +649,7 @@ const CustomAdversaryCreator = forwardRef(({
               {/* Experiences */}
               <div style={sectionStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
-                  <label style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Experiences</label>
-                  <InfoPopover>
+                  <InfoPopover label={<span style={popoverLabelStyle}>Experiences</span>}>
                     {guide?.experiences?.length > 0 ? (
                       <>
                         <div style={{ fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>

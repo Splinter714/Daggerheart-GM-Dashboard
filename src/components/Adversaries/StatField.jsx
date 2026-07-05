@@ -1,7 +1,7 @@
 import React from 'react'
 import { Minus, Plus } from 'lucide-react'
 import { formatRange, formatAtkRange, getGuideRange, isInRange, guideRanges } from './adversaryGuideRanges'
-import { inputStyle, labelStyle, sectionStyle } from './customCreatorConstants'
+import { inputStyle, sectionStyle, popoverLabelStyle } from './customCreatorConstants'
 import { InfoPopover } from './InfoPopover'
 import TouchTarget from '../Shared/TouchTarget'
 
@@ -53,10 +53,9 @@ export const StatField = ({ label, field, subfield, rangeKey, disabled, formData
 
   return (
     <div style={sectionStyle}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.3rem' }}>
-        <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.3rem' }}>
         <span style={{ visibility: disabled ? 'hidden' : 'visible', display: 'flex', alignItems: 'center' }}>
-          <InfoPopover minWidth={320}>
+          <InfoPopover minWidth={320} label={<span style={popoverLabelStyle}>{label}</span>}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
               <thead>
                 <tr>

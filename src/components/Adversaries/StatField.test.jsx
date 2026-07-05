@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { StatField } from './StatField'
 
@@ -63,5 +63,27 @@ describe('StatField — compact number display (#41)', () => {
     const input = screen.getByDisplayValue('2')
     const stepperRow = input.parentElement
     expect(stepperRow.style.justifyContent).toBe('center')
+  })
+
+  // #123: the label itself is now the InfoPopover trigger (dashed underline),
+  // replacing the separate circular "i" icon that used to sit next to it.
+  it('renders the label as the InfoPopover trigger, opening the guide table on click', () => {
+    render(
+      <StatField
+        label="Attack Modifier"
+        field="atk"
+        rangeKey="atk"
+        formData={baseFormData}
+        setFormData={vi.fn()}
+        adversaryType="Standard"
+        currentTier={1}
+      />
+    )
+
+    const trigger = screen.getByText('Attack Modifier')
+    expect(trigger.closest('button')).toBeInTheDocument()
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    fireEvent.click(trigger)
+    expect(screen.getByRole('table')).toBeInTheDocument()
   })
 })
