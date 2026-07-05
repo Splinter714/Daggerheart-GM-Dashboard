@@ -1,8 +1,24 @@
 import React from 'react'
+import { ArrowUp, ArrowDown } from 'lucide-react'
 import Browser from '../Browser/Browser'
 import EncounterReceipt from './EncounterReceipt'
 import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from './constants'
 import logoImage from '../../assets/daggerheart-logo.svg'
+
+const SORT_OPTIONS = [
+  { value: 'name',       label: 'Name'             },
+  { value: 'tier',       label: 'Tier'             },
+  { value: 'type',       label: 'Type'             },
+  { value: 'hp',         label: 'Max HP'           },
+  { value: 'difficulty', label: 'Difficulty'       },
+  { value: 'atk',        label: 'Attack'           },
+  { value: 'threshold',  label: 'Damage threshold' },
+]
+
+const GROUP_OPTIONS = [
+  { value: 'type', label: 'Type' },
+  { value: 'tier', label: 'Tier' },
+]
 
 const ColumnHeader = ({ title }) => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
@@ -35,12 +51,86 @@ const ToggleRow = ({ label, value, options, onChange }) => (
   </div>
 )
 
-const InfoContent = ({ colossusDisplayMode, onColossusDisplayModeChange, instanceLabelStyle, onInstanceLabelStyleChange }) => (
+// Sort-by/group-by option row, shared styling with the Colossus/Instance toggles below it.
+const optRow = (selected) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  padding: '0.25rem 0.5rem',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  background: selected ? 'color-mix(in srgb, var(--purple) 12%, transparent)' : 'transparent',
+  color: selected ? 'var(--purple)' : 'var(--text-primary)',
+  fontSize: '0.85rem',
+  userSelect: 'none',
+  justifyContent: 'space-between',
+})
+
+const optDot = (selected) => ({
+  width: 14, height: 14,
+  borderRadius: '50%',
+  border: `2px solid ${selected ? 'var(--purple)' : 'var(--border)'}`,
+  backgroundColor: selected ? 'var(--purple)' : 'transparent',
+  flexShrink: 0,
+  transition: 'background 0.1s, border-color 0.1s',
+})
+
+// Board-wide sort/group-by controls — relocated here from the standalone
+// SortGroupPopover (#111) so all app configuration lives in one Settings area.
+const SortGroupSection = ({ sortBy, sortDir, groupBy, onSortBy, onGroupBy }) => (
+  <div style={{ marginBottom: '1.25rem' }}>
+    <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+      Sort by
+    </div>
+    {SORT_OPTIONS.map(({ value, label }) => {
+      const selected = sortBy === value
+      return (
+        <div key={value} style={optRow(selected)} onClick={() => onSortBy(value)}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={optDot(selected)} />
+            {label}
+          </div>
+          {selected && (
+            sortDir === 'asc'
+              ? <ArrowUp size={13} strokeWidth={2.2} />
+              : <ArrowDown size={13} strokeWidth={2.2} />
+          )}
+        </div>
+      )
+    })}
+    <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', margin: '0.75rem 0 0.5rem' }}>
+      Group by
+    </div>
+    {GROUP_OPTIONS.map(({ value, label }) => (
+      <div key={value} style={optRow(groupBy === value)} onClick={() => onGroupBy(value)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={optDot(groupBy === value)} />
+          {label}
+        </div>
+      </div>
+    ))}
+  </div>
+)
+
+const InfoContent = ({
+  colossusDisplayMode, onColossusDisplayModeChange,
+  instanceLabelStyle, onInstanceLabelStyleChange,
+  sortBy, sortDir, groupBy, onSortBy, onGroupBy,
+}) => (
   <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem' }}>
     <img src={logoImage} alt="Daggerheart Community Content Logo"
       width="639" height="156"
       style={{ width: '100%', maxWidth: '220px', height: 'auto', display: 'block', margin: '0 auto 1.25rem' }}
       onError={(e) => { e.target.style.display = 'none' }} />
+    {onSortBy && onGroupBy && (
+      <SortGroupSection
+        sortBy={sortBy}
+        sortDir={sortDir}
+        groupBy={groupBy}
+        onSortBy={onSortBy}
+        onGroupBy={onGroupBy}
+      />
+    )}
     {onColossusDisplayModeChange && (
       <ToggleRow
         label="Colossus display"
@@ -187,12 +277,20 @@ const RightColumn = ({
       )}
 
       {mode === 'info' && (
-        <InfoContent
-          colossusDisplayMode={colossusDisplayMode}
-          onColossusDisplayModeChange={onColossusDisplayModeChange}
-          instanceLabelStyle={instanceLabelStyle}
-          onInstanceLabelStyleChange={onInstanceLabelStyleChange}
-        />
+        <>
+          <ColumnHeader title="Settings" />
+          <InfoContent
+            colossusDisplayMode={colossusDisplayMode}
+            onColossusDisplayModeChange={onColossusDisplayModeChange}
+            instanceLabelStyle={instanceLabelStyle}
+            onInstanceLabelStyleChange={onInstanceLabelStyleChange}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            groupBy={groupBy}
+            onSortBy={onSortBy}
+            onGroupBy={onGroupBy}
+          />
+        </>
       )}
 
       {mode === 'receipt' && (

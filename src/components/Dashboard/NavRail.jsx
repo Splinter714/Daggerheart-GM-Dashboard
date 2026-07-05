@@ -1,5 +1,5 @@
 import React from 'react'
-import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList, Dices } from 'lucide-react'
+import { Skull, TreePine, Plus, WandSparkles, Settings, ClipboardList, Dices } from 'lucide-react'
 import { DASHBOARD_GAP } from './constants'
 
 const RAIL_SIZE = 60
@@ -77,8 +77,8 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
       })}
       {renderButton({
         id: 'info',
-        Icon: Info,
-        label: 'App info',
+        Icon: Settings,
+        label: 'Settings',
         active: activeId === 'info',
         onClick: () => onAction('info'),
       })}
