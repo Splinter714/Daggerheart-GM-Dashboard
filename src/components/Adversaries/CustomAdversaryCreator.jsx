@@ -35,6 +35,7 @@ const CustomAdversaryCreator = forwardRef(({
   embedded = false,
   hideEmbeddedButtons = false,
   columnWidth = null,
+  contentTypeTabs = null, // Adversary/Environment switcher rendered in ActionBar (#102)
 }, ref) => {
   const nameInputRef = useRef(null)
   const gameCardNameInputRef = useRef(null)
@@ -397,15 +398,16 @@ const CustomAdversaryCreator = forwardRef(({
 
     const canAct = !isSaving && !!formData.name.trim()
     const disabledStyle = { opacity: 0.5, cursor: 'not-allowed' }
+    // Shared style for Cancel/Save As New/Add to Encounter — all equally-subordinate outline buttons.
+    const desktopSecondaryBtnStyle = (enabled = true) => ({
+      padding: '0.3rem 0.7rem', minHeight: '44px', background: 'transparent',
+      border: '1px solid var(--border)', borderRadius: '0.25rem',
+      color: 'var(--text-primary)', fontSize: '0.85rem', cursor: enabled ? 'pointer' : 'not-allowed',
+      ...(enabled ? {} : disabledStyle),
+    })
 
     const ActionBar = () => (
-      <div style={{
-        flex: '0 0 auto',
-        display: 'flex', alignItems: 'center',
-        padding: '0.5rem 0.75rem',
-        borderBottom: '1px solid var(--border)',
-        gap: '0.5rem',
-      }}>
+      <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--border)', gap: '0.5rem' }}>
         {/* Preview toggle — narrow only */}
         {isNarrow && (
           <button
@@ -421,45 +423,21 @@ const CustomAdversaryCreator = forwardRef(({
           >{activeTab === 'preview' ? '← Build' : 'Preview'}</button>
         )}
 
+        {contentTypeTabs}
         <div style={{ flex: 1 }} />
 
         {onCancelEdit && (
-          <button onClick={onCancelEdit} style={{
-            padding: '0.3rem 0.7rem', minHeight: '44px',
-            background: 'transparent',
-            border: '1px solid var(--border)', borderRadius: '0.25rem',
-            color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer',
-          }}>Cancel</button>
+          <button onClick={onCancelEdit} style={desktopSecondaryBtnStyle()}>Cancel</button>
         )}
 
         {/* Save As New — only when editing a homebrew adversary */}
         {editingAdversary && !isStockAdversary && (
-          <button
-            onClick={handleSaveAs}
-            disabled={!canAct}
-            style={{
-              padding: '0.3rem 0.7rem', minHeight: '44px',
-              background: 'transparent',
-              border: '1px solid var(--border)', borderRadius: '0.25rem',
-              color: 'var(--text-primary)', fontSize: '0.85rem', cursor: canAct ? 'pointer' : 'not-allowed',
-              ...(canAct ? {} : disabledStyle),
-            }}
-          >Save As New</button>
+          <button onClick={handleSaveAs} disabled={!canAct} style={desktopSecondaryBtnStyle(canAct)}>Save As New</button>
         )}
 
         {/* Add to Encounter — only when creating new (not editing) */}
         {!editingAdversary && onAddToEncounter && (
-          <button
-            onClick={handleAddToEncounter}
-            disabled={!canAct}
-            style={{
-              padding: '0.3rem 0.7rem', minHeight: '44px',
-              background: 'transparent',
-              border: '1px solid var(--border)', borderRadius: '0.25rem',
-              color: 'var(--text-primary)', fontSize: '0.85rem', cursor: canAct ? 'pointer' : 'not-allowed',
-              ...(canAct ? {} : disabledStyle),
-            }}
-          >Add to Encounter</button>
+          <button onClick={handleAddToEncounter} disabled={!canAct} style={desktopSecondaryBtnStyle(canAct)}>Add to Encounter</button>
         )}
 
         {/* Primary save button */}
@@ -812,6 +790,7 @@ const CustomAdversaryCreator = forwardRef(({
     if (isNarrow) {
       return (
         <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
+          {contentTypeTabs}
           {activeTab === 'build'
             ? formScrollContent
             : <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>{previewContent}</div>

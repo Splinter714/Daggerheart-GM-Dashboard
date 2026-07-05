@@ -15,6 +15,7 @@ const CustomEnvironmentCreator = ({
   onCancelEdit,
   editingEnvironment = null,
   autoFocus = false,
+  contentTypeTabs = null, // Adversary/Environment switcher rendered above the header (#102)
 }) => {
   const nameInputRef = useRef(null)
   const dragFromRef = useRef(null)
@@ -88,6 +89,7 @@ const CustomEnvironmentCreator = ({
       borderRadius: PANEL_BORDER_RADIUS,
       boxShadow: PANEL_BOX_SHADOW,
     }}>
+      {contentTypeTabs}
       <div style={{
         flex: '0 0 auto', display: 'flex', alignItems: 'center',
         padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--border)', gap: '0.5rem',

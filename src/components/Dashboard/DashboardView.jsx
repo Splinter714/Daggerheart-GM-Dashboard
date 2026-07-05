@@ -529,7 +529,7 @@ const DashboardContent = () => {
         {adversaryCreatorOpen && (
           <CreatorPanel
             isNarrow={isNarrow}
-            creatorContentType={creatorContentType}
+            creatorContentType={creatorContentType} setCreatorContentType={setCreatorContentType}
             columnWidth={columnWidth}
             customContent={customContent}
             onCancel={() => setAdversaryCreatorOpen(false)}
