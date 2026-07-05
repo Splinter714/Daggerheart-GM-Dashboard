@@ -1,4 +1,5 @@
 import { getCardScrollTarget } from './cardScrollTarget'
+import { DASHBOARD_GAP } from '../constants'
 
 // Builds a fake scroll container + card element pair with just enough of the
 // DOM API (getBoundingClientRect, scrollLeft, clientWidth, querySelector) for
@@ -49,7 +50,7 @@ describe('getCardScrollTarget', () => {
     addCard('adversary-Dragon', { left: 1500, width: 300 })
     const target = getCardScrollTarget({ container, cardKey: 'adversary-Dragon', columnWidth: 300 })
     expect(target).not.toBeNull()
-    // Card end (1800) should land at the right edge of the (scrolled) viewport.
+    // Card end (1800) should land within the (scrolled) viewport.
     expect(target).toBeGreaterThan(0)
     expect(target + 900).toBeGreaterThanOrEqual(1800 - 10)
   })
@@ -61,6 +62,29 @@ describe('getCardScrollTarget', () => {
     const target = getCardScrollTarget({ container, cardKey: 'adversary-Imp', columnWidth: 300 })
     expect(target).not.toBeNull()
     expect(target).toBeLessThan(1200)
+  })
+
+  // #50: Jackson reported the horizontal auto-scroll landing at "kinda the
+  // wrong spot" for a card hidden past the right edge, so the browser's own
+  // scroll-snap then corrected it — a visible lurch. The container's
+  // scroll-padding-left equals DASHBOARD_GAP (see DashboardView.css), so a
+  // valid snap point is any `cardContentLeft - DASHBOARD_GAP`. The old
+  // "align trailing edge to viewport's right edge" math for the
+  // hidden-on-the-right case did not generally land on one of those points;
+  // this asserts the target now always aligns the card's own leading edge
+  // (a real snap point) instead, whichever direction it's hidden in.
+  it('lands exactly on the card leading-edge snap point when hidden past the right edge (no post-hoc snap correction)', () => {
+    const { container, addCard } = makeContainer({ scrollLeft: 0, clientWidth: 900 })
+    addCard('adversary-Dragon', { left: 1500, width: 300 })
+    const target = getCardScrollTarget({ container, cardKey: 'adversary-Dragon', columnWidth: 300 })
+    expect(target).toBe(1500 - DASHBOARD_GAP)
+  })
+
+  it('lands exactly on the card leading-edge snap point when hidden before the left edge', () => {
+    const { container, addCard } = makeContainer({ scrollLeft: 1200, clientWidth: 900 })
+    addCard('adversary-Imp', { left: 200, width: 300 })
+    const target = getCardScrollTarget({ container, cardKey: 'adversary-Imp', columnWidth: 300 })
+    expect(target).toBe(200 - DASHBOARD_GAP)
   })
 
   it('accounts for the reduced effective width when the browser overlay is open', () => {

@@ -295,3 +295,45 @@ describe('GameCard fade-out confirmation pulse on newly-added cards (#55)', () =
     expect(container.querySelector('.card-recently-added')).toBeTruthy()
   })
 })
+
+// #50: vertical scroll-to-reveal for a newly added instance was silently
+// disabled by a stray `return // scroll disabled` early-return left in the
+// effect (from an old, unrelated UI pass) — the rest of the logic (finding
+// the newest alive instance, computing the scroll delta) was still present
+// and correct, it just never ran. This asserts the effect actually calls
+// scrollBy when a new instance is added and out of view, so a future
+// regression that reintroduces a silent early-return gets caught.
+describe('GameCard vertical scroll-to-reveal on new instance (#50)', () => {
+  const adversaryItem = { id: 'grp-1', name: 'Goblin', hpMax: 10, stressMax: 3 }
+
+  it('scrolls the instance list to reveal a newly added instance that is below the fold', async () => {
+    const oneInstance = [{ id: 'adv-1', duplicateNumber: 1, hp: 0, stress: 0, hpMax: 10, stressMax: 3 }]
+    const twoInstances = [
+      ...oneInstance,
+      { id: 'adv-2', duplicateNumber: 2, hp: 0, stress: 0, hpMax: 10, stressMax: 3 },
+    ]
+
+    const { container, rerender } = render(
+      <GameCard type="adversary" item={adversaryItem} instances={oneInstance} />
+    )
+
+    const scrollable = container.querySelector('.invisible-scrollbar')
+    const scrollBySpy = vi.fn()
+    scrollable.scrollBy = scrollBySpy
+    // Simulate the new instance rendering below the visible viewport.
+    scrollable.getBoundingClientRect = () => ({ top: 0, bottom: 400 })
+
+    rerender(<GameCard type="adversary" item={adversaryItem} instances={twoInstances} />)
+
+    const newEl = container.querySelector('[data-instance-id="adv-2"]')
+    expect(newEl).toBeTruthy()
+    newEl.getBoundingClientRect = () => ({ top: 450, bottom: 500 })
+
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    await new Promise(resolve => requestAnimationFrame(resolve))
+
+    expect(scrollBySpy).toHaveBeenCalled()
+    const call = scrollBySpy.mock.calls[0][0]
+    expect(call.top).toBeGreaterThan(0)
+  })
+})

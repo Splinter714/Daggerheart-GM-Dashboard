@@ -46,14 +46,17 @@ export function getCardScrollTarget({
 
   if (isVisible) return null
 
-  let targetScroll
-  if (cardEnd > currentScroll + effectiveWidth + margin) {
-    // Hidden on the right — bring its trailing edge into the visible area.
-    targetScroll = currentScroll + (cardEnd - (currentScroll + effectiveWidth))
-  } else {
-    // Hidden on the left — align its leading edge.
-    targetScroll = cardPosition - DASHBOARD_GAP
-  }
+  // Every column has scroll-snap-align: 'start' and the container's
+  // scroll-padding-left equals DASHBOARD_GAP, so `cardPosition - DASHBOARD_GAP`
+  // is itself a valid snap point (it's exactly where the browser would snap
+  // this card's leading edge to). Landing there directly — whether the card
+  // is hidden past the right edge or before the left edge — means no
+  // corrective snap runs afterward. An earlier version aligned the card's
+  // *trailing* edge to the viewport's right edge when hidden-right, which
+  // is generally not a snap point, so the browser's own snapping would then
+  // jump the scroll position a second time once the programmatic scroll
+  // settled — a visible lurch (#50).
+  const targetScroll = cardPosition - DASHBOARD_GAP
 
   return Math.max(0, targetScroll)
 }

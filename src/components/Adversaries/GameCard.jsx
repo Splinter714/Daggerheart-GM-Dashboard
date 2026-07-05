@@ -108,7 +108,6 @@ const GameCard = ({
     const prev = prevInstancesLengthRef.current
     prevInstancesLengthRef.current = instances.length
     if (instances.length === prev || !scrollableRef.current) return
-    return // scroll disabled
 
     const aliveInstances = instances.filter(i => (i.hp || 0) < (i.hpMax || 1))
     if (!aliveInstances.length) return
