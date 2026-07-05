@@ -14,7 +14,7 @@ const baseProps = {
 }
 
 describe('EncounterReceipt', () => {
-  it('shows the total minion instance count alongside the BP-group quantity (#87)', () => {
+  it('shows the total minion instance count as a supporting figure alongside the BP-group quantity (#87)', () => {
     const encounterItems = [
       { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Sniper' }, quantity: 1, instanceCount: 4 },
       { type: 'adversary', item: { id: 'm2', type: 'Minion', name: 'Grunt' }, quantity: 2, instanceCount: 8 },
@@ -24,13 +24,36 @@ describe('EncounterReceipt', () => {
     expect(screen.getByText((_, el) => el?.textContent === '· 12 instances')).toBeTruthy()
   })
 
-  it('singularizes the instance count label when exactly one instance', () => {
+  it('singularizes the total instance count label when exactly one instance', () => {
     const encounterItems = [
       { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Sniper' }, quantity: 1, instanceCount: 1 },
     ]
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
 
     expect(screen.getByText((_, el) => el?.textContent === '· 1 instance')).toBeTruthy()
+  })
+
+  it('keeps each minion group row showing its own instance count, not just the section total (#87)', () => {
+    const encounterItems = [
+      { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Sniper' }, quantity: 1, instanceCount: 4 },
+      { type: 'adversary', item: { id: 'm2', type: 'Minion', name: 'Grunt' }, quantity: 2, instanceCount: 8 },
+    ]
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
+
+    // Per-row instance counts are visible independently of the header total.
+    expect(screen.getByText('4 instances')).toBeTruthy()
+    expect(screen.getByText('8 instances')).toBeTruthy()
+    // The header total (12) remains present as the smaller supporting figure.
+    expect(screen.getByText((_, el) => el?.textContent === '· 12 instances')).toBeTruthy()
+  })
+
+  it('singularizes the per-row instance count label when exactly one instance', () => {
+    const encounterItems = [
+      { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Sniper' }, quantity: 1, instanceCount: 1 },
+    ]
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
+
+    expect(screen.getByText('1 instance')).toBeTruthy()
   })
 
   it('renders colossi as separate rows, marks them not BP-costed, and hides the stepper controls (#99)', () => {

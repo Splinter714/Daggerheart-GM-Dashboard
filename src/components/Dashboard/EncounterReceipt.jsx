@@ -270,6 +270,9 @@ const EncounterReceipt = ({
               </div>
               {items.map((encounterItem) => {
                 const isZero = encounterItem.quantity === 0
+                // Per-group instance count stays visible on its own row — the section-header
+                // total is only a smaller supporting figure, not a replacement (#87).
+                const rowInstanceCount = isMinion ? (encounterItem.instanceCount ?? encounterItem.quantity) : null
                 return (
                   <div key={`${encounterItem.item.id}-${encounterItem.type}`} className="receipt-item" style={itemRowStyle}>
                     <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={actionBtn(isColossus || isZero)}>
@@ -283,6 +286,11 @@ const EncounterReceipt = ({
                     <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {encounterItem.item.name || encounterItem.item.baseName}
                     </span>
+                    {isMinion && (
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', flexShrink: 0 }}>
+                        {rowInstanceCount} instance{rowInstanceCount === 1 ? '' : 's'}
+                      </span>
+                    )}
                     {!isColossus && (
                       <button onClick={() => onAdd(encounterItem.item, encounterItem.type)} style={actionBtn(false)}>
                         <Plus size={13} />
