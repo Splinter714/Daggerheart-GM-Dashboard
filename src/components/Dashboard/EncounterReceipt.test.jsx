@@ -16,13 +16,16 @@ describe('EncounterReceipt', () => {
   const isOwnText = (content, el) =>
     el?.textContent === content && Array.from(el.children).every(child => child.textContent !== content)
 
+  // Minion rows render as: [quantity number] [name (with "(perGroup)" appended)],
+  // matching the leading-quantity-number + name structure of non-minion rows (#87).
   it('formats minion rows as "{group count} {name} ({instances per group})" (#87)', () => {
     const encounterItems = [
       { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Giant Rat' }, quantity: 2, instanceCount: 6 },
     ]
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
 
-    expect(screen.getByText((_, el) => isOwnText('2 Giant Rat (3)', el))).toBeTruthy()
+    expect(screen.getByText('2')).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('Giant Rat (3)', el))).toBeTruthy()
   })
 
   it('keeps each minion group row independently formatted when multiple groups of different types exist (#87)', () => {
@@ -32,8 +35,8 @@ describe('EncounterReceipt', () => {
     ]
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
 
-    expect(screen.getByText((_, el) => isOwnText('1 Sniper (4)', el))).toBeTruthy()
-    expect(screen.getByText((_, el) => isOwnText('2 Grunt (4)', el))).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('Sniper (4)', el))).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('Grunt (4)', el))).toBeTruthy()
   })
 
   it('formats a single minion group with 1 instance per group correctly', () => {
@@ -42,7 +45,27 @@ describe('EncounterReceipt', () => {
     ]
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
 
-    expect(screen.getByText((_, el) => isOwnText('1 Sniper (1)', el))).toBeTruthy()
+    expect(screen.getByText((_, el) => isOwnText('Sniper (1)', el))).toBeTruthy()
+  })
+
+  it('styles minion row numbers with the secondary text color, matching non-minion rows (#87)', () => {
+    const encounterItems = [
+      { type: 'adversary', item: { id: 'm1', type: 'Minion', name: 'Giant Rat' }, quantity: 2, instanceCount: 8 },
+      { type: 'adversary', item: { id: 'b1', type: 'Bruiser', name: 'Big Bruiser' }, quantity: 3 },
+    ]
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
+
+    // Non-minion quantity number.
+    const bruiserQty = screen.getByText('3')
+    expect(bruiserQty.style.color).toBe('var(--text-secondary)')
+
+    // Minion leading quantity number uses the same secondary color and row structure.
+    const minionQty = screen.getByText('2')
+    expect(minionQty.style.color).toBe('var(--text-secondary)')
+
+    // Per-group instance count "(4)" also rendered in secondary color.
+    const perGroup = screen.getByText('(4)')
+    expect(perGroup.style.color).toBe('var(--text-secondary)')
   })
 
   it('renders colossi as separate rows, marks them not BP-costed, and hides the stepper controls (#99)', () => {
@@ -115,6 +138,79 @@ describe('EncounterReceipt', () => {
     // No distinct background/border wrapper on the auto rows — same as manual rows.
     expect(autoRow.style.background).toBe(manualRow.style.background)
     expect(autoRow.style.borderRadius).toBe(manualRow.style.borderRadius)
+  })
+
+  it('does not italicize auto-detected adjustment row labels (#78)', () => {
+    const encounterItems = [
+      { type: 'adversary', item: { id: 's1', type: 'Solo', name: 'Solo A' }, quantity: 2 },
+    ]
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
+
+    const soloLabel = screen.getByText('2+ Solos')
+    const majorThreatsLabel = screen.getByText('No Major Threats')
+    expect(soloLabel.style.fontStyle).not.toBe('italic')
+    expect(majorThreatsLabel.style.fontStyle).not.toBe('italic')
+  })
+
+  it('does not use red/green color coding for adjustment values (#78)', () => {
+    const encounterItems = [
+      { type: 'adversary', item: { id: 's1', type: 'Solo', name: 'Solo A' }, quantity: 2 },
+    ]
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} bpAdjustments={{ lessDifficult: true }} />)
+
+    const forbiddenColors = ['var(--success)', 'var(--danger)']
+    const lessDifficultLabel = screen.getByText('Less Difficult')
+    const lessDifficultValue = lessDifficultLabel.parentElement.querySelector('span:last-child')
+    expect(forbiddenColors).not.toContain(lessDifficultValue.style.color)
+
+    const soloLabel = screen.getByText('2+ Solos')
+    const soloRow = soloLabel.closest('div')
+    const soloValueSpan = Array.from(soloRow.children).find(el => el.textContent.includes('BP'))
+    expect(forbiddenColors).not.toContain(soloValueSpan.style.color)
+
+    const majorThreatsLabel = screen.getByText('No Major Threats')
+    const majorThreatsRow = majorThreatsLabel.closest('div')
+    const majorThreatsValueSpan = Array.from(majorThreatsRow.children).at(-1)
+    expect(forbiddenColors).not.toContain(majorThreatsValueSpan.style.color)
+  })
+
+  it('makes "More Dangerous" and "Less Difficult" mutually exclusive (#78)', () => {
+    const encounterItems = []
+    const onChangeBpAdjustments = vi.fn()
+
+    // "Less Difficult" is checked — "More Dangerous" should be disabled (greyed out, not clickable).
+    const { rerender } = render(
+      <EncounterReceipt
+        {...baseProps}
+        encounterItems={encounterItems}
+        bpAdjustments={{ lessDifficult: true }}
+        onChangeBpAdjustments={onChangeBpAdjustments}
+      />
+    )
+
+    const moreDangerousLabel = screen.getByText('More Dangerous')
+    const moreDangerousRow = moreDangerousLabel.closest('div')
+    expect(Number(moreDangerousRow.style.opacity)).toBeLessThan(1)
+
+    moreDangerousRow.click()
+    expect(onChangeBpAdjustments).not.toHaveBeenCalled()
+
+    // Flip: "More Dangerous" checked — "Less Difficult" should now be disabled instead.
+    rerender(
+      <EncounterReceipt
+        {...baseProps}
+        encounterItems={encounterItems}
+        bpAdjustments={{ moreDangerous: true }}
+        onChangeBpAdjustments={onChangeBpAdjustments}
+      />
+    )
+    const lessDifficultLabel = screen.getByText('Less Difficult')
+    const lessDifficultRow = lessDifficultLabel.closest('div')
+    expect(Number(lessDifficultRow.style.opacity)).toBeLessThan(1)
+
+    const moreDangerousLabel2 = screen.getByText('More Dangerous')
+    const moreDangerousRow2 = moreDangerousLabel2.closest('div')
+    expect(Number(moreDangerousRow2.style.opacity)).toBe(1)
   })
 
   it('makes Remaining the dominant footer figure, with Budget and Used as smaller supporting lines (#78)', () => {

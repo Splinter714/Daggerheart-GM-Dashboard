@@ -206,15 +206,17 @@ const EncounterReceipt = ({
                     <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={actionBtn(isColossus || isZero)}>
                       {isColossus || isZero ? <X size={13} /> : <Minus size={13} />}
                     </button>
-                    {!isColossus && !isMinion && (
+                    {!isColossus && (
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', minWidth: '1rem', textAlign: 'center', flexShrink: 0 }}>
                         {encounterItem.quantity}
                       </span>
                     )}
                     {isMinion ? (
                       <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {encounterItem.quantity} {encounterItem.item.name || encounterItem.item.baseName}
-                        {perGroupInstances != null && ` (${perGroupInstances})`}
+                        {encounterItem.item.name || encounterItem.item.baseName}
+                        {perGroupInstances != null && (
+                          <span style={{ color: 'var(--text-secondary)' }}> ({perGroupInstances})</span>
+                        )}
                       </span>
                     ) : (
                       <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -240,17 +242,26 @@ const EncounterReceipt = ({
           {/* Manual adjustment rows */}
           {onChangeBpAdjustments && MANUAL_ADJUSTMENTS.map(({ key, label, value }) => {
             const checked = !!bpAdjustments[key]
+            // More Dangerous and Less Difficult are mutually exclusive (#78):
+            // when one is checked, the other is disabled/greyed out.
+            const opposingKey = key === 'moreDangerous' ? 'lessDifficult'
+              : key === 'lessDifficult' ? 'moreDangerous'
+              : null
+            const disabled = opposingKey ? !!bpAdjustments[opposingKey] : false
             return (
               <div
                 key={key}
-                onClick={() => onChangeBpAdjustments(prev => ({ ...prev, [key]: !prev[key] }))}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', cursor: 'pointer', userSelect: 'none' }}
+                onClick={() => {
+                  if (disabled) return
+                  onChangeBpAdjustments(prev => ({ ...prev, [key]: !prev[key] }))
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', cursor: disabled ? 'default' : 'pointer', userSelect: 'none', opacity: disabled ? 0.4 : 1 }}
               >
                 <AppCheckbox checked={checked} onChange={() => {}} />
                 <span style={{ flex: 1, fontSize: '0.85rem', color: checked ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                   {label}
                 </span>
-                <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: checked ? (value > 0 ? 'var(--success)' : 'var(--danger)') : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: checked ? 'var(--text-primary)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
                   {checked ? formatModifier(value) : '—'}
                 </span>
               </div>
@@ -260,10 +271,10 @@ const EncounterReceipt = ({
           {/* Auto adjustment: 2+ Solos */}
           <div style={autoRowStyle}>
             <AutoTag active={twoOrMoreSolos} />
-            <span style={{ flex: 1, fontSize: '0.85rem', color: twoOrMoreSolos ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
+            <span style={{ flex: 1, fontSize: '0.85rem', color: twoOrMoreSolos ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
               2+ Solos
             </span>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: twoOrMoreSolos ? 'var(--danger)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: twoOrMoreSolos ? 'var(--text-primary)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
               {twoOrMoreSolos ? formatModifier(BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos) : '—'}
             </span>
           </div>
@@ -271,10 +282,10 @@ const EncounterReceipt = ({
           {/* Auto adjustment: no major threats */}
           <div style={autoRowStyle}>
             <AutoTag active={noMajorThreats} />
-            <span style={{ flex: 1, fontSize: '0.85rem', color: noMajorThreats ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
+            <span style={{ flex: 1, fontSize: '0.85rem', color: noMajorThreats ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
               No Major Threats
             </span>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: noMajorThreats ? 'var(--success)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: noMajorThreats ? 'var(--text-primary)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
               {noMajorThreats ? formatModifier(BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos) : '—'}
             </span>
           </div>
