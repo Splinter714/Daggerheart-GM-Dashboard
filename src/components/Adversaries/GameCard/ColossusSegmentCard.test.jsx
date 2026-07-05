@@ -58,16 +58,40 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getByText('Peck')).toBeInTheDocument()
   })
 
-  it('HP pips are interactable — clicking a pip calls the slot onToggleHpPip with its index', () => {
+  // #109: exact row order from the 2026-07-04 playtest spec — row 1 =
+  // Attack + Standard Attack, row 2 = Difficulty + Thresholds, row 3 =
+  // Motives + Experience, then the instance mini-cards.
+  it('renders rows in the playtest-specified order: ATK+weapon, then Difficulty+Thresholds, then Motives+Experience', () => {
+    const { container } = render(<ColossusSegmentCard {...baseProps} />)
+    const atkBadgeValue = screen.getByText('+2')
+    const diffBadgeValue = screen.getByText('16')
+    const motives = screen.getByText(/Entangle, intimidate, peck, stomp/)
+    const experience = screen.getByText('Huge +2')
+
+    const position = (el) => {
+      const all = Array.from(container.querySelectorAll('*'))
+      return all.indexOf(el)
+    }
+    expect(position(atkBadgeValue)).toBeLessThan(position(diffBadgeValue))
+    expect(position(diffBadgeValue)).toBeLessThan(position(motives))
+    expect(position(motives)).toBeLessThan(position(experience))
+  })
+
+  it('renders an HP adjuster (+/- buttons) for each instance mini-card, calling onToggleHpPip with the new marked count', () => {
     const onToggleHpPip = vi.fn()
-    const { container } = render(<ColossusSegmentCard {...baseProps} slots={[makeSlot({ onToggleHpPip })]} />)
-
-    // HP pips render as 5 clickable divs (segment.hp = 5)
-    const pips = container.querySelectorAll('[style*="border-radius: 50%"]')
-    expect(pips.length).toBeGreaterThanOrEqual(5)
-
-    fireEvent.click(pips[2])
+    render(<ColossusSegmentCard {...baseProps} slots={[makeSlot({ markedHp: 2, onToggleHpPip })]} />)
+    const plusButtons = screen.getAllByText('+')
+    fireEvent.click(plusButtons[0])
     expect(onToggleHpPip).toHaveBeenCalledWith(2)
+  })
+
+  it('renders a Stress adjuster (+/- buttons) for each instance mini-card, calling onUpdate with the shared instance stress field', () => {
+    const onUpdate = vi.fn()
+    render(<ColossusSegmentCard {...baseProps} onUpdate={onUpdate} />)
+    const plusButtons = screen.getAllByText('+')
+    // Second "+" button belongs to the Stress StatCounter (HP is first)
+    fireEvent.click(plusButtons[1])
+    expect(onUpdate).toHaveBeenCalledWith('adv-1', { stress: 3 })
   })
 
   it('shows Destroyed label when all HP is marked', () => {
@@ -80,36 +104,32 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getAllByText('Broken').length).toBeGreaterThan(0)
   })
 
-  it('renders parent colossus name for context', () => {
-    render(<ColossusSegmentCard {...baseProps} />)
-    expect(screen.getByText('Ikeri, Injuries Untold')).toBeInTheDocument()
-  })
-
   it('shows the running instance number for each instance slot (#109, #110)', () => {
     render(<ColossusSegmentCard {...baseProps} slots={[
       makeSlot({ instanceKey: 'ikeri-head-1', instanceNumber: 3 }),
       makeSlot({ instanceKey: 'ikeri-head-2', instanceNumber: 4 }),
     ]} />)
+    expect(screen.getAllByText('3').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('4').length).toBeGreaterThan(0)
     expect(screen.getAllByText((_, el) => el?.textContent === 'Head #3').length).toBeGreaterThan(0)
     expect(screen.getAllByText((_, el) => el?.textContent === 'Head #4').length).toBeGreaterThan(0)
   })
 
-  it('consolidates multiple instances into one card with independent HP pips and tokens per slot (#110)', () => {
+  it('consolidates multiple instances into one card with independent HP adjusters per slot (#110)', () => {
     const onToggleHpPipA = vi.fn()
     const onToggleHpPipB = vi.fn()
-    const { container } = render(<ColossusSegmentCard {...baseProps} slots={[
+    render(<ColossusSegmentCard {...baseProps} slots={[
       makeSlot({ instanceKey: 'ikeri-head-1', instanceNumber: 3, markedHp: 1, onToggleHpPip: onToggleHpPipA }),
       makeSlot({ instanceKey: 'ikeri-head-2', instanceNumber: 4, markedHp: 2, onToggleHpPip: onToggleHpPipB }),
     ]} />)
-    // Only one card is rendered (single header), but two 5-pip HP rows
-    // (10 pips) plus the shared 6-pip Stress row (framework info, once per
-    // card) = 16 pips total.
-    const pips = container.querySelectorAll('[style*="border-radius: 50%"]')
-    expect(pips.length).toBe(16)
-    // Clicking within the second slot's pip row only calls that slot's handler
-    fireEvent.click(pips[7])
-    expect(onToggleHpPipB).toHaveBeenCalled()
-    expect(onToggleHpPipA).not.toHaveBeenCalled()
+    // Two mini-cards each with their own HP StatCounter + shared Stress
+    // StatCounter = 4 "+" buttons total (2 per mini-card).
+    const plusButtons = screen.getAllByText('+')
+    expect(plusButtons.length).toBe(4)
+    // First mini-card's HP "+" only calls that slot's handler
+    fireEvent.click(plusButtons[0])
+    expect(onToggleHpPipA).toHaveBeenCalledWith(1)
+    expect(onToggleHpPipB).not.toHaveBeenCalled()
   })
 
   it('shows framework-shared Motives & Tactics (#109)', () => {
@@ -127,19 +147,6 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getByText('Major 11 / Severe 22')).toBeInTheDocument()
   })
 
-  it('shows shared Stress pips and toggling one calls onUpdate with the shared instance stress field (#109)', () => {
-    const onUpdate = vi.fn()
-    const { container } = render(<ColossusSegmentCard {...baseProps} onUpdate={onUpdate} />)
-    expect(screen.getByText('Stress')).toBeInTheDocument()
-    const pips = container.querySelectorAll('[style*="border-radius: 50%"]')
-    // 5 HP pips + 6 Stress pips
-    expect(pips.length).toBe(11)
-    // inst.stress = 2 (from the shared `inst` fixture); clicking the first
-    // stress pip (index 0 within the marked range) unmarks down to 0.
-    fireEvent.click(pips[5]) // first stress pip
-    expect(onUpdate).toHaveBeenCalledWith('adv-1', { stress: 0 })
-  })
-
   it('shows both segment-specific and framework-wide features, clearly distinguished (#109)', () => {
     render(<ColossusSegmentCard {...baseProps} />)
     expect(screen.getByText('Fatal')).toBeInTheDocument()
@@ -147,7 +154,7 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getByText('Colossus Features')).toBeInTheDocument()
   })
 
-  // #79: the DIFF/ATK/thresholds badges are fixed-size and must not shrink —
+  // #79: the DIFF/thresholds badges are fixed-size and must not shrink —
   // only the weapon pill should give way, wrapping onto its own line at
   // narrow widths instead of being squeezed illegibly small. Verifies the
   // structural styles (flexShrink/flexBasis) rather than pixel layout, since

@@ -80,20 +80,19 @@ export const ColossusStress = ({ colossus, inst, onUpdate }) => {
   )
 }
 
-// Full framework-info block for a segment card: Motives/Experience row, then
-// Stress. Thresholds is rendered inline alongside Difficulty by the caller
-// (mirrors the regular adversary card's Difficulty | Thresholds convention),
-// so it isn't included here.
-const ColossusFrameworkInfo = ({ colossus, inst, onUpdate }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
-    {(colossus.motivesAndTactics?.trim() || colossus.experience?.length > 0) && (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
-        <ColossusMotives colossus={colossus} />
-        <ColossusExperience colossus={colossus} />
-      </div>
-    )}
-    <ColossusStress colossus={colossus} inst={inst} onUpdate={onUpdate} />
-  </div>
-)
+// Motives + Experience row — framework-shared, rendered as its own row
+// (row 3 of the adversary-card-mirroring layout, #109) above the
+// instance-style mini-cards. Thresholds/Stress are rendered elsewhere by the
+// caller (Thresholds inline with Difficulty in row 2; Stress inside each
+// instance mini-card via ColossusStressAdjuster).
+const ColossusFrameworkInfo = ({ colossus }) => {
+  if (!colossus.motivesAndTactics?.trim() && !colossus.experience?.length) return null
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
+      <ColossusMotives colossus={colossus} />
+      <ColossusExperience colossus={colossus} />
+    </div>
+  )
+}
 
 export default ColossusFrameworkInfo

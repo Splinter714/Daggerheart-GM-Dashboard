@@ -333,7 +333,9 @@ const VitalRow = ({ label, pipType, value, onChange }) => (
   </div>
 )
 
-const StatCounter = ({ value, max, Icon, iconColor, onDec, onInc }) => (
+// Exported so colossus segment cards (#109) can render HP/Stress adjusters
+// in the exact same numbered-instance-row style as regular adversary cards.
+export const StatCounter = ({ value, max, Icon, iconColor, onDec, onInc }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
     <button onClick={onDec} style={counterBtnStyle}>−</button>
     <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem', fontWeight: 600, color: 'white', minWidth: '2.5rem', justifyContent: 'center', fontVariantNumeric: 'tabular-nums' }}>

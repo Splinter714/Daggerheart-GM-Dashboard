@@ -41,9 +41,9 @@ describe('GameCard colossus display modes', () => {
     expect(onUpdate).toHaveBeenCalledWith('adv-1', { segmentHp: { 'ikeri-head': 1 } })
   })
 
-  it('segments mode (segment prop set): renders this segment as its own standalone card with interactable HP pips', () => {
+  it('segments mode (segment prop set): renders this segment as its own standalone card with an interactable HP adjuster (#109)', () => {
     const onUpdate = vi.fn()
-    const { container } = render(
+    render(
       <GameCard
         type="adversary"
         item={colossusItem}
@@ -57,9 +57,11 @@ describe('GameCard colossus display modes', () => {
     // The standalone segment card also shows the parent colossus name for context
     expect(screen.getByText('Ikeri, Injuries Untold')).toBeInTheDocument()
 
-    const pips = container.querySelectorAll('[style*="border-radius: 50%"]')
-    expect(pips.length).toBeGreaterThan(0)
-    fireEvent.click(pips[0])
+    // HP is rendered as an instance-style +/- adjuster mirroring regular
+    // adversary card instance rows (#109), not click-pips.
+    const plusButtons = screen.getAllByText('+')
+    expect(plusButtons.length).toBeGreaterThan(0)
+    fireEvent.click(plusButtons[0])
     expect(onUpdate).toHaveBeenCalledWith('adv-1', { segmentHp: { 'ikeri-head': 1 } })
   })
 })
