@@ -225,6 +225,22 @@ describe('GameCard environment visual polish pass (#100)', () => {
     render(<GameCard type="environment" item={envItem} />)
     expect(screen.queryByText(/Smother/)).toBeNull()
   })
+
+  // Playtested 2026-07-04: Jackson found the PASSIVES/ACTIONS/REACTIONS
+  // section-header formatting inconsistent between environment and
+  // adversary cards. The header text color must match the adversary card's
+  // FeatureDivider (text-primary, not text-secondary).
+  it('formats section headers (e.g. PASSIVES) identically to adversary cards — text-primary color, uppercase h4', () => {
+    const envItem = {
+      id: 'env-1', name: 'Ashen Wastes', type: 'Exploration', tier: 2,
+      features: [{ name: 'Choking Ash', type: 'Passive', description: 'The air is thick with ash.' }],
+    }
+    render(<GameCard type="environment" item={envItem} />)
+    const header = screen.getByText('Passives')
+    expect(header.tagName).toBe('H4')
+    expect(header.style.color).toBe('var(--text-primary)')
+    expect(header.style.textTransform).toBe('uppercase')
+  })
 })
 
 describe('GameCard environment narrow/mobile layout (#105)', () => {
