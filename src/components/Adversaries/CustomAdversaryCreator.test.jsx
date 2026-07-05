@@ -45,3 +45,15 @@ describe('CustomAdversaryCreator — Colossus type (#98)', () => {
     expect(saved.segments[0]).toMatchObject({ name: 'Head', role: 'torso' })
   })
 })
+
+describe('CustomAdversaryCreator — live preview pill (#56)', () => {
+  it('renders the Type: PREVIEW pill with the same rail-border treatment as normal group pills', () => {
+    render(<CustomAdversaryCreator onSave={vi.fn()} />)
+
+    // Narrow/mobile layout shows the preview behind a "Preview" tab toggle.
+    fireEvent.click(screen.getByText('Preview'))
+
+    expect(screen.getByText('Type: PREVIEW')).toBeInTheDocument()
+    expect(screen.getByTestId('preview-rail-border')).toBeInTheDocument()
+  })
+})
