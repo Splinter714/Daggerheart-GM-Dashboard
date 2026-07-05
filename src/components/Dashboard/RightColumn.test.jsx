@@ -108,3 +108,90 @@ describe('RightColumn Settings panel (#111: sort/group-by consolidated here)', (
     expect(baseProps.onGroupBy).toHaveBeenCalledWith('tier')
   })
 })
+
+describe('RightColumn Encounter List (#55: add-instance pulse wiring)', () => {
+  const baseProps = {
+    open: true,
+    mode: 'receipt',
+    columnWidth: 320,
+    onClose: () => {},
+    browserContentType: 'adversary',
+    browserActiveTab: 'adversaries',
+    onTabChange: () => {},
+    selectedCustomAdversaryId: null,
+    onSelectCustomAdversary: () => {},
+    onAddEnvironmentFromBrowser: () => {},
+    pcCount: 4,
+    updatePartySize: () => {},
+    bpAdjustments: {},
+    onChangeBpAdjustments: () => {},
+    availableBattlePoints: 14,
+    spentBattlePoints: 0,
+    sortBy: 'name',
+    sortDir: 'asc',
+    groupBy: 'type',
+    onSortBy: () => {},
+    onGroupBy: () => {},
+    colossusDisplayMode: 'nested',
+    onColossusDisplayModeChange: () => {},
+    instanceLabelStyle: 'numeric',
+    onInstanceLabelStyleChange: () => {},
+  }
+
+  // The Encounter List's own +/- controls used to call createAdversary/
+  // createAdversariesBulk directly, completely bypassing the same
+  // setRecentlyAddedCards wiring the browser-panel add path uses — so the
+  // "just added" confirmation pulse never fired when an instance was added
+  // this way, even though the round-2 fix looked complete from the browser
+  // panel alone (#55 round-3 playtest).
+  it('routes its "+" control through onAddAdversaryFromBrowser so the pulse wiring fires, instead of calling createAdversary directly', () => {
+    const onAddAdversaryFromBrowser = vi.fn()
+    const createAdversary = vi.fn()
+    const createAdversariesBulk = vi.fn()
+    const adversaryGroups = [
+      { id: 'grp1', baseName: 'Bear', type: 'Bruiser', instances: [{ id: 'a1' }] },
+    ]
+
+    render(
+      <RightColumn
+        {...baseProps}
+        adversaryGroups={adversaryGroups}
+        onAddAdversaryFromBrowser={onAddAdversaryFromBrowser}
+        createAdversary={createAdversary}
+        createAdversariesBulk={createAdversariesBulk}
+        deleteAdversary={() => {}}
+      />
+    )
+
+    const addButton = screen.getByText('Bear').closest('.receipt-item').querySelectorAll('button')[1]
+    fireEvent.click(addButton)
+
+    expect(onAddAdversaryFromBrowser).toHaveBeenCalledTimes(1)
+    expect(onAddAdversaryFromBrowser.mock.calls[0][0].name).toBe('Bear')
+    expect(createAdversary).not.toHaveBeenCalled()
+    expect(createAdversariesBulk).not.toHaveBeenCalled()
+  })
+
+  it('falls back to calling createAdversary directly when onAddAdversaryFromBrowser is not provided', () => {
+    const createAdversary = vi.fn()
+    const adversaryGroups = [
+      { id: 'grp1', baseName: 'Bear', type: 'Bruiser', instances: [{ id: 'a1' }] },
+    ]
+
+    render(
+      <RightColumn
+        {...baseProps}
+        adversaryGroups={adversaryGroups}
+        onAddAdversaryFromBrowser={undefined}
+        createAdversary={createAdversary}
+        createAdversariesBulk={() => {}}
+        deleteAdversary={() => {}}
+      />
+    )
+
+    const addButton = screen.getByText('Bear').closest('.receipt-item').querySelectorAll('button')[1]
+    fireEvent.click(addButton)
+
+    expect(createAdversary).toHaveBeenCalledTimes(1)
+  })
+})

@@ -207,7 +207,15 @@ const RightColumn = ({
 
   const encounterItems = groupsToEncounterItems(adversaryGroups, pcCount)
 
+  // Routed through the same handler the adversary browser uses so the
+  // "just added" confirmation pulse (#55) also fires when an instance is
+  // added to an existing group from the Encounter List's own +/- controls,
+  // not just from the browser search panel.
   const handleAdd = (item) => {
+    if (onAddAdversaryFromBrowser) {
+      onAddAdversaryFromBrowser(item)
+      return
+    }
     const isMinion = item.type === 'Minion'
     if (isMinion) {
       createAdversariesBulk(Array(pcCount).fill(null).map(() => ({ ...item })))
