@@ -139,11 +139,15 @@ const AppCheckbox = ({ checked, onChange }) => (
 const formatModifier = (value) => value > 0 ? `+${value} BP` : `${value} BP`
 
 // Small badge marking a row as auto-detected/read-only, distinct from the
-// clickable manual-adjustment rows above it (#78).
-const AutoTag = () => (
+// clickable manual-adjustment rows above it (#78). Fills with the accent color
+// when its condition is active, so it reads differently from the inactive state.
+const AutoTag = ({ active }) => (
   <span style={{
     fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
-    color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '4px',
+    color: active ? 'white' : 'var(--text-secondary)',
+    border: `1px solid ${active ? 'var(--purple)' : 'var(--border)'}`,
+    borderRadius: '4px',
+    background: active ? 'var(--purple)' : 'transparent',
     padding: '0.05rem 0.3rem', flexShrink: 0,
   }}>
     auto
@@ -151,9 +155,8 @@ const AutoTag = () => (
 )
 
 const autoRowStyle = {
-  display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0.3rem',
-  userSelect: 'none', borderRadius: '5px',
-  background: 'color-mix(in srgb, var(--text-secondary) 6%, transparent)',
+  display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0',
+  userSelect: 'none',
 }
 
 const EncounterReceipt = ({
@@ -326,7 +329,7 @@ const EncounterReceipt = ({
 
           {/* Auto adjustment: 2+ Solos */}
           <div style={autoRowStyle}>
-            <AutoTag />
+            <AutoTag active={twoOrMoreSolos} />
             <span style={{ flex: 1, fontSize: '0.85rem', color: twoOrMoreSolos ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
               2+ Solos
             </span>
@@ -337,7 +340,7 @@ const EncounterReceipt = ({
 
           {/* Auto adjustment: no major threats */}
           <div style={autoRowStyle}>
-            <AutoTag />
+            <AutoTag active={noMajorThreats} />
             <span style={{ flex: 1, fontSize: '0.85rem', color: noMajorThreats ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
               No Major Threats
             </span>

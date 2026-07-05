@@ -85,6 +85,39 @@ describe('EncounterReceipt', () => {
     expect(label.style.color).toBe('var(--text-primary)')
   })
 
+  it('gives the auto badge a distinct active fill when its condition is true, vs inactive (#78)', () => {
+    const encounterItems = [
+      { type: 'adversary', item: { id: 's1', type: 'Solo', name: 'Solo A' }, quantity: 2 },
+    ]
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
+
+    // "2+ Solos" is active (2 solos present) — its auto badge should be filled/highlighted.
+    const activeLabel = screen.getByText('2+ Solos')
+    const activeRow = activeLabel.closest('div')
+    const activeBadge = Array.from(activeRow.children).find(el => el.textContent === 'auto')
+    expect(activeBadge.style.background).toBe('var(--purple)')
+
+    // "No Major Threats" is inactive (a Solo counts as a major threat) — its badge should not be filled.
+    const inactiveLabel = screen.getByText('No Major Threats')
+    const inactiveRow = inactiveLabel.closest('div')
+    const inactiveBadge = Array.from(inactiveRow.children).find(el => el.textContent === 'auto')
+    expect(inactiveBadge.style.background).not.toBe('var(--purple)')
+  })
+
+  it('unifies the auto-adjustment rows\' container styling with the manual adjustment rows (#78)', () => {
+    const encounterItems = [
+      { type: 'adversary', item: { id: 's1', type: 'Solo', name: 'Solo A' }, quantity: 2 },
+    ]
+    render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} />)
+
+    const manualRow = screen.getByText('Less Difficult').closest('div')
+    const autoRow = screen.getByText('2+ Solos').closest('div')
+
+    // No distinct background/border wrapper on the auto rows — same as manual rows.
+    expect(autoRow.style.background).toBe(manualRow.style.background)
+    expect(autoRow.style.borderRadius).toBe(manualRow.style.borderRadius)
+  })
+
   it('makes Remaining the dominant footer figure, with Budget and Used as smaller supporting lines (#78)', () => {
     const encounterItems = []
     render(<EncounterReceipt {...baseProps} encounterItems={encounterItems} availableBattlePoints={14} spentBattlePoints={6} />)
