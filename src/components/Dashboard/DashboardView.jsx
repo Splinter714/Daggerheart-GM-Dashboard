@@ -69,7 +69,7 @@ const DashboardContent = () => {
 
   // Column layout state
   const [newCards, setNewCards] = useState(new Set())
-  const [recentlyAddedCards, setRecentlyAddedCards] = useState(new Set()) // #55
+  const [recentlyAddedCards, setRecentlyAddedCards] = useState(new Map()) // #55: baseName-key -> pulse token
   const [removingCardSpacer, setRemovingCardSpacer] = useState(null)
   const [spacerShrinking, setSpacerShrinking] = useState(false)
   const scrollContainerRef = useRef(null)

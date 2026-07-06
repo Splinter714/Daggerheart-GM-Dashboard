@@ -27,7 +27,7 @@ function setup(overrides = {}) {
   const createAdversary = vi.fn()
   const createAdversariesBulk = vi.fn()
   const setNewCards = vi.fn((fn) => fn(new Set()))
-  const setRecentlyAddedCards = vi.fn((fn) => fn(new Set()))
+  const setRecentlyAddedCards = vi.fn((fn) => fn(new Map()))
   const onAdversaryAdded = vi.fn()
   const scrollContainerRef = { current: null }
 
@@ -90,21 +90,24 @@ describe('useAdversaryAddition fade-out confirmation pulse (#55)', () => {
   beforeEach(() => vi.useFakeTimers())
   afterEach(() => vi.useRealTimers())
 
-  it('flags the added card key in recentlyAddedCards', () => {
+  it('flags the added card key in recentlyAddedCards with a pulse token', () => {
     const { result, setRecentlyAddedCards } = setup()
     act(() => result.current({ name: 'Goblin', type: 'Standard' }))
     expect(setRecentlyAddedCards).toHaveBeenCalled()
     const updater = setRecentlyAddedCards.mock.calls[0][0]
-    expect(updater(new Set()).has('adversary-Goblin')).toBe(true)
+    const next = updater(new Map())
+    expect(next.has('adversary-Goblin')).toBe(true)
+    expect(typeof next.get('adversary-Goblin')).toBe('number')
     act(() => { vi.advanceTimersByTime(RECENTLY_ADDED_DURATION_MS + 200) })
   })
 
   it('clears the flag again after RECENTLY_ADDED_DURATION_MS', () => {
     const { result, setRecentlyAddedCards } = setup()
     act(() => result.current({ name: 'Goblin', type: 'Standard' }))
+    const [firstUpdater] = setRecentlyAddedCards.mock.calls[0]
+    const seeded = firstUpdater(new Map())
     act(() => vi.advanceTimersByTime(RECENTLY_ADDED_DURATION_MS))
     const lastUpdater = setRecentlyAddedCards.mock.calls.at(-1)[0]
-    const seeded = new Set(['adversary-Goblin'])
     expect(lastUpdater(seeded).has('adversary-Goblin')).toBe(false)
     act(() => { vi.advanceTimersByTime(200) })
   })
@@ -113,6 +116,57 @@ describe('useAdversaryAddition fade-out confirmation pulse (#55)', () => {
     const { result } = setup({ setRecentlyAddedCards: undefined })
     expect(() => act(() => result.current({ name: 'Goblin', type: 'Standard' }))).not.toThrow()
     act(() => { vi.advanceTimersByTime(RECENTLY_ADDED_DURATION_MS + 200) })
+  })
+
+  // #55 round 3 (2026-07-05 playtest): the pulse must restart even when a
+  // second instance of an already-present type is added before the first
+  // instance's pulse has finished — a Set (or unchanged flag) would leave the
+  // card's className identical across both adds, so the CSS animation never
+  // actually replayed even though the code "fired" on every add.
+  it('bumps the pulse token on a second add for the same card while the first pulse is still active, and a stale clear does not erase it', () => {
+    // Simulates real setState semantics: each updater fn is applied in order
+    // against an accumulating Map, just like React would.
+    let state = new Map()
+    const setRecentlyAddedCards = vi.fn((updater) => { state = updater(state) })
+    const { result } = renderHook(() =>
+      useAdversaryAddition({
+        entityGroups: [],
+        pcCount: 4,
+        scrollContainerRef: { current: null },
+        createAdversariesBulk: vi.fn(),
+        createAdversary: vi.fn(),
+        setNewCards: vi.fn(),
+        setRecentlyAddedCards,
+        getEntityGroups: () => [],
+        smoothScrollTo: vi.fn(),
+        browserOpenAtPosition: null,
+        columnWidth: 300,
+        sortBy: 'name',
+        sortDir: 'asc',
+        groupBy: 'none',
+        onAdversaryAdded: undefined,
+      })
+    )
+
+    act(() => result.current({ name: 'Goblin', type: 'Standard' }))
+    const firstToken = state.get('adversary-Goblin')
+    expect(firstToken).toBeDefined()
+
+    act(() => { vi.advanceTimersByTime(100) }) // still well within RECENTLY_ADDED_DURATION_MS
+    act(() => result.current({ name: 'Goblin', type: 'Standard' }))
+    const secondToken = state.get('adversary-Goblin')
+    expect(secondToken).toBeDefined()
+    expect(secondToken).not.toBe(firstToken) // a fresh token forces the CSS animation to restart
+
+    // Advance to when the FIRST add's clear would fire (but not the second's) —
+    // it must be a no-op since a newer token has since been set.
+    act(() => { vi.advanceTimersByTime(RECENTLY_ADDED_DURATION_MS - 100) })
+    expect(state.has('adversary-Goblin')).toBe(true)
+    expect(state.get('adversary-Goblin')).toBe(secondToken)
+
+    // The second add's own clear does eventually fire.
+    act(() => { vi.advanceTimersByTime(300) })
+    expect(state.has('adversary-Goblin')).toBe(false)
   })
 })
 

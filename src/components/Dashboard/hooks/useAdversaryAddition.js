@@ -60,12 +60,26 @@ export const useAdversaryAddition = ({
 
       // Soft "just added" confirmation pulse — every add flashes the card that
       // now holds the new instance, whether it's a brand-new group or a
-      // duplicate joining an existing one (#55).
+      // duplicate joining an existing one (#55). The value stored per key is
+      // a pulse "token" (not just membership) so that adding a second
+      // instance to a card that's already mid-pulse still restarts the CSS
+      // animation — a Set (or any unchanged boolean-ish flag) would leave the
+      // rendered className identical across the two adds, and CSS animations
+      // don't replay just because a class was redundantly reapplied without
+      // ever being removed in between (#55 round 3).
       const addedCardKey = `adversary-${baseName}`
-      setRecentlyAddedCards?.((prev) => new Set(prev).add(addedCardKey))
+      const pulseToken = Date.now()
+      setRecentlyAddedCards?.((prev) => {
+        const next = new Map(prev)
+        next.set(addedCardKey, pulseToken)
+        return next
+      })
       setTimeout(() => {
         setRecentlyAddedCards?.((prev) => {
-          const next = new Set(prev)
+          // Only clear if this timeout's token is still the most recent one —
+          // a later add on the same card already scheduled its own clear.
+          if (prev.get(addedCardKey) !== pulseToken) return prev
+          const next = new Map(prev)
           next.delete(addedCardKey)
           return next
         })

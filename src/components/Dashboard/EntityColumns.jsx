@@ -6,6 +6,7 @@ import { getCardScrollTarget } from './hooks/cardScrollTarget'
 import { isColossusGroup, buildAdversaryItem } from './hooks/useEntityGroups'
 import { RECENTLY_ADDED_DURATION_MS } from './hooks/useAdversaryAddition'
 import { GroupTabBar } from './GroupTabBar'
+import { useRecentlyAddedPulseRestart } from './hooks/useRecentlyAddedPulseRestart'
 
 // Collect consecutive same-groupName entries into sections (any entity type).
 function buildSections(entityGroups) {
@@ -57,9 +58,10 @@ const EntityColumns = ({
   deleteEnvironment,
   setRemovingCardSpacer,
   setSpacerShrinking,
-  onOpenBrowser, instanceLabelStyle = 'numeric', recentlyAddedCards = new Set(), setRecentlyAddedCards,
+  onOpenBrowser, instanceLabelStyle = 'numeric', recentlyAddedCards = new Map(), setRecentlyAddedCards,
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
+  useRecentlyAddedPulseRestart(recentlyAddedCards, scrollContainerRef)
 
   // When groupBy is active, compute each section's total width so we can
   // size group-level removal spacers correctly.
@@ -230,16 +232,15 @@ const EntityColumns = ({
                 } else {
                   createAdversary(item)
                 }
-                // Soft "just added" confirmation pulse — also fires when adding
-                // another instance to an already-open existing card, not just
-                // on first-time card creation (#55).
+                // Soft "just added" confirmation pulse, keyed by a token (not
+                // just membership) so re-adding mid-pulse still restarts it (#55).
                 const addedCardKey = `adversary-${group.baseName}`
-                setRecentlyAddedCards?.(prev => new Set(prev).add(addedCardKey))
+                const pulseToken = Date.now()
+                setRecentlyAddedCards?.(prev => new Map(prev).set(addedCardKey, pulseToken))
                 setTimeout(() => {
                   setRecentlyAddedCards?.(prev => {
-                    const next = new Set(prev)
-                    next.delete(addedCardKey)
-                    return next
+                    if (prev.get(addedCardKey) !== pulseToken) return prev
+                    const next = new Map(prev); next.delete(addedCardKey); return next
                   })
                 }, RECENTLY_ADDED_DURATION_MS)
                 setTimeout(() => {

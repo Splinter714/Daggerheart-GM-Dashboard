@@ -417,8 +417,60 @@ describe('EntityColumns re-pulses on adding an instance to an existing card (#55
     expect(createAdversary).toHaveBeenCalledWith(template)
     expect(setRecentlyAddedCards).toHaveBeenCalled()
     const updater = setRecentlyAddedCards.mock.calls[0][0]
-    const result = updater(new Set())
+    const result = updater(new Map())
     expect(result.has('adversary-Bear')).toBe(true)
+  })
+
+  // #55 round 3 (2026-07-05 playtest): "it fades in, but only when the
+  // adversary type itself is brand new" — adding a 2nd/3rd instance to a type
+  // already on the board must also pulse, not just first-of-type adds. Verify
+  // GameCard actually receives isRecentlyAdded=true once recentlyAddedCards
+  // carries the group's key — computed directly from group.baseName,
+  // independent of whether the group has one instance or several.
+  it('passes isRecentlyAdded=true to GameCard for an existing group with multiple instances', () => {
+    const template = { baseName: 'Bear', type: 'Bruiser', hpMax: 5, stressMax: 2 }
+    const instances = [
+      { id: 'Bear-1', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true },
+      { id: 'Bear-2', duplicateNumber: 2, hp: 0, stress: 0, isVisible: true },
+      { id: 'Bear-3', duplicateNumber: 3, hp: 0, stress: 0, isVisible: true },
+    ]
+    const existingGroup = { type: 'adversary', baseName: 'Bear', template, instances }
+    const entityGroups = [existingGroup]
+
+    render(
+      <EntityColumns
+        {...baseProps}
+        entityGroups={entityGroups}
+        getEntityGroups={() => entityGroups}
+        createAdversary={noop}
+        recentlyAddedCards={new Map([['adversary-Bear', Date.now()]])}
+        setRecentlyAddedCards={noop}
+      />
+    )
+
+    const props = GameCard.mock.calls.at(-1)[0]
+    expect(props.isRecentlyAdded).toBe(true)
+  })
+
+  it('passes isRecentlyAdded=false when the group key is not in recentlyAddedCards', () => {
+    const template = { baseName: 'Bear', type: 'Bruiser', hpMax: 5, stressMax: 2 }
+    const instances = [{ id: 'Bear-1', duplicateNumber: 1, hp: 0, stress: 0, isVisible: true }]
+    const existingGroup = { type: 'adversary', baseName: 'Bear', template, instances }
+    const entityGroups = [existingGroup]
+
+    render(
+      <EntityColumns
+        {...baseProps}
+        entityGroups={entityGroups}
+        getEntityGroups={() => entityGroups}
+        createAdversary={noop}
+        recentlyAddedCards={new Map()}
+        setRecentlyAddedCards={noop}
+      />
+    )
+
+    const props = GameCard.mock.calls.at(-1)[0]
+    expect(props.isRecentlyAdded).toBe(false)
   })
 })
 
