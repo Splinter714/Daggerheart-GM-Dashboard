@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import ColossusSegmentCard from './ColossusSegmentCard'
+import ColossusSegmentCard, { NestedSegmentBlock } from './ColossusSegmentCard'
 
 const colossus = {
   name: 'Ikeri, Injuries Untold',
@@ -170,8 +170,36 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getByText('22')).toBeInTheDocument()
   })
 
-  it('shows both segment-specific and framework-wide features, clearly distinguished (#109)', () => {
+  // #119: in Segments display mode, framework-wide features (e.g. "Colossal
+  // Power") are merged into the same type-grouped Passives/Actions/Reactions
+  // sections as segment-specific features — no separate "Colossus Features"
+  // block, and no tag/badge distinguishing the two once merged.
+  it('merges segment-specific and framework-wide features into the same type-grouped sections, with no separate Colossus Features block (#119)', () => {
     render(<ColossusSegmentCard {...baseProps} />)
+    expect(screen.getByText('Fatal')).toBeInTheDocument()
+    expect(screen.getByText('Colossal Power')).toBeInTheDocument()
+    expect(screen.queryByText('Colossus Features')).not.toBeInTheDocument()
+    // Both features are type "Passive" — they should appear together under
+    // a single "Passives" section header (not one each under two headers).
+    expect(screen.getAllByText('Passives').length).toBe(1)
+  })
+
+  // #119 regression guard: Nested display mode's segment block must keep
+  // the separate "Colossus Features" divider/section as-is — this change is
+  // scoped to Segments mode only.
+  it('Nested mode keeps framework-wide features in their own separate Colossus Features block (#119 regression guard)', () => {
+    render(
+      <NestedSegmentBlock
+        seg={segment}
+        instanceKey="ikeri-head"
+        instanceNumber={1}
+        markedHp={0}
+        tokenCount={0}
+        inst={inst}
+        colossus={colossus}
+        onUpdate={vi.fn()}
+      />
+    )
     expect(screen.getByText('Fatal')).toBeInTheDocument()
     expect(screen.getByText('Colossal Power')).toBeInTheDocument()
     expect(screen.getByText('Colossus Features')).toBeInTheDocument()

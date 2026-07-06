@@ -83,8 +83,10 @@ export const FeatureList = ({ features }) => {
 }
 
 // Segment-specific features plus framework-wide features (e.g. "Colossal
-// Power"), clearly distinguished with their own divider/section since both
-// now appear together on the same self-contained segment card (#109).
+// Power"), clearly distinguished with their own divider/section — used by
+// the Nested display mode's segment blocks (#109). Segments display mode
+// instead merges the two into the same type-grouped sections; see
+// MergedSegmentFeatures below (#119).
 export const SegmentFeatures = ({ segmentFeatures, frameworkFeatures }) => (
   <>
     <FeatureList features={segmentFeatures} />
@@ -106,6 +108,17 @@ export const SegmentFeatures = ({ segmentFeatures, frameworkFeatures }) => (
       </div>
     )}
   </>
+)
+
+// Segments display mode only (#119): framework-wide features (e.g.
+// "Colossal Power") are merged into the same ACTIONS/PASSIVES/REACTIONS
+// sections as segment-specific features, grouped/sorted together by type
+// rather than kept in a separate "Colossus Features" block. No visual
+// tag/badge distinguishes a framework-wide feature from a segment-specific
+// one once merged — Jackson confirmed that distinction doesn't matter.
+// Nested mode is unaffected and keeps using SegmentFeatures above.
+export const MergedSegmentFeatures = ({ segmentFeatures, frameworkFeatures }) => (
+  <FeatureList features={[...(segmentFeatures || []), ...(frameworkFeatures || [])]} />
 )
 
 // Individually-clickable HP pips — same interaction model as the nested view.
@@ -450,9 +463,10 @@ const ColossusSegmentCard = ({
             ))}
           </div>
 
-          {/* Features — segment-specific plus framework-wide, clearly distinguished */}
+          {/* Features — segment-specific and framework-wide merged together,
+              grouped/sorted by type (#119) */}
           <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H }}>
-            <SegmentFeatures segmentFeatures={seg.features} frameworkFeatures={colossus.features} />
+            <MergedSegmentFeatures segmentFeatures={seg.features} frameworkFeatures={colossus.features} />
           </div>
 
           <div style={{ height: CARD_SPACE_V }} />
