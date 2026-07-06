@@ -158,7 +158,6 @@ describe('GameCard nested colossus segment cards repeat framework info (#109)', 
     expect(screen.getAllByText(/Entangle, intimidate, peck, stomp/).length).toBeGreaterThan(0)
     expect(screen.getAllByText('Huge +2').length).toBeGreaterThan(0)
     expect(screen.getAllByText(/Thresh 11\/22/).length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Colossal Power').length).toBeGreaterThan(0)
 
     // Two Stress rows now render (top-level colossus header + segment block),
     // both reading/writing the same shared inst.stress field (#109).
@@ -167,6 +166,55 @@ describe('GameCard nested colossus segment cards repeat framework info (#109)', 
     const segmentStressPips = stressLabels[1].parentElement.querySelectorAll('[style*="border-radius: 50%"]')
     fireEvent.click(segmentStressPips[3])
     expect(onUpdate).toHaveBeenCalledWith('adv-1', { stress: 4 })
+  })
+})
+
+// #118: framework-wide features (e.g. "Colossal Power") must render exactly
+// once at the top-level colossus card in Nested display mode — NOT repeated
+// on every segment block, unlike the framework info above (Motives/
+// Experience/Thresholds/Stress) which is intentionally still repeated.
+describe('GameCard nested colossus framework features render once, not per segment (#118)', () => {
+  it('nested mode: renders a framework-wide feature (e.g. Colossal Power) exactly once, not per segment', () => {
+    const onUpdate = vi.fn()
+    render(
+      <GameCard type="adversary" item={colossusItem} instances={[colossusInstance]} onUpdate={onUpdate} />
+    )
+    // Only one segment in this fixture — assert exactly one render even so,
+    // guarding against the bug where NestedSegmentBlock re-rendered it per
+    // segment on top of the top-level FeatureList render.
+    expect(screen.getAllByText('Colossal Power').length).toBe(1)
+  })
+
+  it('nested mode: renders a framework-wide feature exactly once even with multiple segments', () => {
+    const onUpdate = vi.fn()
+    const multiSegmentItem = {
+      ...colossusItem,
+      segments: [
+        { id: 'ikeri-head', name: 'Head', role: 'head', count: 1, hp: 5, difficulty: 16, atk: 2 },
+        { id: 'ikeri-tail', name: 'Tail', role: 'tail', count: 1, hp: 4, difficulty: 14, atk: 1 },
+      ],
+    }
+    const multiInstance = { ...colossusInstance, segmentHp: { 'ikeri-head': 0, 'ikeri-tail': 0 } }
+    render(
+      <GameCard type="adversary" item={multiSegmentItem} instances={[multiInstance]} onUpdate={onUpdate} />
+    )
+    expect(screen.getAllByText('Colossal Power').length).toBe(1)
+  })
+
+  it('segments mode: still repeats the framework-wide feature on the standalone segment card, unchanged (#109 regression guard)', () => {
+    const onUpdate = vi.fn()
+    render(
+      <GameCard
+        type="adversary"
+        item={colossusItem}
+        instances={[colossusInstance]}
+        segment={colossusItem.segments[0]}
+        segmentInstances={[{ instanceKey: 'ikeri-head', instanceNumber: 1 }]}
+        onUpdate={onUpdate}
+      />
+    )
+    expect(screen.getAllByText('Colossal Power').length).toBeGreaterThan(0)
+    expect(screen.getByText('Colossus Features')).toBeInTheDocument()
   })
 })
 

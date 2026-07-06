@@ -262,8 +262,15 @@ export const NestedSegmentBlock = ({ seg, instanceKey, instanceNumber, markedHp,
           <ColossusStress colossus={colossus} inst={inst} onUpdate={onUpdate} />
         </div>
       )}
-      {/* Features — segment-specific plus framework-wide, clearly distinguished */}
-      <SegmentFeatures segmentFeatures={seg.features} frameworkFeatures={colossus?.features} />
+      {/* Segment-specific features only. Framework-wide features (e.g.
+          "Colossal Power") are shown once at the top-level colossus card in
+          Nested mode (GameCard.jsx renders colossus.features via FeatureList
+          there) — this block must NOT repeat them or they'd duplicate on
+          every segment (#118). This is distinct from the Segments
+          (standalone) display mode's ColossusSegmentCard, which intentionally
+          repeats framework features on every self-contained segment card
+          (#109) via its own separate SegmentFeatures call. */}
+      <FeatureList features={seg.features} />
     </div>
   )
 }
