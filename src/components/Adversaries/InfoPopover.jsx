@@ -15,9 +15,37 @@ export const InfoPopover = ({ children, label, align = 'left', minWidth = 220 })
   const [adjust, setAdjust] = useState({ dx: 0, flipUp: false })
   const containerRef = useRef(null)
   const popoverRef = useRef(null)
+  const closeTimeoutRef = useRef(null)
+
+  // #123 (2026-07-05 playtest): hover-capable (desktop) devices should
+  // auto-close the popover a brief moment after the mouse leaves both the
+  // trigger and the panel, instead of requiring a click outside. Touch/
+  // tap-only devices have no hover state, so they keep the original
+  // tap-elsewhere-to-close behavior.
+  const isHoverCapable = () =>
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(hover: none)').matches === false
+      : false
+
+  const clearCloseTimeout = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current)
+      closeTimeoutRef.current = null
+    }
+  }
+
+  const scheduleClose = () => {
+    clearCloseTimeout()
+    closeTimeoutRef.current = setTimeout(() => {
+      setOpen(false)
+      closeTimeoutRef.current = null
+    }, 350)
+  }
+
+  useEffect(() => () => clearCloseTimeout(), [])
 
   useEffect(() => {
-    if (!open) return
+    if (!open || isHoverCapable()) return
     const handler = (e) => { if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', handler)
     document.addEventListener('touchstart', handler)
@@ -60,7 +88,12 @@ export const InfoPopover = ({ children, label, align = 'left', minWidth = 220 })
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        onMouseEnter={() => setOpen(true)}
+        onMouseEnter={() => {
+          if (!isHoverCapable()) return
+          clearCloseTimeout()
+          setOpen(true)
+        }}
+        onMouseLeave={() => { if (isHoverCapable()) scheduleClose() }}
         style={{
           border: 'none', background: 'transparent',
           cursor: 'pointer', padding: 0,
@@ -77,18 +110,22 @@ export const InfoPopover = ({ children, label, align = 'left', minWidth = 220 })
         {label}
       </button>
       {open && (
-        <div ref={popoverRef} style={{
-          position: 'absolute', ...hAlign, ...vAlign,
-          minWidth: `${minWidth}px`, maxWidth: `${Math.max(minWidth, 320)}px`,
-          backgroundColor: 'var(--bg-primary)',
-          border: '1px solid var(--border)',
-          borderRadius: '0.5rem',
-          padding: '0.75rem',
-          zIndex: 200,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-          fontSize: '0.75rem', lineHeight: 1.5, color: 'var(--text-secondary)',
-          transform: adjust.dx ? `translateX(${adjust.dx}px)` : 'none',
-        }}>
+        <div
+          ref={popoverRef}
+          onMouseEnter={() => { if (isHoverCapable()) clearCloseTimeout() }}
+          onMouseLeave={() => { if (isHoverCapable()) scheduleClose() }}
+          style={{
+            position: 'absolute', ...hAlign, ...vAlign,
+            minWidth: `${minWidth}px`, maxWidth: `${Math.max(minWidth, 320)}px`,
+            backgroundColor: 'var(--bg-primary)',
+            border: '1px solid var(--border)',
+            borderRadius: '0.5rem',
+            padding: '0.75rem',
+            zIndex: 200,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+            fontSize: '0.75rem', lineHeight: 1.5, color: 'var(--text-secondary)',
+            transform: adjust.dx ? `translateX(${adjust.dx}px)` : 'none',
+          }}>
           {children}
         </div>
       )}
