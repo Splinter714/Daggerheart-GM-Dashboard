@@ -184,10 +184,12 @@ describe('ColossusSegmentCard', () => {
     expect(screen.getAllByText('Passives').length).toBe(1)
   })
 
-  // #119 regression guard: Nested display mode's segment block must keep
-  // the separate "Colossus Features" divider/section as-is — this change is
-  // scoped to Segments mode only.
-  it('Nested mode keeps framework-wide features in their own separate Colossus Features block (#119 regression guard)', () => {
+  // #119 regression guard: this change is scoped to Segments mode only.
+  // Nested display mode's segment block (#118) renders framework-wide
+  // features once at the top-level colossus card (see GameCard.test.jsx's
+  // #118 coverage) rather than per segment block at all — it must not gain
+  // a merged or separate framework-features section of its own.
+  it('Nested mode segment block only renders segment-specific features, not framework-wide ones (#119 regression guard)', () => {
     render(
       <NestedSegmentBlock
         seg={segment}
@@ -201,8 +203,8 @@ describe('ColossusSegmentCard', () => {
       />
     )
     expect(screen.getByText('Fatal')).toBeInTheDocument()
-    expect(screen.getByText('Colossal Power')).toBeInTheDocument()
-    expect(screen.getByText('Colossus Features')).toBeInTheDocument()
+    expect(screen.queryByText('Colossal Power')).not.toBeInTheDocument()
+    expect(screen.queryByText('Colossus Features')).not.toBeInTheDocument()
   })
 
   // #79: the weapon pill (row 1) must not be squeezed illegibly small at

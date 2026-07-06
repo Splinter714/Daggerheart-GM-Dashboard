@@ -201,7 +201,12 @@ describe('GameCard nested colossus framework features render once, not per segme
     expect(screen.getAllByText('Colossal Power').length).toBe(1)
   })
 
-  it('segments mode: still repeats the framework-wide feature on the standalone segment card, unchanged (#109 regression guard)', () => {
+  // #119: Segments mode still repeats the framework-wide feature on the
+  // standalone segment card, but now merges it into the same type-grouped
+  // Actions/Passives/Reactions sections as segment-specific features rather
+  // than keeping it under a separate "Colossus Features" divider (which
+  // #109 originally introduced and this supersedes).
+  it('segments mode: still repeats the framework-wide feature on the standalone segment card, merged into the type-grouped sections (#119)', () => {
     const onUpdate = vi.fn()
     render(
       <GameCard
@@ -214,7 +219,7 @@ describe('GameCard nested colossus framework features render once, not per segme
       />
     )
     expect(screen.getAllByText('Colossal Power').length).toBeGreaterThan(0)
-    expect(screen.getByText('Colossus Features')).toBeInTheDocument()
+    expect(screen.queryByText('Colossus Features')).not.toBeInTheDocument()
   })
 })
 
