@@ -149,3 +149,67 @@ describe('InfoPopover — hover auto-close (#123)', () => {
     expect(screen.queryByText('HP guide content')).not.toBeInTheDocument()
   })
 })
+
+// #123 (2026-07-05 playtest screenshot): the threshold-guide popover (T/Diff/
+// Maj/Sev/HP/Stress/ATK table) positioned off-screen to the right when its
+// trigger sat near the right edge of the viewport, clipping the rightmost
+// column. InfoPopover's useLayoutEffect measures the rendered panel against
+// the nearest clip boundary (a scrollable ancestor, or the viewport) and
+// shifts it back on-screen via a translateX — mirrors the existing flip-up
+// vertical-overflow handling.
+describe('InfoPopover — horizontal overflow clamp (#123)', () => {
+  const origGBCR = HTMLElement.prototype.getBoundingClientRect
+
+  afterEach(() => {
+    HTMLElement.prototype.getBoundingClientRect = origGBCR
+  })
+
+  it('shifts the panel left (via transform) when it would overflow the right edge of the viewport', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 400, configurable: true })
+
+    render(
+      <InfoPopover label="ATK" minWidth={220}>
+        <div>Thresholds table</div>
+      </InfoPopover>
+    )
+
+    // Simulate the trigger sitting near the right edge of a 400px viewport:
+    // a left-anchored 320px-wide panel would overflow to x=700.
+    HTMLElement.prototype.getBoundingClientRect = function () {
+      if (this.textContent && this.textContent.includes('Thresholds table')) {
+        return { left: 380, right: 380 + 320, top: 50, bottom: 150, width: 320, height: 100 }
+      }
+      return origGBCR.call(this)
+    }
+
+    const trigger = screen.getByText('ATK')
+    fireEvent.click(trigger)
+
+    const panel = screen.getByText('Thresholds table').parentElement
+    // dx = clipRight(400) - MARGIN(8) - rect.right(700) = -308
+    expect(panel).toHaveStyle({ transform: 'translateX(-308px)' })
+  })
+
+  it('does not shift the panel when it already fits within the viewport', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true })
+
+    render(
+      <InfoPopover label="ATK" minWidth={220}>
+        <div>Thresholds table</div>
+      </InfoPopover>
+    )
+
+    HTMLElement.prototype.getBoundingClientRect = function () {
+      if (this.textContent && this.textContent.includes('Thresholds table')) {
+        return { left: 100, right: 100 + 320, top: 50, bottom: 150, width: 320, height: 100 }
+      }
+      return origGBCR.call(this)
+    }
+
+    const trigger = screen.getByText('ATK')
+    fireEvent.click(trigger)
+
+    const panel = screen.getByText('Thresholds table').parentElement
+    expect(panel).toHaveStyle({ transform: 'none' })
+  })
+})
