@@ -18,7 +18,7 @@ const BUDGETS = {
   'src/components/Adversaries/CustomAdversaryCreator.jsx': 932,
   'src/components/Adversaries/GameCard.jsx': 1257, // #30: +1 prop (pcCount), +1 import; group-size calc extracted to GameCard/hooks/useMinionGroupCount.js
   'src/components/Dashboard/DashboardView.jsx': 581,
-  'src/components/Dashboard/EntityColumns.jsx': 585,
+  'src/components/Dashboard/EntityColumns.jsx': 525, // #56: group-pill/rail markup extracted to shared GroupTabBar.jsx
 }
 
 // Every other source file must stay under this.

@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from 'react'
+import React from 'react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
 import { getCardScrollTarget } from './hooks/cardScrollTarget'
 import { isColossusGroup, buildAdversaryItem } from './hooks/useEntityGroups'
 import { RECENTLY_ADDED_DURATION_MS } from './hooks/useAdversaryAddition'
+import { GroupTabBar } from './GroupTabBar'
 
 // Collect consecutive same-groupName entries into sections (any entity type).
 function buildSections(entityGroups) {
@@ -59,19 +60,6 @@ const EntityColumns = ({
   onOpenBrowser, instanceLabelStyle = 'numeric', recentlyAddedCards = new Set(), setRecentlyAddedCards,
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
-
-  // Measure the actual rendered pill height so the frame line sits exactly at
-  // the pill's vertical midpoint and the hook drop = exactly half the pill height.
-  const GROUP_TAB_TOP_SPACE = DASHBOARD_GAP // px above pill top
-  const [pillHeight, setPillHeight] = useState(22) // updated on first render
-  const pillMeasureRef = useCallback(node => {
-    if (node) {
-      const h = node.getBoundingClientRect().height
-      if (h > 0) setPillHeight(h)
-    }
-  }, [])
-  const groupTabBarHeight = Math.round(GROUP_TAB_TOP_SPACE + pillHeight)
-  const groupLineY = Math.round(GROUP_TAB_TOP_SPACE + pillHeight * 0.35)
 
   // When groupBy is active, compute each section's total width so we can
   // size group-level removal spacers correctly.
@@ -398,7 +386,6 @@ const EntityColumns = ({
 
   const sections = buildSections(entityGroups)
   const items = []
-  let firstGroupSeen = false
 
   sections.forEach((section, sectionIndex) => {
     const isFirstSection = sectionIndex === 0
@@ -442,55 +429,9 @@ const EntityColumns = ({
           }}
         >
           {/* Inset top-tab label — full-width frame renders behind the pill.
-              groupLineY and groupTabBarHeight are derived from the actual measured
-              pill height, so the rail sits exactly at the pill's midpoint and the
-              hook drop equals exactly half the pill height. */}
-          {(() => {
-            const isFirst = !firstGroupSeen
-            if (isFirst) firstGroupSeen = true
-            return (
-              <div style={{
-                height: groupTabBarHeight, position: 'relative',
-              }}>
-                {/* Sticky (not absolute) with an explicit width so its left edge
-                    tracks the pinned pill instead of the wrapper's scrolled-away
-                    edge — absolute + left:0/right:0 let the top border draw past
-                    the pill once scrolled (#86). Needs a non-flex parent for the
-                    100% width to resolve against the wrapper. */}
-                <div data-testid="group-rail-border" style={{
-                  position: 'sticky', top: groupLineY, left: 0, width: '100%',
-                  height: `calc(100% - ${groupLineY}px - 6px)`,
-                  borderTop: '1px solid var(--text-secondary)',
-                  borderLeft: '1px solid var(--text-secondary)',
-                  borderRight: '1px solid var(--text-secondary)',
-                  borderTopRightRadius: 4, pointerEvents: 'none', boxSizing: 'border-box', zIndex: 1,
-                }} />
-                <span
-                  ref={isFirst ? pillMeasureRef : undefined}
-                  style={{
-                    position: 'sticky',
-                    left: 0,
-                    display: 'inline-block',
-                    zIndex: 1,
-                    marginTop: GROUP_TAB_TOP_SPACE,
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: 'white',
-                    whiteSpace: 'nowrap',
-                    userSelect: 'none',
-                    background: 'var(--bg-card)',
-                    border: '2px solid var(--border)',
-                    borderRadius: '6px',
-                    padding: '3px 9px',
-                  }}
-                >
-                  {groupName}
-                </span>
-              </div>
-            )
-          })()}
+              Shared with the adversary creator's live preview pill (#56) via
+              GroupTabBar so both always render identically. */}
+          <GroupTabBar label={groupName} sticky />
           {/* Cards row — on narrow viewports this scrolls+snaps internally so
               a multi-entry group (e.g. colossus segments) still shows one
               full-width card at a time instead of overflowing (#79). */}

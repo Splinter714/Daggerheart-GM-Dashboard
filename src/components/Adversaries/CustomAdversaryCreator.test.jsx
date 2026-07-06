@@ -53,8 +53,34 @@ describe('CustomAdversaryCreator — live preview pill (#56)', () => {
     // Narrow/mobile layout shows the preview behind a "Preview" tab toggle.
     fireEvent.click(screen.getByText('Preview'))
 
-    expect(screen.getByText('Type: PREVIEW')).toBeInTheDocument()
-    expect(screen.getByTestId('preview-rail-border')).toBeInTheDocument()
+    const pill = screen.getByText('Type: PREVIEW')
+    const rail = screen.getByTestId('preview-rail-border')
+    expect(pill).toBeInTheDocument()
+    expect(rail).toBeInTheDocument()
+
+    // #56: the preview pill previously floated as a bespoke rounded box with
+    // a visible gap above the card instead of merging into the card's top
+    // border like a normal group pill (e.g. "LEADER"). It now reuses the
+    // shared GroupTabBar component, so it must render with the exact same
+    // sticky/absolute-positioned, zIndex-1, top-border-merging structure as
+    // a real group pill — flush top-left, no separate floating box.
+    expect(pill.style.position).toBe('absolute')
+    expect(pill.style.left).toBe('0px')
+    expect(pill.style.zIndex).toBe('1')
+    expect(pill.style.background).toBe('var(--bg-card)')
+    expect(pill.style.border).toBe('2px solid var(--border)')
+    expect(pill.style.borderRadius).toBe('6px')
+
+    expect(rail.style.position).toBe('absolute')
+    expect(rail.style.left).toBe('0px')
+    expect(rail.style.width).toBe('100%')
+    expect(rail.style.borderTop).toBeTruthy()
+    expect(rail.style.borderLeft).toBeTruthy()
+    expect(rail.style.borderRight).toBeTruthy()
+    // Rail height must extend past the tab bar itself so it overlaps/merges
+    // into the card below instead of stopping short and leaving a gap.
+    // (jsdom's CSSOM folds "X - 6px" into a single combined px offset.)
+    expect(rail.style.height).toMatch(/^calc\(100% - \d+px\)$/)
   })
 })
 
