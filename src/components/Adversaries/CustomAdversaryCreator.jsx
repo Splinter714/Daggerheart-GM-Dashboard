@@ -259,7 +259,7 @@ const CustomAdversaryCreator = forwardRef(({
     setIsSaving(true)
     try {
       const filterBlank = (exps) =>
-        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
+        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier != null && e.modifier !== 0))
 
       const baseName = formData.name.trim()
       const { damageType, ...formRest } = formData
@@ -309,7 +309,7 @@ const CustomAdversaryCreator = forwardRef(({
     setIsSaving(true)
     try {
       const filterBlank = (exps) =>
-        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
+        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier != null && e.modifier !== 0))
       const baseName = formData.name.trim()
       const { damageType, ...formRest } = formData
       const data = {
@@ -334,7 +334,7 @@ const CustomAdversaryCreator = forwardRef(({
     setIsSaving(true)
     try {
       const filterBlank = (exps) =>
-        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
+        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier != null && e.modifier !== 0))
       const baseName = formData.name.trim()
       const { damageType, ...formRest } = formData
       const data = {
@@ -357,7 +357,7 @@ const CustomAdversaryCreator = forwardRef(({
     setIsSaving(true)
     try {
       const filterBlank = (exps) =>
-        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
+        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier != null && e.modifier !== 0))
       const baseName = formData.name.trim()
       const { damageType, ...formRest } = formData
       const data = {
@@ -660,7 +660,7 @@ const CustomAdversaryCreator = forwardRef(({
                             <button key={i} type="button"
                               onClick={() => {
                                 const bonus = Math.min(formData.tier + 1, 3)
-                                setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: exp, modifier: bonus }] }))
+                                setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: `${exp} +${bonus}`, modifier: null }] }))
                               }}
                               style={{
                                 padding: '0.2rem 0.5rem',
@@ -673,22 +673,24 @@ const CustomAdversaryCreator = forwardRef(({
                       </>
                     ) : (
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                        Experiences represent things this adversary is particularly skilled at. Each experience has a name and a bonus modifier (+1 to +3) added to relevant rolls.
+                        Experiences represent things this adversary is particularly skilled at. Type the whole thing as one entry, e.g. "Huge +2".
                       </div>
                     )}
                   </InfoPopover>
                   <button type="button" onClick={() => {
-                    const bonus = Math.min(formData.tier + 1, 3)
-                    setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: '', modifier: bonus }] }))
+                    setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: '', modifier: null }] }))
                   }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title="Add experience">+</button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                   {(formData.experience || []).map((exp, i) => {
-                    const name = typeof exp === 'string' ? exp : (exp.name || '')
-                    const modifier = typeof exp === 'object' ? (exp.modifier || 0) : 0
-                    const setExp = (patch) => setFormData(prev => {
+                    // Free-text single-string entry (#120) — new/edited entries store
+                    // { name: <full text incl. modifier, e.g. "Huge +2">, modifier: null }
+                    // so old structured { name, modifier } SRD/stored entries keep working
+                    // unchanged (both shapes render via ExperienceTags).
+                    const text = typeof exp === 'string' ? exp : (exp.name || '')
+                    const setText = (value) => setFormData(prev => {
                       const next = [...(prev.experience || [])]
-                      next[i] = { name, modifier, ...patch }
+                      next[i] = { name: value, modifier: null }
                       return { ...prev, experience: next }
                     })
                     return (
@@ -699,23 +701,9 @@ const CustomAdversaryCreator = forwardRef(({
                         <DragHandle />
                         <input
                           type="text"
-                          value={modifier > 0 ? `+${modifier}` : ''}
-                          onChange={e => {
-                            const raw = e.target.value.replace(/[^0-9+-]/g, '')
-                            setExp({ modifier: Math.max(0, raw === '' || raw === '+' ? 0 : parseInt(raw) || 0) })
-                          }}
-                          onKeyDown={e => {
-                            if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
-                            e.preventDefault()
-                            setExp({ modifier: Math.max(0, modifier + (e.key === 'ArrowUp' ? 1 : -1)) })
-                          }}
-                          style={{ width: '24px', height: '24px', flexShrink: 0, border: '1px solid var(--text-secondary)', borderRadius: '4px', backgroundColor: 'transparent', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'center', outline: 'none' }}
-                        />
-                        <input
-                          type="text"
-                          value={name}
-                          onChange={e => setExp({ name: e.target.value })}
-                          placeholder="Experience name"
+                          value={text}
+                          onChange={e => setText(e.target.value)}
+                          placeholder='Experience (e.g. "Huge +2")'
                           style={{ ...inputStyle, flex: 1, fontSize: '0.85rem' }}
                         />
                         <TouchTarget type="button" onClick={() => {

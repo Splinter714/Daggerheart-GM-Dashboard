@@ -155,3 +155,52 @@ describe('CustomAdversaryCreator — font-size review (#123)', () => {
     expect(container.querySelector('.adversary-creator')).toBeInTheDocument()
   })
 })
+
+describe('CustomAdversaryCreator — Experience as single free-text field (#120)', () => {
+  it('adding an Experience shows a single free-text input, not separate name + modifier fields', () => {
+    render(<CustomAdversaryCreator onSave={vi.fn()} />)
+
+    fireEvent.click(screen.getByTitle('Add experience'))
+
+    // Single combined input, e.g. "Huge +2" typed as one string.
+    const expInput = screen.getByPlaceholderText('Experience (e.g. "Huge +2")')
+    expect(expInput).toBeInTheDocument()
+
+    // No separate small numeric modifier box should exist alongside it.
+    expect(screen.queryByPlaceholderText('Experience name')).not.toBeInTheDocument()
+  })
+
+  it('a newly-typed free-text Experience entry saves and renders correctly on the card preview', async () => {
+    const onSave = vi.fn()
+    render(<CustomAdversaryCreator onSave={onSave} />)
+
+    fireEvent.change(screen.getByPlaceholderText(/Name — or search/), { target: { value: 'Test Foe' } })
+    fireEvent.click(screen.getByTitle('Add experience'))
+    fireEvent.change(screen.getByPlaceholderText('Experience (e.g. "Huge +2")'), { target: { value: 'Huge +2' } })
+
+    // Preview tab renders the read-only card using the shared ExperienceTags component.
+    fireEvent.click(screen.getByText('Preview'))
+    expect(screen.getByText('Huge +2')).toBeInTheDocument()
+
+    await clickSave()
+    expect(onSave).toHaveBeenCalledTimes(1)
+    const saved = onSave.mock.calls[0][0]
+    expect(saved.experience).toEqual([{ name: 'Huge +2', modifier: null }])
+  })
+
+  it('regression: an existing structured {name, modifier} Experience entry (SRD/stored data) still displays correctly', async () => {
+    const editingAdversary = {
+      id: 'adv-legacy', name: 'Legacy Foe', baseName: 'Legacy Foe', type: 'Standard', tier: 1,
+      experience: [{ name: 'Tracker', modifier: 2 }],
+    }
+    render(<CustomAdversaryCreator onSave={vi.fn()} editingAdversary={editingAdversary} />)
+
+    // Editing an existing structured entry loads it into the single free-text
+    // input showing its name (the modifier field itself is gone in the new UI).
+    expect(screen.getByDisplayValue('Tracker')).toBeInTheDocument()
+
+    // Read-only preview still formats the legacy structured shape as "name +modifier".
+    fireEvent.click(screen.getByText('Preview'))
+    expect(screen.getByText('Tracker +2')).toBeInTheDocument()
+  })
+})
