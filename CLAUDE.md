@@ -20,6 +20,8 @@ For styling/highlighting work, start simple (single accent, minimal coloring) an
 
 Don't start your own `npm run dev` — Claude Code's preview owns this worktree's dev server (`.claude/launch.json`, `autoPort: true`), and each worktree gets its own port. A second server in the same worktree bumps the preview onto a phantom port and the panes diverge (the "stale dev server" gotcha). For verification, rely on the preview's already-running server; only start one if none is detected for this worktree.
 
+**Known host-tool bug (background agents in worktrees):** `preview_start` has been observed binding its process to the main checkout's cwd even when invoked from inside a `.claude/worktrees/<name>/` worktree (confirmed via `lsof -a -p <pid> -d cwd`), so a live-preview check in that situation silently exercises main's committed code, not the worktree's uncommitted changes. This is a bug in the Claude Code host tool itself, not something fixable from repo config (`launch.json` has no `cwd` field). Until it's fixed upstream, background agents working in a worktree should skip live-preview verification and rely on the test net (`npm test` / `npm run build`) instead — which is consistent with the mandatory two-layer test net above.
+
 ## Versioning
 
 Bump the patch version in `package.json` (`0.11.11` → `0.11.12`) as part of any change landing on `main` — this repo doesn't do minor/major semver bumps, just an incrementing patch counter per shipped change. Bump it in the same PR as the change (no need for a separate `chore: bump version` commit unless the change is otherwise unrelated to a landed PR).
