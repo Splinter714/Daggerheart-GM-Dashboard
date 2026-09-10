@@ -24,4 +24,10 @@ Don't start your own `npm run dev` — Claude Code's preview owns this worktree'
 
 ## Versioning
 
-Bump the patch version in `package.json` (`0.11.11` → `0.11.12`) as part of any change landing on `main` — this repo doesn't do minor/major semver bumps, just an incrementing patch counter per shipped change. Bump it in the same PR as the change (no need for a separate `chore: bump version` commit unless the change is otherwise unrelated to a landed PR).
+Bump the patch version in `package.json` (`0.11.11` → `0.11.12`) as part of any change landing on `main`. Bump it in the same PR as the change (no need for a separate `chore: bump version` commit unless the change is otherwise unrelated to a landed PR).
+
+**Minor bumps mark content releases** (`0.11.88` → `0.12.0`). A content release is a batch of work that meaningfully changes what a GM has available at the table — a new SRD edition's adversaries and environments, a whole campaign-frame mechanic — not an ordinary feature or fix, however large. Everything else stays a patch increment. Major bumps are still unused; `1.0.0` is not spoken for, so don't reach for it without asking.
+
+The minor bump is its own decision, not something to infer from a change feeling big: **ask before taking one**. Set the number as part of the release commit, the same as a patch bump.
+
+_History: `0.12.0` (2026-09-09) was the first minor bump — the Daggerheart SRD 2.0 / Hope & Fear import, which took adversaries from 129 to 264 and environments from 20 to 47 (#125, #129)._
