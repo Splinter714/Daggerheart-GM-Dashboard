@@ -3,7 +3,7 @@
     "version": "2.0.0",
     "source": "Daggerheart SRD 2.0 (August 25, 2026) — Darrington Press Community Gaming License 2.0",
     "lastUpdated": "2026-09-09",
-    "totalEnvironments": 49
+    "totalEnvironments": 48
   },
   "environmentTypes": {
     "EXPLORATION": "Exploration",
@@ -640,345 +640,436 @@
       ]
     },
     {
-      "id": "ancient-library",
-      "name": "Ancient Library",
+      "id": "burning-heart-of-the-woods",
+      "name": "Burning Heart of the Woods",
       "tier": 3,
       "type": "Exploration",
-      "description": "A vast repository of forgotten knowledge, with towering shelves and ancient tomes.",
-      "impulses": "Reveal hidden truths, tempt with forbidden knowledge",
-      "difficulty": 17,
-      "source": "Unknown",
-      "potentialAdversaries": [
-        "Constructs (Guardian Golem, Knowledge Keeper)",
-        "Undead (Spectral Scholar, Wraith)"
-      ],
-      "features": [
-        {
-          "name": "Forbidden Tomes",
-          "type": "Passive",
-          "description": "Ancient texts contain dangerous knowledge. A PC can attempt to read a forbidden tome with a Knowledge Roll. On a success, they gain valuable information but must mark a Stress. On a failure, they take 2d8 psychic damage and mark a Stress.",
-          "prompts": [
-            "What dark secrets do these tomes contain?",
-            "Who would want this knowledge kept hidden?"
-          ]
-        },
-        {
-          "name": "Living Shelves",
-          "type": "Action",
-          "description": "Spend a Fear to have the library's shelves shift and rearrange, trapping PCs in maze-like corridors. PCs must succeed on a Knowledge Roll to navigate or mark a Stress.",
-          "prompts": [
-            "How do the shelves move?",
-            "What patterns emerge in their arrangement?"
-          ]
-        },
-        {
-          "name": "Knowledge Drain",
-          "type": "Reaction",
-          "description": "When a PC fails a Knowledge Roll, the library drains their memories. They lose access to one Experience or background feature until they complete a Progress Countdown (8).",
-          "prompts": [
-            "What memories are being stolen?",
-            "How does it feel to lose part of yourself?"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "blighted-forest",
-      "name": "Blighted Forest",
-      "tier": 3,
-      "type": "Exploration",
-      "description": "A corrupted woodland where nature has been twisted by dark magic.",
-      "impulses": "Corrupt the pure, spread blight",
+      "description": "Thick indigo ash fills the air around a towering moss-covered tree that burns eternally with flames a sickly shade of blue.",
+      "impulses": "Beat out an uncanny rhythm for all to follow, corrupt the woods",
       "difficulty": 16,
-      "source": "Unknown",
+      "source": "Daggerheart SRD 2.0",
       "potentialAdversaries": [
-        "Corrupted Beasts (Blight Wolf, Twisted Bear)",
-        "Fey (Corrupted Dryad, Blight Sprite)"
+        "Beasts (Bear, Glass Snake)",
+        "Elementals (Elemental Spark)",
+        "Verdant Defenders (Dryad, Oak Treant, Stag Knight)"
       ],
       "features": [
         {
-          "name": "Blight Spread",
+          "name": "Chaos Magic Locus",
           "type": "Passive",
-          "description": "The corruption spreads through contact. PCs who touch blighted areas must succeed on a Constitution Roll or take 1d6 poison damage and mark a Stress.",
+          "description": "When a PC makes a Spellcast Roll, they must roll two Fear Dice and take the higher result.",
           "prompts": [
-            "How does the blight manifest visually?",
-            "What does it feel like to be touched by corruption?"
+            "What does it feel like to work magic in this chaos-touched place?",
+            "What do you fear will happen if you lose control of the spell?"
           ]
         },
         {
-          "name": "Corrupted Wildlife",
+          "name": "The Indigo Flame",
+          "type": "Passive",
+          "description": "PCs who approach the central tree can make a Knowledge Roll to try to identify the magic that consumed this environment.",
+          "details": [
+            "On a success: They learn three of the below details. On a success with Fear, they learn two.",
+            "On a failure: They can mark a Stress to learn one and gain advantage on the next action roll to investigate this environment.",
+            "Details: This is a result of Fallen magic. The corruption is spread through the ashen moss. It can be cleansed only by a ritual of nature magic with a Progress Countdown (8)."
+          ],
+          "prompts": [
+            "What Fallen cult corrupted these woods?",
+            "What have they already done with the cursed wood and sap from this tree?"
+          ]
+        },
+        {
+          "name": "Grasping Vines",
           "type": "Action",
-          "description": "Spend a Fear to summon corrupted versions of normal forest creatures. They deal extra poison damage and can spread blight.",
+          "description": "Animate vines bristling with thorns whip out from the underbrush to ensnare the PCs. A target must succeed on an Agility Reaction Roll or become Restrained and Vulnerable until they break free, clearing both conditions, with a successful Finesse or Strength Roll or by dealing 10 damage to the vines. When the target makes a roll to escape, they take 1d8+4 physical damage and lose a Hope.",
           "prompts": [
-            "How have these creatures been changed?",
-            "What drives their corrupted behavior?"
+            "What painful memories do the vines bring to the surface as they pierce flesh?"
           ]
         },
         {
-          "name": "Purification Ritual",
-          "type": "Reaction",
-          "description": "PCs can attempt to purify blighted areas with a Religion Roll. Success creates safe zones, but failure spreads the blight further.",
+          "name": "Charcoal Constructs",
+          "type": "Action",
+          "description": "Warped animals wreathed in indigo flame trample through a point of your choice. All targets within Close range of that point must make an Agility Reaction Roll. Targets who fail take 3d12+3 physical damage. Targets who succeed take half damage instead.",
           "prompts": [
-            "What does purification look like?",
-            "How do you know if it's working?"
+            "Are these real animals consumed by the flame or merely constructs of the corrupting magic?"
+          ]
+        },
+        {
+          "name": "Choking Ash",
+          "type": "Reaction",
+          "description": "Countdown (Loop 6). When the PCs enter the Burning Heart of the Woods, activate the countdown. When it triggers, all characters must make a Strength or Instinct Reaction Roll. Targets who fail take 4d6+5 direct physical damage. Targets who succeed take half damage. Protective masks or clothes give advantage on the reaction roll.",
+          "prompts": [
+            "What hallucinations does the ash induce?",
+            "What incongruous taste does it possess?"
           ]
         }
       ]
     },
     {
-      "id": "crystal-caverns",
-      "name": "Crystal Caverns",
+      "id": "castle-siege",
+      "name": "Castle Siege",
       "tier": 3,
-      "type": "Exploration",
-      "description": "A network of caves filled with luminescent crystals that pulse with magical energy.",
-      "impulses": "Amplify magic, drain the unwary",
-      "difficulty": 18,
-      "source": "Unknown",
-      "potentialAdversaries": [
-        "Elementals (Crystal Golem, Energy Wisp)",
-        "Aberrations (Crystal Crawler, Void Walker)"
-      ],
-      "features": [
-        {
-          "name": "Crystal Resonance",
-          "type": "Passive",
-          "description": "Crystals amplify magical effects. Spells cast here have their damage increased by 1d6, but the caster must succeed on a Constitution Roll or take 1d4 psychic damage.",
-          "prompts": [
-            "How do the crystals react to magic?",
-            "What colors do they pulse with?"
-          ]
-        },
-        {
-          "name": "Energy Drain",
-          "type": "Action",
-          "description": "Spend a Fear to have crystals drain magical energy from nearby creatures. PCs must succeed on a Constitution Roll or lose access to their highest-level spell until they rest.",
-          "prompts": [
-            "How does it feel to have your magic drained?",
-            "What happens to the drained energy?"
-          ]
-        },
-        {
-          "name": "Crystal Maze",
-          "type": "Reaction",
-          "description": "When PCs become disoriented, the crystals create illusory passages. They must succeed on an Investigation Roll to find the real path or become lost.",
-          "prompts": [
-            "How do you distinguish real from illusion?",
-            "What patterns emerge in the crystal formations?"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "floating-islands",
-      "name": "Floating Islands",
-      "tier": 3,
-      "type": "Traversal",
-      "description": "A series of islands suspended in the sky, connected by precarious bridges and magical currents.",
-      "impulses": "Separate the party, test balance and courage",
+      "type": "Event",
+      "description": "An active siege with an attacking force fighting to gain entry to a fortified castle.",
+      "impulses": "Bleed out the will to fight, breach the walls, build tension",
       "difficulty": 17,
-      "source": "Unknown",
+      "source": "Daggerheart SRD 2.0",
       "potentialAdversaries": [
-        "Flying Creatures (Harpy, Wyvern)",
-        "Elementals (Air Elemental, Storm Spirit)"
+        "Mercenaries (Harrier, Sellsword, Spellblade, Weaponmaster)",
+        "Noble Forces (Archer Squadron, Conscript, Elite Soldier, Knight of the Realm)"
       ],
       "features": [
         {
-          "name": "Wind Currents",
+          "name": "Secret Entrance",
           "type": "Passive",
-          "description": "Strong winds buffet the islands. PCs must succeed on an Acrobatics Roll to move between islands or risk being blown off course.",
+          "description": "A PC can find or recall a secret way into the castle with a successful Instinct or Knowledge Roll.",
           "prompts": [
-            "How do the wind patterns change?",
-            "What happens if you're caught in a strong gust?"
+            "How do they get in without revealing the pathway to the attackers?",
+            "Are any of the defenders monitoring this path?"
           ]
         },
         {
-          "name": "Fragile Bridges",
+          "name": "Siege Weapons (Environment Change)",
           "type": "Action",
-          "description": "Spend a Fear to have a bridge begin to crumble. PCs must quickly cross or find an alternative route. Failure results in falling damage.",
+          "description": "Consequence Countdown (6). The attacking force deploys siege weapons to try to raze the defenders' fortifications. Activate the countdown when the siege begins (for a protracted siege, make this a long-term countdown instead). When it triggers, the defenders' fortifications have been breached and the attackers flood inside. You gain 2 Fear, then shift to the Pitched Battle environment and spotlight it.",
           "prompts": [
-            "How do you know a bridge is unstable?",
-            "What alternatives exist for crossing?"
+            "What siege weapons are being deployed?",
+            "Are they magical, mundane, or a mixture of both?",
+            "What defenses must the characters overcome to storm the castle?"
           ]
         },
         {
-          "name": "Sky Pirates",
-          "type": "Reaction",
-          "description": "When PCs are vulnerable on a bridge, sky pirates may appear to ambush them. They seek treasure and magical items.",
+          "name": "Reinforcements!",
+          "type": "Action",
+          "description": "Summon a Knight of the Realm, a number of Tier 3 Minions equal to the number of PCs, and two adversaries of your choice within Far range of a chosen PC as reinforcements. The Knight of the Realm immediately takes the spotlight.",
           "prompts": [
-            "How do the pirates approach?",
-            "What do they want from the party?"
+            "Who are they targeting first?",
+            "What formation do they take?"
+          ]
+        },
+        {
+          "name": "Collateral Damage",
+          "type": "Reaction",
+          "description": "When an adversary is defeated, you can spend a Fear to have a stray attack from a siege weapon hit a point on the battlefield. All targets within Very Close range of that point must make an Agility Reaction Roll.",
+          "details": [
+            "Targets who fail take 3d8+3 physical or magic damage and must mark a Stress.",
+            "Targets who succeed must mark a Stress."
+          ],
+          "prompts": [
+            "What debris is scattered by the attack?",
+            "What is broken by the strike that can't be easily mended?"
           ]
         }
       ]
     },
     {
-      "id": "celestial-realm",
-      "name": "Celestial Realm",
+      "id": "pitched-battle",
+      "name": "Pitched Battle",
+      "tier": 3,
+      "type": "Event",
+      "description": "A massive combat between two large groups of armed combatants.",
+      "impulses": "Seize people, land, and wealth, spill blood for greed and glory",
+      "difficulty": 17,
+      "source": "Daggerheart SRD 2.0",
+      "potentialAdversaries": [
+        "Mercenaries (Sellsword, Harrier, Spellblade, Weaponmaster)",
+        "Noble Forces (Archer Squadron, Conscript, Elite Soldier, Knight of the Realm)"
+      ],
+      "features": [
+        {
+          "name": "Adrift on a Sea of Steel",
+          "type": "Passive",
+          "description": "Traversing a battlefield during an active combat is extremely dangerous. A PC must succeed on an Agility Roll to move at all, and can only go up to Close range on a success. If an adversary is within Melee range of them, they must mark a Stress to make an Agility Roll to move.",
+          "prompts": [
+            "Do the combatants mistake you for the enemy or consider you interlopers?",
+            "Can you tell the difference between friend and foe in the fray?"
+          ]
+        },
+        {
+          "name": "Raze and Pillage",
+          "type": "Action",
+          "description": "The attacking force raises the stakes by lighting a fire, stealing a valuable asset, kidnapping an important person, or killing the populace.",
+          "prompts": [
+            "What is valuable here?",
+            "Who is most vulnerable?"
+          ]
+        },
+        {
+          "name": "War Magic",
+          "type": "Action",
+          "description": "Spend a Fear as a mage from one side uses large-scale destructive magic. Pick a point on the battlefield within Very Far range of the mage. All targets within Close range of that point must make an Agility Reaction Roll. Targets who fail take 3d12+8 magic damage and must mark a Stress.",
+          "prompts": [
+            "What form does the attack take—fireball, raining acid, a storm of blades?",
+            "What tactical objective is this attack meant to accomplish, and what comes next?"
+          ]
+        },
+        {
+          "name": "Reinforcements!",
+          "type": "Action",
+          "description": "Summon a Knight of the Realm, a number of Tier 3 Minions equal to the number of PCs, and two adversaries of your choice within Far range of a chosen PC as reinforcements. The Knight of the Realm immediately takes the spotlight.",
+          "prompts": [
+            "Who are they targeting first?",
+            "What formation do they take?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chaos-realm",
+      "name": "Chaos Realm",
       "tier": 4,
-      "type": "Exploration",
-      "description": "A plane of pure light and divine energy, where the laws of reality bend to celestial will.",
-      "impulses": "Purify the impure, test mortal worth",
+      "type": "Traversal",
+      "description": "An otherworldly space where the laws of reality are unstable and dangerous.",
+      "impulses": "Annihilate certainty, consume power, defy logic",
       "difficulty": 20,
-      "source": "Unknown",
+      "source": "Daggerheart SRD 2.0",
       "potentialAdversaries": [
-        "Celestials (Solar, Seraphim)",
-        "Constructs (Divine Guardian, Light Golem)"
+        "Outer Realms Monstrosities (Abomination, Corruptor, Thrall)"
       ],
       "features": [
         {
-          "name": "Divine Aura",
+          "name": "Impossible Architecture",
           "type": "Passive",
-          "description": "The realm's pure energy affects all within it. Evil-aligned creatures take 2d8 radiant damage per round, while good-aligned creatures gain advantage on all rolls.",
+          "description": "Up is down, down is right, right is starward. Gravity and directionality themselves are in flux, and any attempt to move through this realm is an odyssey unto itself, requiring a Progress Countdown (8). On a failure, a PC must mark a Stress in addition to the roll's other consequences.",
           "prompts": [
-            "How does the divine energy feel?",
-            "What happens to those unworthy of this realm?"
+            "What does it feel like to move in a space so alien to the Mortal Realm?",
+            "What landmark or point do you fixate on to maintain your balance?",
+            "What bizarre landmarks do you traverse on your journey?"
           ]
         },
         {
-          "name": "Reality Warp",
+          "name": "Everything You Are This Place Will Take from You",
           "type": "Action",
-          "description": "Spend a Fear to alter the fundamental laws of reality in a localized area. Gravity, time, or space may be affected, requiring PCs to adapt quickly.",
+          "description": "Countdown (Loop 1d4). Activate the countdown. When it triggers, all PCs must succeed on a Presence Reaction Roll or their highest trait is temporarily reduced by 1d4 unless they mark a number of Stress equal to its value. Any lost trait points are regained if the PC critically succeeds or escapes the Chaos Realm.",
           "prompts": [
-            "How does reality change?",
-            "What rules govern this new reality?"
+            "How does this place try to steal from you that which makes you legendary?",
+            "What does it feel like to have this power taken from you?"
           ]
         },
         {
-          "name": "Divine Judgment",
-          "type": "Reaction",
-          "description": "When PCs commit acts against their alignment, the realm judges them. They must succeed on a Charisma Roll or face consequences based on their actions.",
+          "name": "Unmaking",
+          "type": "Action",
+          "description": "Spend a Fear to force a PC to make a Strength Reaction Roll. On a failure, they take 4d10 direct magic damage. On a success, they must mark a Stress.",
           "prompts": [
-            "How does the realm judge actions?",
-            "What consequences await the guilty?"
+            "What glimpse of other worlds do you catch while this place tries to unmake you?",
+            "What core facet of your personality does the unmaking try to erase?"
+          ]
+        },
+        {
+          "name": "Outer Realms Predators",
+          "type": "Action",
+          "description": "Spend a Fear to summon an Outer Realms Abomination, an Outer Realms Corruptor, and 2d6 Outer Realms Thralls, who appear at Close range of a chosen PC in defiance of logic and causality. Immediately spotlight one of these adversaries, and you can spend an additional Fear to automatically succeed on that adversary's standard attack.",
+          "prompts": [
+            "What half-consumed remnants of the shattered world do these monstrosities cast aside in pursuit of living flesh?",
+            "What jagged reflections of former personhood do you catch between moments of unquestioning malice?"
+          ]
+        },
+        {
+          "name": "Disorienting Reality",
+          "type": "Reaction",
+          "description": "On a result with Fear, you can ask the PC to describe which of their fears the Chaos Realm evokes as a vision of reality unmakes and reconstitutes itself to the PC. The PC loses a Hope. If it is their last Hope, you gain a Fear.",
+          "prompts": [
+            "What moment do they see?",
+            "If it's a memory, how is it warped by this place?",
+            "How hard will it be to hold on to the real memory?"
           ]
         }
       ]
     },
     {
-      "id": "demonic-portal",
-      "name": "Demonic Portal",
+      "id": "divine-usurpation",
+      "name": "Divine Usurpation",
       "tier": 4,
       "type": "Event",
-      "description": "A gateway to the Abyss, spewing forth demonic energy and corrupting all it touches.",
-      "impulses": "Corrupt and destroy, spread chaos",
+      "description": "A massive ritual designed to breach the gates of the Hallows Above and unseat the New Gods themselves.",
+      "impulses": "Collect power, overawe, silence dissent",
+      "difficulty": 20,
+      "source": "Daggerheart SRD 2.0",
+      "potentialAdversaries": [
+        "Arch-Necromancer",
+        "Fallen Shock Troops",
+        "Mortal Hunter",
+        "Oracle of Doom",
+        "Perfected Zombie"
+      ],
+      "features": [
+        {
+          "name": "Final Preparations",
+          "type": "Passive",
+          "description": "When the environment first takes the spotlight, designate one adversary as the Usurper seeking to overthrow the gods. Activate a Long-Term Countdown (8) as the Usurper assembles what they need to conduct the ritual. When it triggers, spotlight this environment to use the \"Beginning of the End\" feature. While this environment remains in play, you can hold up to 15 Fear.",
+          "prompts": [
+            "What does the Usurper still require: The heart of a High Seraph?",
+            "The lodestone of an ancient waygate?",
+            "The loyalty of two archenemies?",
+            "The heartbroken tears of a pure soul?"
+          ]
+        },
+        {
+          "name": "Divine Blessing",
+          "type": "Passive",
+          "description": "When a PC critically succeeds, they can spend 2 Hope to refresh an ability normally limited by uses (such as once per rest, once per session).",
+          "prompts": [
+            "What god favors you as you fight against this usurpation?",
+            "How does your renewed power reflect their influence?"
+          ]
+        },
+        {
+          "name": "Defilers Abound",
+          "type": "Action",
+          "description": "Spend 2 Fear to summon 1d4+2 Fallen Shock Troops that appear within Close range of the Usurper to assist their divine siege. Immediately spotlight the Shock Troops to use a \"Group Attack\" action.",
+          "prompts": [
+            "Which High Fallen do these troops serve?",
+            "Which god's flesh do they wish to feast upon?"
+          ]
+        },
+        {
+          "name": "Godslayer",
+          "type": "Action",
+          "description": "If the Divine Siege Countdown (see \"Beginning of the End\") has triggered, you can spend 3 Fear to describe the Usurper slaying one of the gods of the Hallows Above, feasting upon their power and growing stronger. The Usurper clears 2 HP. Increase their Difficulty, damage, attack modifier, or give them a new feature from the slain god.",
+          "prompts": [
+            "Which god meets their end?",
+            "What are their last words?",
+            "How does the Usurper's new stolen power manifest?"
+          ]
+        },
+        {
+          "name": "Beginning of the End",
+          "type": "Reaction",
+          "description": "When the \"Final Preparations\" long-term countdown triggers, the Usurper begins hammering on the gates of the Hallows themselves. Activate a Divine Siege Countdown (10). Spotlight the Usurper to describe the Usurper's assault and tick down this countdown by 1. If the Usurper takes Major or greater damage, tick up the countdown by 1. When it triggers, the Usurper shatters the barrier between the Mortal Realm and the Hallows Above to slay the gods and take their place. You gain a Fear for each unmarked HP the Usurper has. You can immediately use the \"Godslayer\" feature without spending Fear to make an additional GM move.",
+          "prompts": [
+            "How does the Mortal Realm writhe as the natural order is violated?",
+            "What mortals witness this blasphemy from afar?"
+          ]
+        },
+        {
+          "name": "Ritual Nexus",
+          "type": "Reaction",
+          "description": "On any failure with Fear against the Usurper, the PC must mark 1d4 Stress from the backlash of magical power.",
+          "prompts": [
+            "What visions of failures past torment you as your efforts fall short?",
+            "How are these memories twisted by the Usurper?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "imperial-court",
+      "name": "Imperial Court",
+      "tier": 4,
+      "type": "Social",
+      "description": "The majestic domain of a powerful empire, lavishly appointed with stolen treasures.",
+      "impulses": "Justify and perpetuate imperial rule, seduce rivals with promises of power and comfort",
+      "difficulty": 20,
+      "source": "Daggerheart SRD 2.0",
+      "potentialAdversaries": [
+        "Bladed Guard",
+        "Courtesan",
+        "Knight of the Realm",
+        "Monarch",
+        "Spy"
+      ],
+      "features": [
+        {
+          "name": "All Roads Lead Here",
+          "type": "Passive",
+          "description": "While in the Imperial Court, a PC has disadvantage on Presence Rolls made to take actions that don't fit the imperial way of life or support the empire's dominance.",
+          "prompts": [
+            "How does the way language is used make even discussing alternative ways of living difficult?",
+            "What obvious benefits for loyalty create friction when you try to discuss alternatives?"
+          ]
+        },
+        {
+          "name": "Rival Vassals",
+          "type": "Passive",
+          "description": "The PCs can find imperial subjects, vassals, and supplicants in the court, each vying for favor, seeking proximity to power, exchanging favors for loyalty, and elevating their status above others'. Some might be desperate to undermine their rivals, while others might even be open to discussions that verge on sedition.",
+          "prompts": [
+            "How do they benefit from vassalage, and what has it cost them?",
+            "What exploitation drives them to consider opposing the unstoppable?"
+          ]
+        },
+        {
+          "name": "The Gravity of Empire",
+          "type": "Action",
+          "description": "Spend a Fear to present a PC with a golden opportunity or offer to satisfy a major goal in exchange for obeying or supporting the empire. The target must make a Presence Reaction Roll. On a failure, they must mark all their Stress or accept the offer. If they have already marked all their Stress, they must accept the offer or exile themselves from the empire. On a success, they must mark 1d4 Stress as they're taxed by temptation.",
+          "prompts": [
+            "What do the PCs want so desperately they might consider throwing in with this ruthless power?",
+            "How did imperial agents learn the PC's greatest desires?"
+          ]
+        },
+        {
+          "name": "Imperial Decree",
+          "type": "Action",
+          "description": "Spend a Fear to tick down a long-term countdown related to the empire's agenda by 1d4. If this triggers the countdown, a proclamation related to the agenda is announced at court as the plan is executed.",
+          "prompts": [
+            "What display of power or transfer of wealth was needed to expedite this plan?",
+            "Whose lives were disrupted or upended to make this happen?"
+          ]
+        },
+        {
+          "name": "Eyes Everywhere",
+          "type": "Reaction",
+          "description": "On a result with Fear, you can spend a Fear to have someone loyal to the empire overhear seditious talk within the court. A PC must succeed on an Instinct Reaction Roll to notice that the group has been overheard so they can try to intercept the witness before the PCs are exposed.",
+          "prompts": [
+            "How has the empire compromised this witness?",
+            "Why is their first impulse to protect the empire, even if doesn't treat them well?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "necromancers-ossuary",
+      "name": "Necromancer's Ossuary",
+      "tier": 4,
+      "type": "Exploration",
+      "description": "A dusty crypt with a library, twisting corridors, and abundant sarcophagi, spattered with the blood of ill-fated invaders.",
+      "impulses": "Confound intruders, delve into secrets best left buried, manifest unlife, unleash a tide of undead",
       "difficulty": 19,
-      "source": "Unknown",
+      "source": "Daggerheart SRD 2.0",
       "potentialAdversaries": [
-        "Demons (Balor, Marilith)",
-        "Corrupted Creatures (Abyssal Spawn, Void Walker)"
+        "Arch-Necromancer's Host (Perfected Zombie, Zombie Legion)"
       ],
       "features": [
         {
-          "name": "Corruption Field",
+          "name": "No Place for the Living",
           "type": "Passive",
-          "description": "The portal's energy corrupts all within range. PCs must succeed on a Constitution Roll each round or take 1d8 necrotic damage and risk corruption.",
+          "description": "A feature or action that clears HP requires spending a Hope to use. If it already costs Hope, a PC must spend an additional Hope.",
           "prompts": [
-            "How does corruption manifest?",
-            "What happens to those fully corrupted?"
+            "What does it feel like to try to heal in a place so antithetical to life?"
           ]
         },
         {
-          "name": "Demonic Summoning",
-          "type": "Action",
-          "description": "Spend a Fear to summon demons from the portal. The number and strength depend on how much Fear is spent.",
-          "prompts": [
-            "What types of demons emerge?",
-            "How do they react to the mortal realm?"
-          ]
-        },
-        {
-          "name": "Portal Instability",
-          "type": "Reaction",
-          "description": "The portal's energy fluctuates unpredictably. PCs must succeed on a Dexterity Roll or be affected by random magical effects.",
-          "prompts": [
-            "How does the portal behave?",
-            "What warning signs precede instability?"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "time-distortion",
-      "name": "Time Distortion",
-      "tier": 4,
-      "type": "Event",
-      "description": "A region where time flows differently, creating temporal anomalies and paradoxes.",
-      "impulses": "Manipulate time, create paradoxes",
-      "difficulty": 20,
-      "source": "Unknown",
-      "potentialAdversaries": [
-        "Temporal Entities (Time Elemental, Paradox Walker)",
-        "Anomalies (Temporal Echo, Time Rift)"
-      ],
-      "features": [
-        {
-          "name": "Temporal Flux",
+          "name": "Centuries of Knowledge",
           "type": "Passive",
-          "description": "Time flows at different rates in different areas. PCs may age rapidly, move slowly, or experience time loops.",
+          "description": "A PC can investigate the library and laboratory and make a Knowledge Roll to learn information related to arcana, local history, and the Necromancer's plans.",
           "prompts": [
-            "How does time behave here?",
-            "What are the consequences of temporal manipulation?"
+            "What are the names of the tomes?",
+            "What project is the necromancer working on and what does it communicate about their plans?"
           ]
         },
         {
-          "name": "Time Loop",
+          "name": "Skeletal Burst",
           "type": "Action",
-          "description": "Spend a Fear to create a localized time loop. PCs must find a way to break the loop or repeat the same events indefinitely.",
+          "description": "All targets within Close range of a point you choose in this environment must succeed on an Agility Reaction Roll or take 4d8+8 physical damage from skeletal shrapnel as part of the ossuary detonates around them.",
           "prompts": [
-            "What triggers the time loop?",
-            "How do you break free from it?"
+            "What ancient skeletal architecture is destroyed?",
+            "What bones stick in your armor?"
           ]
         },
         {
-          "name": "Temporal Paradox",
-          "type": "Reaction",
-          "description": "When PCs create logical contradictions, temporal paradoxes occur. Reality becomes unstable until the paradox is resolved.",
-          "prompts": [
-            "What paradox was created?",
-            "How can it be resolved?"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "void-rift",
-      "name": "Void Rift",
-      "tier": 4,
-      "type": "Exploration",
-      "description": "A tear in reality leading to the void between worlds, where nothingness consumes all.",
-      "impulses": "Consume existence, spread void",
-      "difficulty": 20,
-      "source": "Unknown",
-      "potentialAdversaries": [
-        "Void Entities (Void Walker, Nothingness)",
-        "Abberations (Void Spawn, Reality Eater)"
-      ],
-      "features": [
-        {
-          "name": "Void Corruption",
-          "type": "Passive",
-          "description": "The void's influence corrupts reality itself. PCs must succeed on a Wisdom Roll or begin to fade from existence.",
-          "prompts": [
-            "How does the void affect reality?",
-            "What happens to those who fade away?"
-          ]
-        },
-        {
-          "name": "Reality Tear",
+          "name": "Aura of Death",
           "type": "Action",
-          "description": "Spend a Fear to expand the rift, consuming more of the surrounding area. PCs must find a way to seal it or risk losing everything.",
+          "description": "Once per scene, roll a d4. Each undead within Far range of the Necromancer can clear HP and Stress equal to the result rolled. The undead can choose how that number is divided between HP and Stress.",
           "prompts": [
-            "How does the rift expand?",
-            "What can stop its growth?"
+            "How does their renewed vigor manifest?",
+            "Do they look more lifelike or, paradoxically, are they more decayed but vigorous?"
           ]
         },
         {
-          "name": "Void Manifestation",
-          "type": "Reaction",
-          "description": "When the void's influence grows strong enough, void entities manifest to consume the remaining reality.",
+          "name": "They Just Keep Coming!",
+          "type": "Action",
+          "description": "Spend a Fear to summon 1d6 Rotted Zombies, two Perfected Zombies, or a Zombie Legion, who appear at Close range of a chosen PC.",
           "prompts": [
-            "What do these entities look like?",
-            "How do they consume reality?"
+            "Who were these people before they became the necromancer's pawns?",
+            "What vestiges of those lives remain for the heroes to see?"
           ]
         }
       ]

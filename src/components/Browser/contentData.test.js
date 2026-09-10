@@ -17,9 +17,8 @@ const ADVERSARY_SOURCES = {
   'Daggerheart SRD 2.0 (Hope & Fear)': 135,
 }
 const ENVIRONMENT_SOURCES = {
-  'Daggerheart SRD 2.0': 12,
+  'Daggerheart SRD 2.0': 19,
   'Daggerheart SRD 2.0 (Hope & Fear)': 28,
-  'Unknown': 8,
   'Daggerheart Playtest': 1,
 }
 
@@ -131,7 +130,7 @@ describe('adversaries.json', () => {
 
 describe('environments.json', () => {
   it('ships the full SRD 2.0 roster', () => {
-    expect(ENVIRONMENTS).toHaveLength(49)
+    expect(ENVIRONMENTS).toHaveLength(48)
   })
 
   it('has metadata whose total matches the actual record count', () => {
@@ -146,6 +145,23 @@ describe('environments.json', () => {
 
   it('carries a known source on every record', () => {
     expect(countBySource(ENVIRONMENTS)).toEqual(ENVIRONMENT_SOURCES)
+  })
+
+  // #129: the Core block is the complete SRD 1.0 roster of 19 — the seven that
+  // OCR originally skipped (Castle Siege, Imperial Court, ...) were added, and
+  // the eight invented "Unknown" entries that were never in any SRD were dropped.
+  it('ships the complete Core roster and no unsourced entries', () => {
+    const core = ENVIRONMENTS.filter((e) => e.source === 'Daggerheart SRD 2.0')
+    expect(core).toHaveLength(19)
+    for (const name of ['Burning Heart of the Woods', 'Castle Siege', 'Pitched Battle',
+      'Chaos Realm', 'Divine Usurpation', 'Imperial Court', "Necromancer's Ossuary"]) {
+      expect(core.map((e) => e.name)).toContain(name)
+    }
+    expect(ENVIRONMENTS.filter((e) => e.source === 'Unknown')).toEqual([])
+    for (const name of ['Ancient Library', 'Blighted Forest', 'Crystal Caverns', 'Floating Islands',
+      'Celestial Realm', 'Demonic Portal', 'Time Distortion', 'Void Rift']) {
+      expect(ENVIRONMENTS.find((e) => e.name === name)).toBeUndefined()
+    }
   })
 
   it('folds the Void Chamber playtest orphan into the main file', () => {
