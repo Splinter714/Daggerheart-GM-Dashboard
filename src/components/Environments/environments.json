@@ -3,7 +3,7 @@
     "version": "2.0.0",
     "source": "Daggerheart SRD 2.0 (August 25, 2026) — Darrington Press Community Gaming License 2.0",
     "lastUpdated": "2026-09-09",
-    "totalEnvironments": 48
+    "totalEnvironments": 47
   },
   "environmentTypes": {
     "EXPLORATION": "Exploration",
@@ -2664,32 +2664,6 @@
             "Is this court's authority worthy of respect?",
             "What besides the might of the Time Council and its enforcers justifies their control over the timeline?"
           ]
-        }
-      ]
-    },
-    {
-      "id": "playtest-void-chamber",
-      "name": "Void Chamber",
-      "tier": 3,
-      "type": "Exploration",
-      "description": "A playtest environment where reality becomes unstable.",
-      "impulses": "Test the boundaries of reality, challenge perceptions",
-      "difficulty": 17,
-      "source": "Daggerheart Playtest",
-      "potentialAdversaries": [
-        "Shadow Stalker",
-        "Void Entities"
-      ],
-      "features": [
-        {
-          "name": "Reality Flux",
-          "type": "Passive",
-          "description": "The chamber's walls and floor shift unpredictably. PCs must succeed on an Agility Roll to move safely or risk falling into a temporary void pocket."
-        },
-        {
-          "name": "Void Echo",
-          "type": "Action",
-          "description": "Spend a Fear to create an echo of one of the PCs that acts as an adversary for one turn."
         }
       ]
     }

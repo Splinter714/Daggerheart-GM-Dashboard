@@ -19,7 +19,6 @@ const ADVERSARY_SOURCES = {
 const ENVIRONMENT_SOURCES = {
   'Daggerheart SRD 2.0': 19,
   'Daggerheart SRD 2.0 (Hope & Fear)': 28,
-  'Daggerheart Playtest': 1,
 }
 
 const countBySource = (records) =>
@@ -130,7 +129,7 @@ describe('adversaries.json', () => {
 
 describe('environments.json', () => {
   it('ships the full SRD 2.0 roster', () => {
-    expect(ENVIRONMENTS).toHaveLength(48)
+    expect(ENVIRONMENTS).toHaveLength(47)
   })
 
   it('has metadata whose total matches the actual record count', () => {
@@ -164,10 +163,17 @@ describe('environments.json', () => {
     }
   })
 
-  it('folds the Void Chamber playtest orphan into the main file', () => {
-    const voidChamber = ENVIRONMENTS.find((e) => e.name === 'Void Chamber')
-    expect(voidChamber).toBeDefined()
-    expect(voidChamber.source).toBe('Daggerheart Playtest')
+  // Void Chamber claimed to be playtest material but was invented: 2 features
+  // where the four genuine playtest environments have 4-5, a description that
+  // calls itself "A playtest environment", and potentialAdversaries ("Shadow
+  // Stalker", "Void Entities") that exist nowhere in the adversary roster.
+  it('has no invented Void Chamber entry', () => {
+    expect(ENVIRONMENTS.find((e) => e.name === 'Void Chamber')).toBeUndefined()
+  })
+
+  it('sources every record to the SRD', () => {
+    const srd = /^Daggerheart SRD 2\.0( \(Hope & Fear\))?$/
+    expect(ENVIRONMENTS.filter((e) => !srd.test(e.source))).toEqual([])
   })
 
   it('has non-null required fields on every record', () => {
