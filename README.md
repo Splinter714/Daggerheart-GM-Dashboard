@@ -2,7 +2,7 @@
 
 The GM screen for running Daggerheart tabletop sessions — track adversaries, Fear & Hope, countdowns, and encounter budgets from your browser, online or off. Installable as a PWA on desktop, iOS, and Android.
 
-**Live:** https://splinter714.github.io/Daggerheart/
+**Live:** https://splinter714.github.io/Daggerheart-GM-Dashboard/
 
 ## Features
 
