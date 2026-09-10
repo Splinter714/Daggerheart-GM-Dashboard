@@ -15,7 +15,6 @@ const ENVIRONMENTS = environmentsDoc.environments
 const ADVERSARY_SOURCES = {
   'Daggerheart SRD 2.0': 129,
   'Daggerheart SRD 2.0 (Hope & Fear)': 135,
-  'Daggerheart Playtest': 1,
 }
 const ENVIRONMENT_SOURCES = {
   'Daggerheart SRD 2.0': 12,
@@ -35,7 +34,7 @@ const hasMarkdownEmphasis = (s) => /\*\*.+?\*\*|_[^_]+_/.test(s)
 
 describe('adversaries.json', () => {
   it('ships the full SRD 2.0 roster', () => {
-    expect(ADVERSARIES).toHaveLength(265)
+    expect(ADVERSARIES).toHaveLength(264)
   })
 
   it('has metadata whose total matches the actual record count', () => {
@@ -68,10 +67,18 @@ describe('adversaries.json', () => {
     expect(matches[0].id).toBe('outer-realms-corrupter')
   })
 
-  it('folds the Doppelhünd playtest orphan into the main file', () => {
-    const doppel = ADVERSARIES.find((a) => a.id === 'doppelhund')
-    expect(doppel).toBeDefined()
-    expect(doppel.source).toBe('Daggerheart Playtest')
+  // The playtest Doppelhünd was the same creature SRD 2.0 ships as Doppelhound
+  // (same stats, motives and Blink Beast feature), so it was dropped rather
+  // than shipped alongside its official version.
+  it('ships Doppelhound only, without the playtest Doppelhünd', () => {
+    expect(ADVERSARIES.find((a) => a.id === 'doppelhund')).toBeUndefined()
+    const hound = ADVERSARIES.find((a) => a.name === 'Doppelhound')
+    expect(hound).toBeDefined()
+    expect(hound.source).toBe('Daggerheart SRD 2.0 (Hope & Fear)')
+  })
+
+  it('has no playtest adversaries left', () => {
+    expect(ADVERSARIES.filter((a) => a.source === 'Daggerheart Playtest')).toEqual([])
   })
 
   it('has non-null required fields on every record', () => {

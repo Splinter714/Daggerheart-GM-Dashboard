@@ -3,7 +3,7 @@
     "version": "2.0.0",
     "source": "Daggerheart SRD 2.0 (August 25, 2026) — Darrington Press Community Gaming License 2.0",
     "lastUpdated": "2026-09-09",
-    "totalAdversaries": 265
+    "totalAdversaries": 264
   },
   "_improvisation_guidance": {
     "description": "Daggerheart Improvising Adversaries Guide",
@@ -11923,44 +11923,6 @@
         }
       ],
       "source": "Daggerheart SRD 2.0 (Hope & Fear)"
-    },
-    {
-      "id": "doppelhund",
-      "name": "Doppelhünd",
-      "tier": 2,
-      "type": "Skulk",
-      "description": "A vicious magical six-legged hellhound with glowing red eyes and two long, toothy squid arms. They confuse enemies by conjuring an illusory duplicate of themself.",
-      "motives": "Ambush prey, kill for sport, play with food, trick and deceive",
-      "difficulty": 14,
-      "thresholds": {
-        "major": 9,
-        "severe": 17
-      },
-      "hp": 0,
-      "hpMax": 4,
-      "stress": 0,
-      "stressMax": 5,
-      "damageThreshold": 9,
-      "atk": 3,
-      "weapon": "Toothy Arms",
-      "range": "Very Close",
-      "damage": "2d8+2 phy",
-      "experience": [
-        "Shadows +3"
-      ],
-      "features": [
-        {
-          "name": "Blink Beast",
-          "type": "Passive",
-          "description": "When combat begins, places a duplicate within Close range. The duplicate can move, and the Doppelhünd can target enemies as if in the same place as its duplicate. When attacked, a d6 roll determines if the attack targets the Doppelhünd (even number) or its duplicate (odd number). Attacks against the duplicate fail. A successful attack against the Doppelhünd dispels the duplicate until Fear is spent to conjure it again."
-        },
-        {
-          "name": "Double Lash",
-          "type": "Reaction",
-          "description": "When the Doppelhünd makes a standard attack, it can mark a Stress to make an additional standard attack. If both attacks target the same creature, their damage is combined."
-        }
-      ],
-      "source": "Daggerheart Playtest"
     }
   ]
 }
