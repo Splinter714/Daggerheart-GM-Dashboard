@@ -1,5 +1,5 @@
 // Shared data loading utilities for adversaries and environments
-// Loads official, playtest, and custom content and merges them
+// Loads official and custom content and merges them
 import { readFromStorage } from '../../state/StorageHelpers'
 
 export let adversariesData = { adversaries: [] }
@@ -24,7 +24,7 @@ export function saveCustomContent(type, content) {
   }
 }
 
-// Load all data asynchronously (official + playtest + custom)
+// Load all data asynchronously (official + custom)
 export async function loadData() {
   // Prevent multiple simultaneous loads
   if (_dataLoaded) {
@@ -33,8 +33,6 @@ export async function loadData() {
 
   let officialAdversaries = { adversaries: [] }
   let officialEnvironments = { environments: [] }
-  let playtestAdv = { adversaries: [] }
-  let playtestEnv = { environments: [] }
   let colossaData = { colossi: [] }
 
   try {
@@ -49,20 +47,6 @@ export async function loadData() {
     officialEnvironments = mod?.default || mod
   } catch (e) {
     console.warn('Failed to load environments.json:', e)
-  }
-
-  try {
-    const mod = await import(/* @vite-ignore */ '../Adversaries/playtest-adversaries.json')
-    playtestAdv = mod?.default || mod
-  } catch (e) {
-    console.warn('Failed to load playtest-adversaries.json:', e)
-  }
-
-  try {
-    const mod = await import(/* @vite-ignore */ '../Environments/playtest-environments.json')
-    playtestEnv = mod?.default || mod
-  } catch (e) {
-    console.warn('Failed to load playtest-environments.json:', e)
   }
 
   try {
@@ -83,7 +67,6 @@ export async function loadData() {
     ...officialAdversaries,
     adversaries: [
       ...(officialAdversaries.adversaries || []),
-      ...(playtestAdv.adversaries || []),
       ...colossusAdversaries,
       ...customAdversaries
     ]
@@ -93,7 +76,6 @@ export async function loadData() {
     ...officialEnvironments,
     environments: [
       ...(officialEnvironments.environments || []),
-      ...(playtestEnv.environments || []),
       ...customEnvironments
     ]
   }

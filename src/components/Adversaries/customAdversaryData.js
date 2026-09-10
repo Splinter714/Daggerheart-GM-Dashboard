@@ -11,7 +11,6 @@ export const loadData = async () => {
   if (_dataLoaded) return
 
   let officialAdversaries = { adversaries: [] }
-  let playtestAdv = { adversaries: [] }
 
   try {
     const mod = await import(/* @vite-ignore */ './adversaries.json')
@@ -20,17 +19,9 @@ export const loadData = async () => {
     console.warn('Failed to load adversaries.json:', e)
   }
 
-  try {
-    const mod = await import(/* @vite-ignore */ './playtest-adversaries.json')
-    playtestAdv = mod?.default || mod
-  } catch (e) {
-    console.warn('Failed to load playtest-adversaries.json:', e)
-  }
-
   adversariesData = {
     adversaries: [
       ...(officialAdversaries.adversaries || []),
-      ...(playtestAdv.adversaries || []),
     ],
   }
   _dataLoaded = true

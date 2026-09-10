@@ -34,7 +34,6 @@ export const deleteCustomContent = async (type, id) => {
   environmentsData = data.environmentsData
 }
 
-// Functions to manage playtest content (for development/admin use)
 // Custom hook for browser functionality - all logic inline
 export const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filterCustom = false, customContent = null) => {
   const [searchTerm, setSearchTerm] = useState('')

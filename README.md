@@ -32,4 +32,4 @@ React, Vite, dnd-kit, Lucide icons. No backend — all state in localStorage.
 
 ## License
 
-Includes materials from the Daggerheart SRD 1.0 © Critical Role, LLC under the DPCGL License. Unofficial, not endorsed by Darrington Press or Critical Role.
+Includes materials from the Daggerheart SRD 2.0 © Critical Role, LLC under the DPCGL 2.0. Unofficial, not endorsed by Darrington Press or Critical Role.
